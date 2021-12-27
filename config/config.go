@@ -5,17 +5,21 @@ import (
 	"log"
 	"os"
 )
+
 var PrivateKey string
 var Publickey string
 var ApiServerUrl string
+var IntegrationManagerUrl string
+
 func InitEnvironmentVariables() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("ERROR:", err.Error(),", reading from env")
+		log.Println("ERROR:", err.Error(), ", reading from env")
 
 	}
-	PrivateKey =os.Getenv("PRIVATE_KEY")
-	Publickey=os.Getenv("PUBLIC_KEY")
-	ApiServerUrl=os.Getenv("API_SERVER_URL")
+	PrivateKey = os.Getenv("PRIVATE_KEY")
+	Publickey = os.Getenv("PUBLIC_KEY")
+	ApiServerUrl = os.Getenv("API_SERVER_URL")
+	IntegrationManagerUrl = os.Getenv("INTEGRATION_MANAGER_URL")
 
 }

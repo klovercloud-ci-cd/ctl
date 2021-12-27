@@ -2,5 +2,5 @@ package service
 
 // Pipeline Pipeline operations.
 type Pipeline interface {
-	Logs(url, page,limit string) (httpCode int, data interface{}, err error)
+	Logs(url, page, limit string) (httpCode int, data interface{}, err error)
 }

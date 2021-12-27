@@ -13,18 +13,18 @@ type pipelineService struct {
 func (p pipelineService) Logs(url, page, limit string) (httpCode int, data interface{}, err error) {
 	var response common.ResponseDTO
 	header := make(map[string]string)
-	url=url+"?order=&page="+page+"&limit="+limit
+	url = url + "?order=&page=" + page + "&limit=" + limit
 	code, b, err := p.httpClient.Get(url, header)
 
 	if err != nil {
-		return code, nil,err
+		return code, nil, err
 	}
 	er := json.Unmarshal(b, &response)
 	if er != nil {
-		return code, nil,err
+		return code, nil, err
 	}
 
-	return code, response.Data,nil
+	return code, response.Data, nil
 }
 
 // NewPipelineService returns Pipeline type service
@@ -33,4 +33,3 @@ func NewPipelineService(httpClient service.HttpClient) service.Pipeline {
 		httpClient: httpClient,
 	}
 }
-

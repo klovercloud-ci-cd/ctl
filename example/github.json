@@ -1,0 +1,38 @@
+{
+  "gitType": "github",
+  "companyId": "001",
+  "apiVersion": "v1",
+  "event": {
+    "ref": "refs/heads/master",
+    "repository": {
+      "name": "test-app",
+      "full_name": "zeromsi/test-app",
+      "owner": {
+        "name": "zeromsi",
+        "email": "zeromsi.official@gmail.com",
+        "login": "zeromsi",
+        "type": "User"
+      },
+      "url": "https://github.com/zeromsi/test-app",
+      "default_branch": "master",
+      "stargazers": 0,
+      "master_branch": "master"
+    },
+    "pusher": {
+      "name": "zeromsi",
+      "email": "zeromsi.official@gmail.com"
+    },
+    "sender": {
+      "login": "zeromsi",
+      "type": "User",
+      "site_admin": false
+    },
+    "commits": [
+      {
+        "id": "d16a2db11f9158f5610be1f0d9f3f941ee4ed34d",
+        "tree_id": "345e79a8c8e3ae588119a4ef13c8f979fe926656",
+        "url": "https://github.com/zeromsi/test-app/commit/d16a2db11f9158f5610be1f0d9f3f941ee4ed34d"
+      }
+    ]
+  }
+}
