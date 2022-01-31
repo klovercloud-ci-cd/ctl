@@ -5,6 +5,7 @@ import (
 	"github.com/klovercloud-ci/ctl/config"
 	v1 "github.com/klovercloud-ci/ctl/v1"
 	"github.com/klovercloud-ci/ctl/v1/service"
+	"os"
 )
 
 type githubService struct {
@@ -17,6 +18,7 @@ func (g githubService) Apply(git v1.Git, companyId string) error {
 		return err
 	}
 	header := make(map[string]string)
+	header["Authorization"] = "Bearer " + os.Getenv("CTL_TOKEN")
 	header["Content-Type"] = "application/json"
 	b, err := json.Marshal(git)
 	if err != nil {
