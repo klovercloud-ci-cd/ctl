@@ -20,6 +20,7 @@ func cli() {
 	}
 	commands.AddCommand(cmd.GetLogs())
 	commands.AddCommand(cmd.Trigger())
+	commands.AddCommand(cmd.CreateCompany())
 
 	if err := commands.Execute(); err != nil {
 		os.Exit(1)

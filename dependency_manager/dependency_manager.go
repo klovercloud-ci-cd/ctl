@@ -11,3 +11,7 @@ func GetPipelineService() service.Pipeline {
 func GetV1GithubService() service.Git {
 	return business.NewGithubService(business.NewHttpClientService())
 }
+
+func GetCompanyService() service.Company {
+	return business.NewCompanyService(business.NewHttpClientService())
+}
