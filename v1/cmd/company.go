@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"encoding/json"
-	v1 "github.com/klovercloud-ci-cd/integration-manager/core/v1"
 	"github.com/klovercloud-ci/ctl/dependency_manager"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
@@ -31,7 +30,7 @@ func CreateCompany() *cobra.Command{
 				log.Printf("data.Get err   #%v ", err)
 				return nil
 			}
-			company := new(v1.Company)
+			company := new(interface{})
 			if strings.HasSuffix(file, ".yaml") {
 				err = yaml.Unmarshal(data, company)
 				if err != nil {
@@ -46,7 +45,7 @@ func CreateCompany() *cobra.Command{
 				}
 			}
 			companyService := dependency_manager.GetCompanyService()
-			if err = companyService.Store(*company); err != nil {
+			if err = companyService.Apply(*company); err != nil {
 				log.Fatalf("[ERROR]: %v", err)
 			}
 			return nil

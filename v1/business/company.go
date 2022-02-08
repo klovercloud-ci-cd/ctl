@@ -2,7 +2,6 @@ package business
 
 import (
 	"encoding/json"
-	v1 "github.com/klovercloud-ci-cd/integration-manager/core/v1"
 	"github.com/klovercloud-ci/ctl/config"
 	"github.com/klovercloud-ci/ctl/v1/service"
 	"os"
@@ -12,11 +11,11 @@ type companyService struct {
 	httpClient service.HttpClient
 }
 
-func (c companyService) Store(company v1.Company) error {
-	err := company.Validate()
-	if err != nil {
-		return err
-	}
+func (c companyService) Apply(company interface{}) error {
+	//err := company.Validate()
+	//if err != nil {
+	//	return err
+	//}
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + os.Getenv("CTL_TOKEN")
 	header["Content-Type"] = "application/json"
@@ -24,7 +23,7 @@ func (c companyService) Store(company v1.Company) error {
 	if err != nil {
 		return err
 	}
-	_, err = c.httpClient.Post(config.IntegrationManagerUrl+"companies",header, b)
+	_, err = c.httpClient.Post(config.ApiServerUrl+"companies", header, b)
 	if err != nil {
 		return err
 	}
