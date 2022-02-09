@@ -21,6 +21,8 @@ func cli() {
 	commands.AddCommand(cmd.GetLogs())
 	commands.AddCommand(cmd.Trigger())
 	commands.AddCommand(cmd.CreateCompany())
+	commands.AddCommand(cmd.UpdateCompanyRepositories())
+	commands.AddCommand(cmd.UpdateRepositoryApplications())
 
 	if err := commands.Execute(); err != nil {
 		os.Exit(1)

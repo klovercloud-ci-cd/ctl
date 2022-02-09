@@ -12,10 +12,6 @@ type companyService struct {
 }
 
 func (c companyService) Apply(company interface{}) error {
-	//err := company.Validate()
-	//if err != nil {
-	//	return err
-	//}
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + os.Getenv("CTL_TOKEN")
 	header["Content-Type"] = "application/json"
@@ -24,6 +20,36 @@ func (c companyService) Apply(company interface{}) error {
 		return err
 	}
 	_, err = c.httpClient.Post(config.ApiServerUrl+"companies", header, b)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c companyService) ApplyUpdateRepositories(company interface{}, companyId string, option string) error {
+	header := make(map[string]string)
+	header["Authorization"] = "Bearer " + os.Getenv("CTL_TOKEN")
+	header["Content-Type"] = "application/json"
+	b, err := json.Marshal(company)
+	if err != nil {
+		return err
+	}
+	_, err = c.httpClient.Put(config.ApiServerUrl+"companies/"+companyId+"/repositories?companyUpdateOption="+option, header, b)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c companyService) ApplyUpdateApplications(company interface{}, companyId string, repoId string, option string) error {
+	header := make(map[string]string)
+	header["Authorization"] = "Bearer " + os.Getenv("CTL_TOKEN")
+	header["Content-Type"] = "application/json"
+	b, err := json.Marshal(company)
+	if err != nil {
+		return err
+	}
+	_, err = c.httpClient.Post(config.ApiServerUrl+"applications?companyId="+companyId+"repositoryId="+repoId+"companyUpdateOption="+option, header, b)
 	if err != nil {
 		return err
 	}
