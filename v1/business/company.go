@@ -49,7 +49,7 @@ func (c companyService) ApplyUpdateApplications(company interface{}, companyId s
 	if err != nil {
 		return err
 	}
-	_, err = c.httpClient.Post(config.ApiServerUrl+"applications?companyId="+companyId+"repositoryId="+repoId+"companyUpdateOption="+option, header, b)
+	_, err = c.httpClient.Post(config.ApiServerUrl+"applications?companyId="+companyId+"&repositoryId="+repoId+"&companyUpdateOption="+option, header, b)
 	if err != nil {
 		return err
 	}

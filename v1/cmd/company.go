@@ -140,7 +140,7 @@ func UpdateRepositoryApplications() *cobra.Command{
 				} else if strings.Contains(strings.ToLower(each), "repoid") {
 					strs := strings.Split(each, "=")
 					if len(strs) > 0 {
-						companyId = strs[1]
+						repoId = strs[1]
 					}
 				}
 			}

@@ -1,7 +1,8 @@
 {
   "repositories": [
     {
-      "name": "users"
+      "type": "GITHUB",
+      "token": "123456789"
     }
   ]
 }
