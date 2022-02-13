@@ -13,7 +13,7 @@ import (
 func CreateCompany() *cobra.Command{
 	return &cobra.Command{
 		Use:       "create-company",
-		Short:     "Create Company",
+		Short:     "Create company",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			log.Println(args)
@@ -57,7 +57,7 @@ func CreateCompany() *cobra.Command{
 func UpdateCompanyRepositories() *cobra.Command{
 	return &cobra.Command{
 		Use:       "update-company-repositories",
-		Short:     "Update Company Repositories",
+		Short:     "Update company repositories",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var file string
@@ -114,7 +114,7 @@ func UpdateCompanyRepositories() *cobra.Command{
 func UpdateRepositoryApplications() *cobra.Command{
 	return &cobra.Command{
 		Use:       "update-repository-applications",
-		Short:     "Update Repositories Applications",
+		Short:     "Update repositories applications",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var file string
@@ -175,7 +175,7 @@ func UpdateRepositoryApplications() *cobra.Command{
 func GetCompanyById() *cobra.Command{
 	return &cobra.Command{
 		Use:       "get-company",
-		Short:     "Get Company by Company ID",
+		Short:     "Get company by company ID",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			log.Println(args)
@@ -209,7 +209,7 @@ func GetCompanyById() *cobra.Command{
 func GetCompanies() *cobra.Command{
 	return &cobra.Command{
 		Use:       "get-companies",
-		Short:     "Get All Companies",
+		Short:     "Get all companies",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			log.Println(args)
@@ -234,7 +234,7 @@ func GetCompanies() *cobra.Command{
 func GetRepositoriesByCompanyId() *cobra.Command{
 	return &cobra.Command{
 		Use:       "get-repositories",
-		Short:     "Get Repositories By Company Id",
+		Short:     "Get repositories by company id",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			log.Println(args)

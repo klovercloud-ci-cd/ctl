@@ -12,7 +12,7 @@ import (
 func GetLogs() *cobra.Command {
 	return &cobra.Command{
 		Use:       "logs",
-		Short:     "get logs by processId",
+		Short:     "Get logs by process ID",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 
