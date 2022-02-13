@@ -74,7 +74,7 @@ func getLogs(cmd *cobra.Command, processId string, page string, limit string, fo
 		return nil
 	}
 	if code != 200 {
-		cmd.Println("[ERROR]: ", "Something wen wrong! StatusCode: ", code)
+		cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", code)
 		return nil
 	}
 	if data != nil {

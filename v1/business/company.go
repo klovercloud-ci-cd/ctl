@@ -56,6 +56,20 @@ func (c companyService) ApplyUpdateApplications(company interface{}, companyId s
 	return nil
 }
 
+func (c companyService) GetCompanyById(companyId string) (httpCode int, data []byte, err error) {
+	header := make(map[string]string)
+	header["Authorization"] = "Bearer " + os.Getenv("CTL_TOKEN")
+	header["Content-Type"] = "application/json"
+	return c.httpClient.Get(config.ApiServerUrl+"companies/"+companyId, header)
+}
+
+func (c companyService) GetCompanies() (httpCode int, data []byte, err error) {
+	header := make(map[string]string)
+	header["Authorization"] = "Bearer " + os.Getenv("CTL_TOKEN")
+	header["Content-Type"] = "application/json"
+	return c.httpClient.Get(config.ApiServerUrl+"companies", header)
+}
+
 // NewCompanyService returns company type service
 func NewCompanyService(httpClient service.HttpClient) service.Company {
 	return &companyService{
