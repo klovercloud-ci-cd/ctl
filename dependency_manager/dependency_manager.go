@@ -15,3 +15,7 @@ func GetV1GithubService() service.Git {
 func GetCompanyService() service.Company {
 	return business.NewCompanyService(business.NewHttpClientService())
 }
+
+func GetRepositoryService() service.Repository {
+	return business.NewRepositoryService(business.NewHttpClientService())
+}

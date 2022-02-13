@@ -1,5 +1,6 @@
 package service
 
+// Company Company operations
 type Company interface {
 	Apply(company interface{}) error
 	ApplyUpdateRepositories(company interface{}, companyId string, option string) error

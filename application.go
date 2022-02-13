@@ -26,6 +26,8 @@ func cli() {
 	commands.AddCommand(cmd.GetRepositoriesByCompanyId())
 	commands.AddCommand(cmd.UpdateCompanyRepositories())
 	commands.AddCommand(cmd.UpdateRepositoryApplications())
+	commands.AddCommand(cmd.GetRepositoryById())
+	commands.AddCommand(cmd.GetApplicationsByCompanyId())
 
 	if err := commands.Execute(); err != nil {
 		os.Exit(1)
