@@ -23,6 +23,7 @@ func cli() {
 	commands.AddCommand(cmd.CreateCompany())
 	commands.AddCommand(cmd.GetCompanies())
 	commands.AddCommand(cmd.GetCompanyById())
+	commands.AddCommand(cmd.GetRepositoriesByCompanyId())
 	commands.AddCommand(cmd.UpdateCompanyRepositories())
 	commands.AddCommand(cmd.UpdateRepositoryApplications())
 

@@ -230,3 +230,37 @@ func GetCompanies() *cobra.Command{
 		},
 	}
 }
+
+func GetRepositoriesByCompanyId() *cobra.Command{
+	return &cobra.Command{
+		Use:       "get-repositories",
+		Short:     "Get Repositories By Company Id",
+		ValidArgs: []string{},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			log.Println(args)
+			var companyId string
+			for _, each := range args {
+				if strings.Contains(strings.ToLower(each), "companyid") {
+					strs := strings.Split(strings.ToLower(each), "=")
+					if len(strs) > 0 {
+						companyId = strs[1]
+					}
+				}
+			}
+			companyService := dependency_manager.GetCompanyService()
+			code, data, err := companyService.GetRepositoriesByCompanyId(companyId)
+			if err != nil {
+				cmd.Println("[ERROR]: ", err.Error())
+				return nil
+			}
+			if code != 200 {
+				cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", code)
+				return nil
+			}
+			if data != nil {
+				cmd.Println(string(data))
+			}
+			return nil
+		},
+	}
+}

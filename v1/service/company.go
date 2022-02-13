@@ -6,4 +6,5 @@ type Company interface {
 	ApplyUpdateApplications(company interface{}, companyId string, repoId string, option string) error
 	GetCompanyById(companyId string) (httpCode int, data []byte, err error)
 	GetCompanies() (httpCode int, data []byte, err error)
+	GetRepositoriesByCompanyId(companyId string) (httpCode int, data []byte, err error)
 }

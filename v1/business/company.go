@@ -70,6 +70,13 @@ func (c companyService) GetCompanies() (httpCode int, data []byte, err error) {
 	return c.httpClient.Get(config.ApiServerUrl+"companies", header)
 }
 
+func (c companyService) GetRepositoriesByCompanyId(companyId string) (httpCode int, data []byte, err error) {
+	header := make(map[string]string)
+	header["Authorization"] = "Bearer " + os.Getenv("CTL_TOKEN")
+	header["Content-Type"] = "application/json"
+	return c.httpClient.Get(config.ApiServerUrl+"companies/"+companyId+"/repositories", header)
+}
+
 // NewCompanyService returns company type service
 func NewCompanyService(httpClient service.HttpClient) service.Company {
 	return &companyService{
