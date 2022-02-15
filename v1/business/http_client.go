@@ -77,7 +77,6 @@ func (h httpClientService) Post(url string, header map[string]string, body []byt
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Println("sssss")
 		log.Println("[ERROR] Failed communicate :", err.Error())
 		return http.StatusBadRequest, nil, err
 	}
@@ -90,18 +89,15 @@ func (h httpClientService) Post(url string, header map[string]string, body []byt
 	if resp.StatusCode != 200 {
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			log.Println("ffff")
 			log.Println("[ERROR] Failed communicate ", err.Error())
 			return resp.StatusCode, nil, err
 		} else {
 			log.Println(resp.StatusCode)
-			log.Println("dddd")
 			log.Println("[ERROR] Failed communicate :", string(body))
 		}
 	}
 	body, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Println("qqqqqq")
 		log.Println("[ERROR] Failed communicate ", err.Error())
 		return resp.StatusCode, nil, err
 	}
