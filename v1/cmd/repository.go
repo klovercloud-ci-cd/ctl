@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/klovercloud-ci/ctl/dependency_manager"
+	"github.com/klovercloud-ci/ctl/enums"
 	"github.com/spf13/cobra"
 	"log"
 	"strings"
@@ -24,18 +25,7 @@ func GetRepositoryById() *cobra.Command{
 				}
 			}
 			repositoryService := dependency_manager.GetRepositoryService()
-			code, data, err := repositoryService.GetRepositoryById(repositoryId)
-			if err != nil {
-				cmd.Println("[ERROR]: ", err.Error())
-				return nil
-			}
-			if code != 200 {
-				cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", code)
-				return nil
-			}
-			if data != nil {
-				cmd.Println(string(data))
-			}
+			repositoryService.Apply(string(enums.GET_REPOSITORY), repositoryId, "")
 			return nil
 		},
 	}
@@ -58,18 +48,7 @@ func GetApplicationsByCompanyId() *cobra.Command{
 				}
 			}
 			repositoryService := dependency_manager.GetRepositoryService()
-			code, data, err := repositoryService.GetApplicationsByCompanyId(companyId)
-			if err != nil {
-				cmd.Println("[ERROR]: ", err.Error())
-				return nil
-			}
-			if code != 200 {
-				cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", code)
-				return nil
-			}
-			if data != nil {
-				cmd.Println(string(data))
-			}
+			repositoryService.Apply(string(enums.GET_APPLICATIONS), "", companyId)
 			return nil
 		},
 	}

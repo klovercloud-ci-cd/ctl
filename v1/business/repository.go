@@ -2,12 +2,44 @@ package business
 
 import (
 	"github.com/klovercloud-ci/ctl/config"
+	"github.com/klovercloud-ci/ctl/enums"
 	"github.com/klovercloud-ci/ctl/v1/service"
+	"github.com/spf13/cobra"
 	"os"
+	"log"
 )
 
 type repositoryService struct {
 	httpClient service.HttpClient
+}
+
+func (r repositoryService) Apply(flag, repositoryId, companyId string) {
+	var cmd *cobra.Command
+	switch flag {
+	case string(enums.GET_REPOSITORY):
+		code, data, err := r.GetRepositoryById(repositoryId)
+		if err != nil {
+			cmd.Println("[ERROR]: ", err.Error())
+		}
+		if code != 200 {
+			cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", code)
+		}
+		if data != nil {
+			cmd.Println(string(data))
+		}
+	case string(enums.GET_APPLICATIONS):
+		code, data, err := r.GetApplicationsByCompanyId(companyId)
+		if err != nil {
+			cmd.Println("[ERROR]: ", err.Error())
+		}
+		if code != 200 {
+			cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", code)
+		}
+		if data != nil {
+			cmd.Println(string(data))
+		}
+	}
+
 }
 
 func (r repositoryService) GetRepositoryById(repositoryId string) (httpCode int, data []byte, err error) {

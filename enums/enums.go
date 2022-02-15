@@ -55,3 +55,13 @@ const (
 	// GET_REPOSITORIES get repositories flag
 	GET_REPOSITORIES = COMPANY_FLAG("GET_REPOSITORIES")
 )
+
+// REPOSITORY_FLAG repository flag types to apply
+type REPOSITORY_FLAG string
+
+const (
+	// GET_REPOSITORY get repository flag
+	GET_REPOSITORY = REPOSITORY_FLAG("GET_REPOSITORY")
+	// GET_APPLICATIONS get applications flag
+	GET_APPLICATIONS = REPOSITORY_FLAG("GET_APPLICATIONS")
+)
