@@ -24,7 +24,7 @@ func (g githubService) Apply(git v1.Git, companyId string) error {
 	if err != nil {
 		return err
 	}
-	_, err = g.httpClient.Post(config.IntegrationManagerUrl+"githubs?companyId="+companyId, header, b)
+	_, _, err = g.httpClient.Post(config.IntegrationManagerUrl+"githubs?companyId="+companyId, header, b)
 	if err != nil {
 		return err
 	}

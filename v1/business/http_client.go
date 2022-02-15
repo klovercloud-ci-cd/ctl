@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"github.com/klovercloud-ci/ctl/v1/service"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -30,8 +31,8 @@ func (h httpClientService) Put(url string, header map[string]string, body []byte
 	if resp.StatusCode != 200 {
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			return resp.StatusCode, err
 			log.Println("[ERROR] Failed communicate ", err.Error())
+			return resp.StatusCode, err
 		} else {
 			log.Println("[SUCCESS] Successful :", string(body))
 		}
@@ -68,7 +69,7 @@ func (h httpClientService) Get(url string, header map[string]string) (httpCode i
 }
 
 // Post method that fires a Post request.
-func (h httpClientService) Post(url string, header map[string]string, body []byte) (httpCode int, err error) {
+func (h httpClientService) Post(url string, header map[string]string, body []byte) (httpCode int, data []byte, err error) {
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
 	for k, v := range header {
 		req.Header.Set(k, v)
@@ -76,20 +77,35 @@ func (h httpClientService) Post(url string, header map[string]string, body []byt
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
+		log.Println("sssss")
 		log.Println("[ERROR] Failed communicate :", err.Error())
-		return http.StatusBadRequest, err
+		return http.StatusBadRequest, nil, err
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+
+		}
+	}(resp.Body)
 	if resp.StatusCode != 200 {
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			return resp.StatusCode, err
+			log.Println("ffff")
 			log.Println("[ERROR] Failed communicate ", err.Error())
+			return resp.StatusCode, nil, err
 		} else {
+			log.Println(resp.StatusCode)
+			log.Println("dddd")
 			log.Println("[ERROR] Failed communicate :", string(body))
 		}
 	}
-	return resp.StatusCode, nil
+	body, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("qqqqqq")
+		log.Println("[ERROR] Failed communicate ", err.Error())
+		return resp.StatusCode, nil, err
+	}
+	return resp.StatusCode, body, nil
 }
 
 // NewHttpClientService returns HttpClient type service

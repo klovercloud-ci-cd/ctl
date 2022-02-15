@@ -19,3 +19,7 @@ func GetCompanyService() service.Company {
 func GetRepositoryService() service.Repository {
 	return business.NewRepositoryService(business.NewHttpClientService())
 }
+
+func GetOauthService() service.Oauth {
+	return business.NewOauthService(business.NewHttpClientService())
+}

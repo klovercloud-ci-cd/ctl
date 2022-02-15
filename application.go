@@ -18,6 +18,7 @@ func cli() {
 		Version:      "v1",
 		SilenceUsage: true,
 	}
+	commands.AddCommand(cmd.Relogin())
 	commands.AddCommand(cmd.GetLogs())
 	commands.AddCommand(cmd.Trigger())
 	commands.AddCommand(cmd.CreateCompany())

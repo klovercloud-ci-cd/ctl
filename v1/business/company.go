@@ -19,7 +19,7 @@ func (c companyService) Apply(company interface{}) error {
 	if err != nil {
 		return err
 	}
-	_, err = c.httpClient.Post(config.ApiServerUrl+"companies", header, b)
+	_, _, err = c.httpClient.Post(config.ApiServerUrl+"companies", header, b)
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func (c companyService) ApplyUpdateApplications(company interface{}, companyId s
 	if err != nil {
 		return err
 	}
-	_, err = c.httpClient.Post(config.ApiServerUrl+"applications?companyId="+companyId+"&repositoryId="+repoId+"&companyUpdateOption="+option, header, b)
+	_, _, err = c.httpClient.Post(config.ApiServerUrl+"applications?companyId="+companyId+"&repositoryId="+repoId+"&companyUpdateOption="+option, header, b)
 	if err != nil {
 		return err
 	}

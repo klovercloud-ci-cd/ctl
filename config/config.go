@@ -10,6 +10,7 @@ var PrivateKey string
 var Publickey string
 var ApiServerUrl string
 var IntegrationManagerUrl string
+var SecurityUrl string
 
 func InitEnvironmentVariables() {
 	err := godotenv.Load()
@@ -21,5 +22,5 @@ func InitEnvironmentVariables() {
 	Publickey = os.Getenv("PUBLIC_KEY")
 	ApiServerUrl = os.Getenv("API_SERVER_URL")
 	IntegrationManagerUrl = os.Getenv("INTEGRATION_MANAGER_URL")
-
+	SecurityUrl = os.Getenv("SECURITY_URL")
 }

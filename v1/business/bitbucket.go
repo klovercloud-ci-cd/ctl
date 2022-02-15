@@ -24,7 +24,7 @@ func (b bitbucketService) Apply(git v1.Git, companyId string) error {
 	if err != nil {
 		return err
 	}
-	_, err = b.httpClient.Post(config.IntegrationManagerUrl+"bitbuckets?companyId="+companyId, header, body)
+	_, _, err = b.httpClient.Post(config.IntegrationManagerUrl+"bitbuckets?companyId="+companyId, header, body)
 	if err != nil {
 		return err
 	}
