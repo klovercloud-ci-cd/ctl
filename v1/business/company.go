@@ -3,15 +3,72 @@ package business
 import (
 	"encoding/json"
 	"github.com/klovercloud-ci/ctl/config"
+	"github.com/klovercloud-ci/ctl/enums"
 	"github.com/klovercloud-ci/ctl/v1/service"
+	"github.com/spf13/cobra"
 	"os"
+	"log"
 )
 
 type companyService struct {
 	httpClient service.HttpClient
 }
 
-func (c companyService) Apply(company interface{}) error {
+func (c companyService) Apply(flag string, company interface{}, companyId, repoId, option string) {
+	var cmd *cobra.Command
+	switch flag {
+	case string(enums.CREATE_COMPANY):
+		err := c.CreateCompany(company)
+		if err != nil {
+			log.Fatalf("[ERROR]: %v", err)
+		}
+	case string(enums.UPDATE_REPOSITORIES):
+		err :=  c.UpdateRepositoriesByCompanyId(company, companyId, option)
+		if err != nil {
+			log.Fatalf("[ERROR]: %v", err)
+		}
+	case string(enums.UPDATE_APPLICATIONS):
+		err :=  c.UpdateApplicationsByRepositoryId(company, companyId, repoId, option)
+		if err != nil {
+			log.Fatalf("[ERROR]: %v", err)
+		}
+	case string(enums.GET_COMPANY_BY_ID):
+		code, data, err := c.GetCompanyById(companyId)
+		if err != nil {
+			cmd.Println("[ERROR]: ", err.Error())
+		}
+		if code != 200 {
+			cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", code)
+		}
+		if data != nil {
+			cmd.Println(string(data))
+		}
+	case string(enums.GET_COMPANIES):
+		code, data, err := c.GetCompanies()
+		if err != nil {
+			cmd.Println("[ERROR]: ", err.Error())
+		}
+		if code != 200 {
+			cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", code)
+		}
+		if data != nil {
+			cmd.Println(string(data))
+		}
+	case string(enums.GET_REPOSITORIES):
+		code, data, err := c.GetRepositoriesByCompanyId(companyId)
+		if err != nil {
+			cmd.Println("[ERROR]: ", err.Error())
+		}
+		if code != 200 {
+			cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", code)
+		}
+		if data != nil {
+			cmd.Println(string(data))
+		}
+	}
+}
+
+func (c companyService) CreateCompany(company interface{}) error {
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + os.Getenv("CTL_TOKEN")
 	header["Content-Type"] = "application/json"
@@ -26,7 +83,7 @@ func (c companyService) Apply(company interface{}) error {
 	return nil
 }
 
-func (c companyService) ApplyUpdateRepositories(company interface{}, companyId string, option string) error {
+func (c companyService) UpdateRepositoriesByCompanyId(company interface{}, companyId string, option string) error {
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + os.Getenv("CTL_TOKEN")
 	header["Content-Type"] = "application/json"
@@ -41,7 +98,7 @@ func (c companyService) ApplyUpdateRepositories(company interface{}, companyId s
 	return nil
 }
 
-func (c companyService) ApplyUpdateApplications(company interface{}, companyId string, repoId string, option string) error {
+func (c companyService) UpdateApplicationsByRepositoryId(company interface{}, companyId string, repoId string, option string) error {
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + os.Getenv("CTL_TOKEN")
 	header["Content-Type"] = "application/json"

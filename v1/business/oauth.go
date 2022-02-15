@@ -20,7 +20,7 @@ type ResponseDTOWithPagination struct {
 	Message  string      `json:"message" msgpack:"message" xml:"message"`
 }
 
-func (o oauthService) Relogin(loginDto interface{}) (string, error) {
+func (o oauthService) Apply(loginDto interface{}) (string, error) {
 	header := make(map[string]string)
 	header["Content-Type"] = "application/json"
 	b, err := json.Marshal(loginDto)

@@ -18,15 +18,15 @@ func cli() {
 		Version:      "v1",
 		SilenceUsage: true,
 	}
-	commands.AddCommand(cmd.Relogin())
+	commands.AddCommand(cmd.Login())
 	commands.AddCommand(cmd.GetLogs())
 	commands.AddCommand(cmd.Trigger())
 	commands.AddCommand(cmd.CreateCompany())
 	commands.AddCommand(cmd.GetCompanies())
 	commands.AddCommand(cmd.GetCompanyById())
 	commands.AddCommand(cmd.GetRepositoriesByCompanyId())
-	commands.AddCommand(cmd.UpdateCompanyRepositories())
-	commands.AddCommand(cmd.UpdateRepositoryApplications())
+	commands.AddCommand(cmd.UpdateRepositories())
+	commands.AddCommand(cmd.UpdateApplicationsByRepositoryId())
 	commands.AddCommand(cmd.GetRepositoryById())
 	commands.AddCommand(cmd.GetApplicationsByCompanyId())
 

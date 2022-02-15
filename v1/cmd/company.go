@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"github.com/klovercloud-ci/ctl/dependency_manager"
+	"github.com/klovercloud-ci/ctl/enums"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -12,7 +13,7 @@ import (
 
 func CreateCompany() *cobra.Command{
 	return &cobra.Command{
-		Use:       "create-company",
+		Use:       "create company",
 		Short:     "Create company",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -46,18 +47,16 @@ func CreateCompany() *cobra.Command{
 				}
 			}
 			companyService := dependency_manager.GetCompanyService()
-			if err = companyService.Apply(*company); err != nil {
-				log.Fatalf("[ERROR]: %v", err)
-			}
+			companyService.Apply(string(enums.CREATE_COMPANY), *company, "", "", "")
 			return nil
 		},
 	}
 }
 
-func UpdateCompanyRepositories() *cobra.Command{
+func UpdateRepositories() *cobra.Command{
 	return &cobra.Command{
-		Use:       "update-company-repositories",
-		Short:     "Update company repositories",
+		Use:       "update repositories",
+		Short:     "Update repositories by company id with option",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var file string
@@ -103,18 +102,16 @@ func UpdateCompanyRepositories() *cobra.Command{
 				}
 			}
 			companyService := dependency_manager.GetCompanyService()
-			if err = companyService.ApplyUpdateRepositories(*company, companyId, option); err != nil {
-				log.Fatalf("[ERROR]: %v", err)
-			}
+			companyService.Apply(string(enums.UPDATE_REPOSITORIES),*company, companyId, "", option)
 			return nil
 		},
 	}
 }
 
-func UpdateRepositoryApplications() *cobra.Command{
+func UpdateApplicationsByRepositoryId() *cobra.Command{
 	return &cobra.Command{
-		Use:       "update-repository-applications",
-		Short:     "Update repositories applications",
+		Use:       "update applications",
+		Short:     "Update applications by repository id and company id with option",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var file string
@@ -164,9 +161,7 @@ func UpdateRepositoryApplications() *cobra.Command{
 				}
 			}
 			companyService := dependency_manager.GetCompanyService()
-			if err = companyService.ApplyUpdateApplications(*company, companyId, repoId, option); err != nil {
-				log.Fatalf("[ERROR]: %v", err)
-			}
+			companyService.Apply(string(enums.UPDATE_APPLICATIONS), *company, companyId, repoId, option)
 			return nil
 		},
 	}
@@ -174,7 +169,7 @@ func UpdateRepositoryApplications() *cobra.Command{
 
 func GetCompanyById() *cobra.Command{
 	return &cobra.Command{
-		Use:       "get-company",
+		Use:       "get company",
 		Short:     "Get company by company ID",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -189,18 +184,7 @@ func GetCompanyById() *cobra.Command{
 				}
 			}
 			companyService := dependency_manager.GetCompanyService()
-			code, data, err := companyService.GetCompanyById(companyId)
-			if err != nil {
-				cmd.Println("[ERROR]: ", err.Error())
-				return nil
-			}
-			if code != 200 {
-				cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", code)
-				return nil
-			}
-			if data != nil {
-				cmd.Println(string(data))
-			}
+			companyService.Apply(string(enums.GET_COMPANY_BY_ID), nil, companyId, "", "")
 			return nil
 		},
 	}
@@ -208,24 +192,13 @@ func GetCompanyById() *cobra.Command{
 
 func GetCompanies() *cobra.Command{
 	return &cobra.Command{
-		Use:       "get-companies",
+		Use:       "get companies",
 		Short:     "Get all companies",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			log.Println(args)
 			companyService := dependency_manager.GetCompanyService()
-			code, data, err := companyService.GetCompanies()
-			if err != nil {
-				cmd.Println("[ERROR]: ", err.Error())
-				return nil
-			}
-			if code != 200 {
-				cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", code)
-				return nil
-			}
-			if data != nil {
-				cmd.Println(string(data))
-			}
+			companyService.Apply(string(enums.GET_COMPANIES), nil, "", "", "")
 			return nil
 		},
 	}
@@ -233,7 +206,7 @@ func GetCompanies() *cobra.Command{
 
 func GetRepositoriesByCompanyId() *cobra.Command{
 	return &cobra.Command{
-		Use:       "get-repositories",
+		Use:       "get repositories",
 		Short:     "Get repositories by company id",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -248,18 +221,7 @@ func GetRepositoriesByCompanyId() *cobra.Command{
 				}
 			}
 			companyService := dependency_manager.GetCompanyService()
-			code, data, err := companyService.GetRepositoriesByCompanyId(companyId)
-			if err != nil {
-				cmd.Println("[ERROR]: ", err.Error())
-				return nil
-			}
-			if code != 200 {
-				cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", code)
-				return nil
-			}
-			if data != nil {
-				cmd.Println(string(data))
-			}
+			companyService.Apply(string(enums.GET_REPOSITORIES), nil, companyId, "", "")
 			return nil
 		},
 	}

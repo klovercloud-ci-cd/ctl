@@ -18,10 +18,10 @@ type LoginDto struct {
 	Password string `json:"password" bson:"password"`
 }
 
-func Relogin() *cobra.Command{
+func Login() *cobra.Command{
 	return &cobra.Command{
-		Use:       "relogin",
-		Short:     "Relogin using email and password",
+		Use:       "login",
+		Short:     "Login using email and password",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			email, password := credentials()
@@ -30,7 +30,7 @@ func Relogin() *cobra.Command{
 				Password: password,
 			}
 			oauthService := dependency_manager.GetOauthService()
-			ctlToken, err := oauthService.Relogin(loginDto)
+			ctlToken, err := oauthService.Apply(loginDto)
 			if err != nil {
 				cmd.Println("[ERROR]: ", err.Error())
 				return nil
