@@ -6,18 +6,35 @@ import (
 	"github.com/klovercloud-ci/ctl/v1/service"
 	"github.com/spf13/cobra"
 	"os"
-	"log"
 )
 
 type repositoryService struct {
 	httpClient service.HttpClient
+	flag string
+	companyId string
+	repo string
 }
 
-func (r repositoryService) Apply(flag, repositoryId, companyId string) {
+func (r repositoryService) Flag(flag string) service.Repository {
+	r.flag=flag
+	return r
+}
+
+func (r repositoryService) CompanyId(companyId string) service.Repository {
+	r.companyId=companyId
+	return r
+}
+
+func (r repositoryService) Repo(repoId string) service.Repository {
+	r.repo=repoId
+	return r
+}
+
+func (r repositoryService) Apply() {
 	var cmd *cobra.Command
-	switch flag {
+	switch r.flag {
 	case string(enums.GET_REPOSITORY):
-		code, data, err := r.GetRepositoryById(repositoryId)
+		code, data, err := r.GetRepositoryById(r.repo)
 		if err != nil {
 			cmd.Println("[ERROR]: ", err.Error())
 		}
@@ -28,7 +45,7 @@ func (r repositoryService) Apply(flag, repositoryId, companyId string) {
 			cmd.Println(string(data))
 		}
 	case string(enums.GET_APPLICATIONS):
-		code, data, err := r.GetApplicationsByCompanyId(companyId)
+		code, data, err := r.GetApplicationsByCompanyId(r.companyId)
 		if err != nil {
 			cmd.Println("[ERROR]: ", err.Error())
 		}

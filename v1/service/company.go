@@ -2,5 +2,10 @@ package service
 
 // Company Company operations
 type Company interface {
-	Apply(flag string, company interface{}, companyId, repoId, option string)
+	Apply()
+	Flag(flag string) Company
+	Company(company interface{}) Company
+	CompanyId(companyId string) Company
+	RepoId(repoId string) Company
+	Option(option string) Company
 }

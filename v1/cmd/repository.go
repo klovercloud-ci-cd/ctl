@@ -25,7 +25,7 @@ func GetRepositoryById() *cobra.Command{
 				}
 			}
 			repositoryService := dependency_manager.GetRepositoryService()
-			repositoryService.Apply(string(enums.GET_REPOSITORY), repositoryId, "")
+			repositoryService.Flag(string(enums.GET_REPOSITORY)).Repo(repositoryId).Apply()
 			return nil
 		},
 	}
@@ -48,7 +48,7 @@ func GetApplicationsByCompanyId() *cobra.Command{
 				}
 			}
 			repositoryService := dependency_manager.GetRepositoryService()
-			repositoryService.Apply(string(enums.GET_APPLICATIONS), "", companyId)
+			repositoryService.Flag(string(enums.GET_APPLICATIONS)).CompanyId(companyId).Apply()
 			return nil
 		},
 	}

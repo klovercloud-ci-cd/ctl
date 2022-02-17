@@ -11,47 +11,6 @@ import (
 	"strings"
 )
 
-func CreateCompany() *cobra.Command{
-	return &cobra.Command{
-		Use:       "create company",
-		Short:     "Create company",
-		ValidArgs: []string{},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			log.Println(args)
-			var file string
-			for _, each := range args {
-				if strings.Contains(strings.ToLower(each), "file") || strings.Contains(strings.ToLower(each), "-f") {
-					strs := strings.Split(strings.ToLower(each), "=")
-					if len(strs) > 0 {
-						file = strs[1]
-					}
-				}
-			}
-			data, err := ioutil.ReadFile(file)
-			if err != nil {
-				log.Printf("data.Get err   #%v ", err)
-				return nil
-			}
-			company := new(interface{})
-			if strings.HasSuffix(file, ".yaml") {
-				err = yaml.Unmarshal(data, company)
-				if err != nil {
-					log.Fatalf("yaml Unmarshal: %v", err)
-					return nil
-				}
-			} else {
-				err = json.Unmarshal(data, company)
-				if err != nil {
-					log.Fatalf("json Unmarshal: %v", err)
-					return nil
-				}
-			}
-			companyService := dependency_manager.GetCompanyService()
-			companyService.Apply(string(enums.CREATE_COMPANY), *company, "", "", "")
-			return nil
-		},
-	}
-}
 
 func UpdateRepositories() *cobra.Command{
 	return &cobra.Command{
@@ -102,7 +61,7 @@ func UpdateRepositories() *cobra.Command{
 				}
 			}
 			companyService := dependency_manager.GetCompanyService()
-			companyService.Apply(string(enums.UPDATE_REPOSITORIES),*company, companyId, "", option)
+			companyService.Flag(string(enums.UPDATE_REPOSITORIES)).Company(*company).CompanyId(companyId).Option(option).Apply()
 			return nil
 		},
 	}
@@ -141,6 +100,7 @@ func UpdateApplicationsByRepositoryId() *cobra.Command{
 					}
 				}
 			}
+			log.Println(companyId)
 			data, err := ioutil.ReadFile(file)
 			if err != nil {
 				log.Printf("data.Get err   #%v ", err)
@@ -161,7 +121,7 @@ func UpdateApplicationsByRepositoryId() *cobra.Command{
 				}
 			}
 			companyService := dependency_manager.GetCompanyService()
-			companyService.Apply(string(enums.UPDATE_APPLICATIONS), *company, companyId, repoId, option)
+			companyService.Flag(string(enums.UPDATE_APPLICATIONS)).Company(*company).RepoId(repoId).Option(option).Apply()
 			return nil
 		},
 	}
@@ -169,11 +129,10 @@ func UpdateApplicationsByRepositoryId() *cobra.Command{
 
 func GetCompanyById() *cobra.Command{
 	return &cobra.Command{
-		Use:       "get company",
+		Use:       "describe company",
 		Short:     "Get company by company ID",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			log.Println(args)
 			var companyId string
 			for _, each := range args {
 				if strings.Contains(strings.ToLower(each), "companyid") {
@@ -184,21 +143,7 @@ func GetCompanyById() *cobra.Command{
 				}
 			}
 			companyService := dependency_manager.GetCompanyService()
-			companyService.Apply(string(enums.GET_COMPANY_BY_ID), nil, companyId, "", "")
-			return nil
-		},
-	}
-}
-
-func GetCompanies() *cobra.Command{
-	return &cobra.Command{
-		Use:       "get companies",
-		Short:     "Get all companies",
-		ValidArgs: []string{},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			log.Println(args)
-			companyService := dependency_manager.GetCompanyService()
-			companyService.Apply(string(enums.GET_COMPANIES), nil, "", "", "")
+			companyService.Flag(string(enums.GET_COMPANY_BY_ID)).CompanyId(companyId).Apply()
 			return nil
 		},
 	}
@@ -221,8 +166,9 @@ func GetRepositoriesByCompanyId() *cobra.Command{
 				}
 			}
 			companyService := dependency_manager.GetCompanyService()
-			companyService.Apply(string(enums.GET_REPOSITORIES), nil, companyId, "", "")
+			companyService.Flag(string(enums.GET_REPOSITORIES)).CompanyId(companyId).Apply()
 			return nil
+
 		},
 	}
 }
