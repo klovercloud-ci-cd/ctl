@@ -27,6 +27,7 @@ func cli() {
 	commands.AddCommand(cmd.GetApplicationsByCompanyId())
 
 	commands.AddCommand(cmd.Describe())
+	commands.AddCommand(cmd.List())
 	if err := commands.Execute(); err != nil {
 		os.Exit(1)
 	}
