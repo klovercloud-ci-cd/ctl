@@ -45,7 +45,7 @@ func (r repositoryService) Apply() {
 			cmd.Println(string(data))
 		}
 	case string(enums.GET_APPLICATIONS):
-		code, data, err := r.GetApplicationsByCompanyId(r.companyId)
+		code, data, err := r.GetApplicationsByRepositoryId(r.repo)
 		if err != nil {
 			cmd.Println("[ERROR]: ", err.Error())
 		}
@@ -66,11 +66,11 @@ func (r repositoryService) GetRepositoryById(repositoryId string) (httpCode int,
 	return r.httpClient.Get(config.ApiServerUrl+"repositories/"+repositoryId, header)
 }
 
-func (r repositoryService) GetApplicationsByCompanyId(companyId string) (httpCode int, data []byte, err error) {
+func (r repositoryService) GetApplicationsByRepositoryId(repositoryId string) (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + os.Getenv("CTL_TOKEN")
 	header["Content-Type"] = "application/json"
-	return r.httpClient.Get(config.ApiServerUrl+"repositories/"+companyId+"/applications", header)
+	return r.httpClient.Get(config.ApiServerUrl+"repositories/"+repositoryId+"/applications", header)
 }
 
 // NewCompanyService returns repository type service

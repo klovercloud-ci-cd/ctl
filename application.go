@@ -21,13 +21,9 @@ func cli() {
 	commands.AddCommand(cmd.Login())
 	commands.AddCommand(cmd.GetLogs())
 	commands.AddCommand(cmd.Trigger())
-	commands.AddCommand(cmd.GetRepositoriesByCompanyId())
-	commands.AddCommand(cmd.UpdateRepositories())
-	commands.AddCommand(cmd.UpdateApplicationsByRepositoryId())
-	commands.AddCommand(cmd.GetApplicationsByCompanyId())
-
 	commands.AddCommand(cmd.Describe())
 	commands.AddCommand(cmd.List())
+	commands.AddCommand(cmd.Update())
 	if err := commands.Execute(); err != nil {
 		os.Exit(1)
 	}
