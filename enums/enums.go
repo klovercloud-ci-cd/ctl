@@ -65,3 +65,11 @@ const (
 	// GET_APPLICATIONS get applications flag
 	GET_APPLICATIONS = REPOSITORY_FLAG("GET_APPLICATIONS")
 )
+
+// APPLICATION_FLAG application flag types to apply
+type APPLICATION_FLAG string
+
+const (
+	// GET_APPLICATION get application flag
+	GET_APPLICATION = APPLICATION_FLAG("GET_APPLICATION")
+)

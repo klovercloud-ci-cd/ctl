@@ -11,7 +11,6 @@ import (
 	"strings"
 )
 
-
 func UpdateRepositories() *cobra.Command{
 	return &cobra.Command{
 		Use:       "update repositories",
@@ -24,19 +23,19 @@ func UpdateRepositories() *cobra.Command{
 			for _, each := range args {
 				if strings.Contains(strings.ToLower(each), "file") || strings.Contains(strings.ToLower(each), "-f") {
 					strs := strings.Split(strings.ToLower(each), "=")
-					if len(strs) > 0 {
+					if len(strs) > 1 {
 						file = strs[1]
 					}
 				}
 				if strings.Contains(strings.ToLower(each), "option") {
 					strs := strings.Split(strings.ToUpper(each), "=")
-					if len(strs) > 0 {
+					if len(strs) > 1 {
 						option = strs[1]
 					}
 				}
 				if strings.Contains(strings.ToLower(each), "companyid") {
 					strs := strings.Split(each, "=")
-					if len(strs) > 0 {
+					if len(strs) > 1 {
 						companyId = strs[1]
 					}
 				}
@@ -61,7 +60,7 @@ func UpdateRepositories() *cobra.Command{
 				}
 			}
 			companyService := dependency_manager.GetCompanyService()
-			companyService.Flag(string(enums.UPDATE_REPOSITORIES)).Company(*company).CompanyId(companyId).Option(option).Apply()
+			companyService.Cmd(cmd).Flag(string(enums.UPDATE_REPOSITORIES)).Company(*company).CompanyId(companyId).Option(option).Apply()
 			return nil
 		},
 	}
@@ -80,22 +79,22 @@ func UpdateApplicationsByRepositoryId() *cobra.Command{
 			for _, each := range args {
 				if strings.Contains(strings.ToLower(each), "file") || strings.Contains(strings.ToLower(each), "-f") {
 					strs := strings.Split(strings.ToLower(each), "=")
-					if len(strs) > 0 {
+					if len(strs) > 1 {
 						file = strs[1]
 					}
 				} else if strings.Contains(strings.ToLower(each), "option") {
 					strs := strings.Split(strings.ToUpper(each), "=")
-					if len(strs) > 0 {
+					if len(strs) > 1 {
 						option = strs[1]
 					}
 				} else if strings.Contains(strings.ToLower(each), "companyid") {
 					strs := strings.Split(each, "=")
-					if len(strs) > 0 {
+					if len(strs) > 1 {
 						companyId = strs[1]
 					}
 				} else if strings.Contains(strings.ToLower(each), "repoid") {
 					strs := strings.Split(each, "=")
-					if len(strs) > 0 {
+					if len(strs) > 1 {
 						repoId = strs[1]
 					}
 				}
@@ -121,54 +120,8 @@ func UpdateApplicationsByRepositoryId() *cobra.Command{
 				}
 			}
 			companyService := dependency_manager.GetCompanyService()
-			companyService.Flag(string(enums.UPDATE_APPLICATIONS)).Company(*company).RepoId(repoId).Option(option).Apply()
+			companyService.Cmd(cmd).Flag(string(enums.UPDATE_APPLICATIONS)).Company(*company).RepoId(repoId).Option(option).Apply()
 			return nil
-		},
-	}
-}
-
-func GetCompanyById() *cobra.Command{
-	return &cobra.Command{
-		Use:       "describe company",
-		Short:     "Get company by company ID",
-		ValidArgs: []string{},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			var companyId string
-			for _, each := range args {
-				if strings.Contains(strings.ToLower(each), "companyid") {
-					strs := strings.Split(strings.ToLower(each), "=")
-					if len(strs) > 0 {
-						companyId = strs[1]
-					}
-				}
-			}
-			companyService := dependency_manager.GetCompanyService()
-			companyService.Flag(string(enums.GET_COMPANY_BY_ID)).CompanyId(companyId).Apply()
-			return nil
-		},
-	}
-}
-
-func GetRepositoriesByCompanyId() *cobra.Command{
-	return &cobra.Command{
-		Use:       "get repositories",
-		Short:     "Get repositories by company id",
-		ValidArgs: []string{},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			log.Println(args)
-			var companyId string
-			for _, each := range args {
-				if strings.Contains(strings.ToLower(each), "companyid") {
-					strs := strings.Split(strings.ToLower(each), "=")
-					if len(strs) > 0 {
-						companyId = strs[1]
-					}
-				}
-			}
-			companyService := dependency_manager.GetCompanyService()
-			companyService.Flag(string(enums.GET_REPOSITORIES)).CompanyId(companyId).Apply()
-			return nil
-
 		},
 	}
 }

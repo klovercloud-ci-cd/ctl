@@ -20,6 +20,10 @@ func GetRepositoryService() service.Repository {
 	return business.NewRepositoryService(business.NewHttpClientService())
 }
 
+func GetApplicationService() service.Application {
+	return business.NewApplicationService(business.NewHttpClientService())
+}
+
 func GetOauthService() service.Oauth {
 	return business.NewOauthService(business.NewHttpClientService())
 }

@@ -4,10 +4,14 @@ import (
 	"encoding/json"
 	"github.com/klovercloud-ci/ctl/config"
 	"github.com/klovercloud-ci/ctl/enums"
+	v1 "github.com/klovercloud-ci/ctl/v1"
 	"github.com/klovercloud-ci/ctl/v1/service"
+	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 	"log"
 	"os"
+	"strconv"
 )
 
 type companyService struct {
@@ -17,8 +21,13 @@ type companyService struct {
 	companyId string
 	repoId string
 	option string
+	cmd *cobra.Command
 }
 
+func (c companyService) Cmd(cmd *cobra.Command) service.Company {
+	c.cmd=cmd
+	return c
+}
 func (c companyService) Flag(flag string) service.Company {
 	c.flag=flag
 	return c
@@ -45,7 +54,6 @@ func (c companyService) Option(option string) service.Company {
 }
 
 func (c companyService) Apply() {
-	var cmd *cobra.Command
 	switch c.flag {
 	case string(enums.CREATE_COMPANY):
 		err := c.CreateCompany(c.company)
@@ -63,39 +71,70 @@ func (c companyService) Apply() {
 			log.Fatalf("[ERROR]: %v", err)
 		}
 	case string(enums.GET_COMPANY_BY_ID):
-		code, data, err := c.GetCompanyById(c.companyId)
+		code, data, err := c.GetCompanyById(c.companyId, c.option)
 		if err != nil {
-			cmd.Println("[ERROR]: ", err.Error())
-		}
-		if code != 200 {
-			cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", code)
-		}
-		if data != nil {
-			cmd.Println(string(data))
+			c.cmd.Println("[ERROR]: ", err.Error())
+		} else if code != 200 {
+			c.cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", code)
+		} else if data != nil {
+			var responseDTO v1.ResponseDTO
+			err := json.Unmarshal(data, &responseDTO)
+			if err != nil {
+				c.cmd.Println("[ERROR]: ", err.Error())
+			} else {
+				jsonString, _ := json.Marshal(responseDTO.Data)
+				var company v1.Company
+				json.Unmarshal(jsonString, &company)
+				b, _ := yaml.Marshal(company)
+				b = v1.AddRootIndent(b, 4)
+				c.cmd.Println(string(b))
+			}
 		}
 	case string(enums.GET_COMPANIES):
 		code, data, err := c.GetCompanies()
 		if err != nil {
-			cmd.Println("[ERROR]: ", err.Error())
-		}
-		if code != 200 {
-			cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", code)
-		}
-		if data != nil {
-			cmd.Println(string(data))
+			c.cmd.Println("[ERROR]: ", err.Error())
+		} else if code != 200 {
+			c.cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", code)
+		} else if data != nil {
+			c.cmd.Println(string(data))
 		}
 	case string(enums.GET_REPOSITORIES):
 		code, data, err := c.GetRepositoriesByCompanyId(c.companyId)
 		if err != nil {
-			cmd.Println("[ERROR]: ", err.Error())
+			c.cmd.Println("[ERROR]: ", err.Error())
+		} else if code != 200 {
+			c.cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", code)
+		} else if data != nil {
+			var responseDTO v1.ResponseDTO
+			err := json.Unmarshal(data, &responseDTO)
+			if err != nil {
+				c.cmd.Println("[ERROR]: ", err.Error())
+			} else {
+				jsonString, _ := json.Marshal(responseDTO.Data)
+				var repositories v1.Repositories
+				json.Unmarshal(jsonString, &repositories)
+				table := tablewriter.NewWriter(os.Stdout)
+				if c.option == "loadApplications=false" {
+					table.SetHeader([]string{"Id", "Type"})
+					for _, eachRepo := range repositories {
+						repository := []string{eachRepo.Id, eachRepo.Type}
+						table.Append(repository)
+					}
+				} else {
+					table.SetHeader([]string{"Id", "Type", "Applications Count"})
+					for _, eachRepo := range repositories {
+						repository := []string{eachRepo.Id, eachRepo.Type, strconv.Itoa(len(eachRepo.Applications))}
+						table.Append(repository)
+					}
+				}
+				table.Render()
+			}
 		}
-		if code != 200 {
-			cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", code)
-		}
-		if data != nil {
-			cmd.Println(string(data))
-		}
+	default:
+		c.cmd.Println("[ERROR]: ", "Please provide valid options")
 	}
+
 }
 
 func (c companyService) CreateCompany(company interface{}) error {
@@ -143,11 +182,11 @@ func (c companyService) UpdateApplicationsByRepositoryId(company interface{}, co
 	return nil
 }
 
-func (c companyService) GetCompanyById(companyId string) (httpCode int, data []byte, err error) {
+func (c companyService) GetCompanyById(companyId string, option string) (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + os.Getenv("CTL_TOKEN")
 	header["Content-Type"] = "application/json"
-	return c.httpClient.Get(config.ApiServerUrl+"companies/"+companyId, header)
+	return c.httpClient.Get(config.ApiServerUrl+"companies/"+companyId+"?"+option, header)
 }
 
 func (c companyService) GetCompanies() (httpCode int, data []byte, err error) {
@@ -161,7 +200,7 @@ func (c companyService) GetRepositoriesByCompanyId(companyId string) (httpCode i
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + os.Getenv("CTL_TOKEN")
 	header["Content-Type"] = "application/json"
-	return c.httpClient.Get(config.ApiServerUrl+"companies/"+companyId+"/repositories", header)
+	return c.httpClient.Get(config.ApiServerUrl+"companies/"+companyId+"/repositories?"+c.option, header)
 }
 
 // NewCompanyService returns company type service

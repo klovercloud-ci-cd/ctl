@@ -26,7 +26,6 @@ func Trigger() *cobra.Command {
 						file = strs[1]
 					}
 				}
-
 			}
 			data, err := ioutil.ReadFile(file)
 			if err != nil {
