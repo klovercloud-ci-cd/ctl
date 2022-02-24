@@ -1,4 +1,4 @@
 build:
-	go build -o ctl
-run:
-	./ctl
+	 go build -o ctl
+install:
+	 cp ctl /usr/bin/
