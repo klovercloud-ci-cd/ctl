@@ -2,7 +2,7 @@ package business
 
 import (
 	"encoding/json"
-	"github.com/klovercloud-ci/ctl/config"
+	v1 "github.com/klovercloud-ci/ctl/v1"
 	"github.com/klovercloud-ci/ctl/v1/service"
 )
 
@@ -27,7 +27,7 @@ func (o oauthService) Apply(loginDto interface{}) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	_, data, err := o.httpClient.Post(config.SecurityUrl+"oauth/login?grant_type=password&token_type=ctl", header, b)
+	_, data, err := o.httpClient.Post(v1.GetSecurityUrl()+"oauth/login?grant_type=password&token_type=ctl", header, b)
 	if err != nil {
 		return "", err
 	}

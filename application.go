@@ -1,14 +1,13 @@
 package main
 
 import (
-	"github.com/klovercloud-ci/ctl/config"
 	"github.com/klovercloud-ci/ctl/v1/cmd"
 	"github.com/spf13/cobra"
 	"os"
 )
 
 func main() {
-	config.InitEnvironmentVariables()
+	//config.InitEnvironmentVariables()
 	cli()
 }
 func cli() {

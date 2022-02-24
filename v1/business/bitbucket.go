@@ -2,10 +2,8 @@ package business
 
 import (
 	"encoding/json"
-	"github.com/klovercloud-ci/ctl/config"
 	v1 "github.com/klovercloud-ci/ctl/v1"
 	"github.com/klovercloud-ci/ctl/v1/service"
-	"os"
 )
 
 type bitbucketService struct {
@@ -18,13 +16,14 @@ func (b bitbucketService) Apply(git v1.Git, companyId string) error {
 		return err
 	}
 	header := make(map[string]string)
-	header["Authorization"] = "Bearer " + os.Getenv("CTL_TOKEN")
+	token, _ := v1.GetToken()
+	header["Authorization"] = "Bearer " + token
 	header["Content-Type"] = "application/json"
 	body, err := json.Marshal(git)
 	if err != nil {
 		return err
 	}
-	_, _, err = b.httpClient.Post(config.IntegrationManagerUrl+"bitbuckets?companyId="+companyId, header, body)
+	_, _, err = b.httpClient.Post(v1.GetApiServerUrl()+"bitbuckets?companyId="+companyId, header, body)
 	if err != nil {
 		return err
 	}

@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/golang-jwt/jwt"
-	"github.com/klovercloud-ci/ctl/config"
+	"io/ioutil"
 	"log"
-	"strings"
+	"os"
 )
 
 // UserMetadata holds users metadata
@@ -21,20 +21,24 @@ type UserResourcePermissionDto struct {
 	UserId    string                 `json:"user_id" bson:"user_id"`
 }
 
+// Config contains config file struct
+type Config struct {
+	Token 			string `json:"token" bson:"token"`
+	ApiServerUrl 	string `json:"api_server_url" bson:"api_server_url"`
+	SecurityUrl 	string `json:"security_url" bson:"security_url"`
+}
+
 func GetUserMetadataFromBearerToken() (UserMetadata, error) {
-	bearerToken := GetBearerToken()
-	if bearerToken == "" {
-		return UserMetadata{}, errors.New("no token found")
+	token, err := GetToken()
+	if err != nil {
+		return UserMetadata{}, nil
 	}
-	var token string
-	if len(strings.Split(bearerToken, " ")) == 2 {
-		token = strings.Split(bearerToken, " ")[1]
-	} else {
+	if token == "" {
 		return UserMetadata{}, errors.New("no token found")
 	}
 	claims := jwt.MapClaims{}
 	jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(config.Publickey), nil
+		return []byte(""), nil
 	})
 	jsonbody, err := json.Marshal(claims["data"])
 	if err != nil {
@@ -47,8 +51,97 @@ func GetUserMetadataFromBearerToken() (UserMetadata, error) {
 	return userResourcePermission.Metadata, nil
 }
 
-func GetBearerToken() string {
-	return "Bearer eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7Im1ldGFkYXRhIjp7ImNvbXBhbnlfaWQiOiIxMjM0NSJ9LCJ1c2VyX2lkIjoiYjg3NmVjOGEtOTY1MC00MDhlLTg0YmItZTVmM2QzNmI0NzA0IiwicmVzb3VyY2VzIjpbeyJuYW1lIjoicGlwZWxpbmUiLCJyb2xlcyI6W3sibmFtZSI6IkFETUlOIiwicGVybWlzc2lvbnMiOlt7Im5hbWUiOiJDUkVBVEUifSx7Im5hbWUiOiJSRUFEIn0seyJuYW1lIjoiVVBEQVRFIn0seyJuYW1lIjoiREVMRVRFIn1dfV19LHsibmFtZSI6InByb2Nlc3MiLCJyb2xlcyI6W3sibmFtZSI6IkFETUlOIiwicGVybWlzc2lvbnMiOlt7Im5hbWUiOiJDUkVBVEUifSx7Im5hbWUiOiJSRUFEIn0seyJuYW1lIjoiVVBEQVRFIn0seyJuYW1lIjoiREVMRVRFIn1dfV19LHsibmFtZSI6ImNvbXBhbnkiLCJyb2xlcyI6W3sibmFtZSI6IkFETUlOIiwicGVybWlzc2lvbnMiOlt7Im5hbWUiOiJDUkVBVEUifSx7Im5hbWUiOiJSRUFEIn0seyJuYW1lIjoiVVBEQVRFIn0seyJuYW1lIjoiREVMRVRFIn1dfV19LHsibmFtZSI6InJlcG9zaXRvcnkiLCJyb2xlcyI6W3sibmFtZSI6IkFETUlOIiwicGVybWlzc2lvbnMiOlt7Im5hbWUiOiJDUkVBVEUifSx7Im5hbWUiOiJSRUFEIn0seyJuYW1lIjoiVVBEQVRFIn0seyJuYW1lIjoiREVMRVRFIn1dfV19LHsibmFtZSI6ImFwcGxpY2F0aW9uIiwicm9sZXMiOlt7Im5hbWUiOiJBRE1JTiIsInBlcm1pc3Npb25zIjpbeyJuYW1lIjoiQ1JFQVRFIn0seyJuYW1lIjoiUkVBRCJ9LHsibmFtZSI6IlVQREFURSJ9LHsibmFtZSI6IkRFTEVURSJ9XX1dfSx7Im5hbWUiOiJ1c2VyIiwicm9sZXMiOlt7Im5hbWUiOiJBRE1JTiIsInBlcm1pc3Npb25zIjpbeyJuYW1lIjoiQ1JFQVRFIn0seyJuYW1lIjoiUkVBRCJ9LHsibmFtZSI6IlVQREFURSJ9LHsibmFtZSI6IkRFTEVURSJ9XX1dfV19LCJleHAiOjE5NTQ2NDg5OTgsImlhdCI6MTY0MzYwODk5OCwic3ViIjoiYjg3NmVjOGEtOTY1MC00MDhlLTg0YmItZTVmM2QzNmI0NzA0In0.vUxIiWWcbUA3aWBrOzzNMzqGb1vInZ3nJCuUyXOGv_RFSlBUhPWStLgBt0EjNq8_DuXckSa7qM-UNHlCI-z9Ma4KIFjUIBf3Q8hIOBt5WTrfyT4_v64Vocxl0qgIbyZg1zH_WP0i3yHxMuo3Pvq7DrRXOasROhncF9yhxxngyyghq9RXGzSyRzmM8KDepfuHQ5JHoPECR2oz07MwvlD8yg1nCziTFDlwJwBMWoUFc44vuo5g84JfWiSKQw6dgQyMSOZtGkhqdCwnK871T2jZRuRPKjGXhr__XKIjPFlSQNj3Cw0TngMiYYCPt0ti1VvRtZViBzIZptSHSPNo27GVnTabzkxUHTlqE95DoYtgTcibJBdy9q1SMPmifqUV5XHEGOpEcebAvPIBHTCm5xAgEq73p-dRKFZUvI8Plrayb7UcNzlJGMPULI6fZDk9ts3jZ362-vPBh41fZPPK_up3d-jzn6j779I7kpb9_kxzYXxYfsOvBCDUkgQ572575llO3hptFwFQACBxMg5pXUiZp20SImOCS475O6j8OHFrPlWoLdyxsz-1GkpkA_jC3v93aELAR5GsEy0QfYxP2GkaZUpJwtXNVejbngT0wtXKKlXi5FKs6rB1-TEMaOsBJvYLtSwxZm3UXffIyRARumBW6AHow448_HL8rqc0P62fWFg"
+func GetToken() (string, error) {
+	if _, err := os.Stat("config.cfg"); errors.Is(err, os.ErrNotExist) {
+		return "", errors.New("user is not logged in")
+	}
+	jsonFile, err := os.Open("config.cfg")
+	if err != nil {
+		return "", err
+	}
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	var configFile Config
+	err = json.Unmarshal(byteValue, &configFile)
+	if err != nil {
+		return "", err
+	}
+	if configFile.Token == "" {
+		return "", errors.New("user is not logged in")
+	}
+	return configFile.Token, nil
+}
+
+func GetApiServerUrl() string {
+	if _, err := os.Stat("config.cfg"); errors.Is(err, os.ErrNotExist) {
+		return ""
+	}
+	jsonFile, err := os.Open("config.cfg")
+	if err != nil {
+		return ""
+	}
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	var configFile Config
+	err = json.Unmarshal(byteValue, &configFile)
+	if err != nil {
+		return ""
+	}
+	return configFile.ApiServerUrl
+}
+
+func GetSecurityUrl() string {
+	if _, err := os.Stat("config.cfg"); errors.Is(err, os.ErrNotExist) {
+		return ""
+	}
+	jsonFile, err := os.Open("config.cfg")
+	if err != nil {
+		return ""
+	}
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	var configFile Config
+	err = json.Unmarshal(byteValue, &configFile)
+	if err != nil {
+		return ""
+	}
+	return configFile.SecurityUrl
+}
+
+func IsUserLoggedIn() error {
+	if _, err := GetToken(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func AddToConfigFile(token, apiServerUrl, securityUrl string) error {
+	configFile := Config{
+		Token:        token,
+	}
+	if apiServerUrl == "" {
+		configFile.ApiServerUrl = "http://localhost:8080/api/v1/"
+	} else {
+		configFile.ApiServerUrl = apiServerUrl
+	}
+	if securityUrl == "" {
+		configFile.SecurityUrl = "http://localhost:8085/api/v1/"
+	} else {
+		configFile.SecurityUrl = securityUrl
+	}
+
+	if _, err := os.Stat("config.cfg"); errors.Is(err, os.ErrNotExist) {
+		_, err := os.Create("config.cfg")
+		if err != nil {
+			return err
+		}
+	}
+	data, err := json.MarshalIndent(configFile, "", "")
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile("config.cfg", data, 0644)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func AddRootIndent(b []byte, n int) []byte {

@@ -4,10 +4,10 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/klovercloud-ci/ctl/dependency_manager"
+	v1 "github.com/klovercloud-ci/ctl/v1"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 	_ "golang.org/x/term"
-	"log"
 	"os"
 	"strings"
 	"syscall"
@@ -24,6 +24,29 @@ func Login() *cobra.Command{
 		Short:     "Login using email and password",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			var apiServerUrl string
+			var securityUrl string
+			for idx, each := range args {
+				if strings.Contains(strings.ToLower(each), "option") {
+					if idx + 1 < len(args) {
+						if strings.Contains(strings.ToLower(args[idx+1]), "apiserver") {
+							strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+							if len(strs) > 1 {
+								apiServerUrl = strs[1]
+							}
+						} else if strings.Contains(strings.ToLower(args[idx+1]), "security") {
+							strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+							if len(strs) > 1 {
+								securityUrl = strs[1]
+							}
+						}
+					}
+				}
+			}
+			err := v1.AddToConfigFile("", apiServerUrl, securityUrl)
+			if err != nil {
+				cmd.Println("[ERROR]: ", err.Error())
+			}
 			email, password := credentials()
 			loginDto := LoginDto{
 				Email:    email,
@@ -39,8 +62,10 @@ func Login() *cobra.Command{
 				cmd.Println("[ERROR]: Something went wrong!")
 				return nil
 			}
-			log.Println(ctlToken)
-			os.Setenv("CTL_TOKEN", ctlToken)
+			err = v1.AddToConfigFile(ctlToken, apiServerUrl, securityUrl)
+			if err != nil {
+				cmd.Println("[ERROR]: ", err.Error())
+			}
 			cmd.Println("[SUCCESS]: Successfully logged in!")
 			return nil
 		},

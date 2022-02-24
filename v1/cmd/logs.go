@@ -1,9 +1,10 @@
 package cmd
 
 import (
-	"github.com/klovercloud-ci/ctl/config"
 	"github.com/klovercloud-ci/ctl/dependency_manager"
+	v1 "github.com/klovercloud-ci/ctl/v1"
 	"github.com/spf13/cobra"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -15,7 +16,10 @@ func GetLogs() *cobra.Command {
 		Short:     "Get logs by process ID",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
-
+			if err := v1.IsUserLoggedIn(); err != nil {
+				log.Printf("[ERROR]: %v", err.Error())
+				return nil
+			}
 			var processId, page, limit string
 			var follow bool
 			for _, each := range args {
@@ -68,7 +72,7 @@ func GetLogs() *cobra.Command {
 
 func getLogs(cmd *cobra.Command, processId string, page string, limit string, follow bool) error {
 	pipelineService := dependency_manager.GetPipelineService()
-	code, data, err := pipelineService.Logs(config.ApiServerUrl+"pipelines/"+processId, page, limit)
+	code, data, err := pipelineService.Logs(v1.GetApiServerUrl()+"pipelines/"+processId, page, limit)
 	if err != nil {
 		cmd.Println("[ERROR]: ", err.Error())
 		return nil

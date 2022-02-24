@@ -2,7 +2,6 @@ package business
 
 import (
 	"encoding/json"
-	"github.com/klovercloud-ci/ctl/config"
 	v1 "github.com/klovercloud-ci/ctl/v1"
 	"github.com/klovercloud-ci/ctl/v1/service"
 	"github.com/olekukonko/tablewriter"
@@ -85,9 +84,10 @@ func (p processService) Apply() {
 
 func (p processService) GetByCompanyIdAndRepositoryIdAndAppName() (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
-	header["Authorization"] = "Bearer " + os.Getenv("CTL_TOKEN")
+	token, _ := v1.GetToken()
+	header["Authorization"] = "Bearer " + token
 	header["Content-Type"] = "application/json"
-	return p.httpClient.Get(config.ApiServerUrl+"processes?repositoryId="+p.repoId+"&appId="+p.appId, header)
+	return p.httpClient.Get(v1.GetApiServerUrl()+"processes?repositoryId="+p.repoId+"&appId="+p.appId, header)
 }
 
 // NewProcessService returns process type service

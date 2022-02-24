@@ -2,13 +2,11 @@ package business
 
 import (
 	"encoding/json"
-	"github.com/klovercloud-ci/ctl/config"
 	"github.com/klovercloud-ci/ctl/enums"
 	v1 "github.com/klovercloud-ci/ctl/v1"
 	"github.com/klovercloud-ci/ctl/v1/service"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
-	"os"
 )
 
 type applicationService struct {
@@ -89,9 +87,10 @@ func (a applicationService) Option(option string) service.Application {
 
 func (a applicationService) GetApplication(companyId, repoId, applicationId string) (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
-	header["Authorization"] = "Bearer " + os.Getenv("CTL_TOKEN")
+	token, _ := v1.GetToken()
+	header["Authorization"] = "Bearer " + token
 	header["Content-Type"] = "application/json"
-	return a.httpClient.Get(config.ApiServerUrl+"applications/"+applicationId+"?&repositoryId="+repoId, header)
+	return a.httpClient.Get(v1.GetApiServerUrl()+"applications/"+applicationId+"?&repositoryId="+repoId, header)
 }
 
 // NewApplicationService returns application type service

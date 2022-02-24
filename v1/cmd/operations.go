@@ -19,6 +19,10 @@ func Create() *cobra.Command{
 		Short:     "Create resource [Company]",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := v1.IsUserLoggedIn(); err != nil {
+				log.Printf("[ERROR]: %v", err.Error())
+				return nil
+			}
 			if len(args) < 1{
 				log.Fatalf("[ERROR]: %v", "please provide a resource name!")
 				return nil
@@ -70,6 +74,10 @@ func Describe() *cobra.Command{
 		Short:     "Describe resource [company/repository/application]",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := v1.IsUserLoggedIn(); err != nil {
+				log.Printf("[ERROR]: %v", err.Error())
+				return nil
+			}
 			if len(args) < 1{
 				log.Fatalf("[ERROR]: %v", "please provide a resource name!")
 				return nil
@@ -173,6 +181,10 @@ func List() *cobra.Command{
 		Short:     "Describe resource [company/repository/application/process]",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := v1.IsUserLoggedIn(); err != nil {
+				log.Printf("[ERROR]: %v", err.Error())
+				return nil
+			}
 			if len(args) < 1{
 				log.Fatalf("[ERROR]: %v", "please provide a resource name!")
 				return nil
@@ -256,6 +268,10 @@ func Update() *cobra.Command{
 		Short:     "Update resource [repository/application]",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := v1.IsUserLoggedIn(); err != nil {
+				log.Printf("[ERROR]: %v", err.Error())
+				return nil
+			}
 			if len(args) < 1{
 				log.Fatalf("[ERROR]: %v", "please provide a resource name!")
 				return nil

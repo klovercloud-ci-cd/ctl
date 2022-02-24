@@ -18,6 +18,10 @@ func Trigger() *cobra.Command {
 		Short:     "Notify git",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := v1.IsUserLoggedIn(); err != nil {
+				log.Printf("[ERROR]: %v", err.Error())
+				return nil
+			}
 			var file string
 			for _, each := range args {
 				if strings.Contains(strings.ToLower(each), "file") || strings.Contains(strings.ToLower(each), "-f") {

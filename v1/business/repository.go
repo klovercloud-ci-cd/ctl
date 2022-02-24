@@ -2,7 +2,6 @@ package business
 
 import (
 	"encoding/json"
-	"github.com/klovercloud-ci/ctl/config"
 	"github.com/klovercloud-ci/ctl/enums"
 	v1 "github.com/klovercloud-ci/ctl/v1"
 	"github.com/klovercloud-ci/ctl/v1/service"
@@ -10,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 	"os"
+	"strconv"
 )
 
 type repositoryService struct {
@@ -104,7 +104,7 @@ func (r repositoryService) Apply() {
 						for key, val := range eachApp.MetaData.Labels {
 							labels += key + ": " + val + "\n"
 						}
-						application := []string{"api/v1", r.kind, eachApp.MetaData.Id, eachApp.MetaData.Name, labels, eachApp.MetaData.IsWebhookEnabled, eachApp.Url}
+						application := []string{"api/v1", r.kind, eachApp.MetaData.Id, eachApp.MetaData.Name, labels, strconv.FormatBool(eachApp.MetaData.IsWebhookEnabled), eachApp.Url}
 						table.Append(application)
 					}
 					table.Render()
@@ -117,16 +117,18 @@ func (r repositoryService) Apply() {
 
 func (r repositoryService) GetRepositoryById(repositoryId string) (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
-	header["Authorization"] = "Bearer " + os.Getenv("CTL_TOKEN")
+	token, _ := v1.GetToken()
+	header["Authorization"] = "Bearer " + token
 	header["Content-Type"] = "application/json"
-	return r.httpClient.Get(config.ApiServerUrl+"repositories/"+repositoryId+"?"+r.option, header)
+	return r.httpClient.Get(v1.GetApiServerUrl()+"repositories/"+repositoryId+"?"+r.option, header)
 }
 
 func (r repositoryService) GetApplicationsByRepositoryId(repositoryId string) (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
-	header["Authorization"] = "Bearer " + os.Getenv("CTL_TOKEN")
+	token, _ := v1.GetToken()
+	header["Authorization"] = "Bearer " + token
 	header["Content-Type"] = "application/json"
-	return r.httpClient.Get(config.ApiServerUrl+"repositories/"+repositoryId+"/applications?status=ACTIVE", header)
+	return r.httpClient.Get(v1.GetApiServerUrl()+"repositories/"+repositoryId+"/applications?status=ACTIVE", header)
 }
 
 // NewRepositoryService returns repository type service
