@@ -87,7 +87,7 @@ func (p processService) GetByCompanyIdAndRepositoryIdAndAppName() (httpCode int,
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + os.Getenv("CTL_TOKEN")
 	header["Content-Type"] = "application/json"
-	return p.httpClient.Get(config.ApiServerUrl+"processes?repositoryId="+p.repoId+"&appId="+p.appId+"&companyId=12345", header)
+	return p.httpClient.Get(config.ApiServerUrl+"processes?repositoryId="+p.repoId+"&appId="+p.appId, header)
 }
 
 // NewProcessService returns process type service

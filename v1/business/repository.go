@@ -126,7 +126,7 @@ func (r repositoryService) GetApplicationsByRepositoryId(repositoryId string) (h
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + os.Getenv("CTL_TOKEN")
 	header["Content-Type"] = "application/json"
-	return r.httpClient.Get(config.ApiServerUrl+"repositories/"+repositoryId+"/applications", header)
+	return r.httpClient.Get(config.ApiServerUrl+"repositories/"+repositoryId+"/applications?status=ACTIVE", header)
 }
 
 // NewRepositoryService returns repository type service
