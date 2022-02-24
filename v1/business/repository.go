@@ -19,6 +19,12 @@ type repositoryService struct {
 	repo string
 	cmd *cobra.Command
 	option string
+	kind string
+}
+
+func (r repositoryService) Kind(kind string) service.Repository {
+	r.kind=kind
+	return r
 }
 
 func (r repositoryService) Option(option string) service.Repository {
@@ -63,7 +69,12 @@ func (r repositoryService) Apply() {
 				jsonString, _ := json.Marshal(responseDTO.Data)
 				var repository v1.Repository
 				json.Unmarshal(jsonString, &repository)
-				b, _ := yaml.Marshal(repository)
+				repositoryDto := v1.RepositoryDto{
+					ApiVersion: "api/v1",
+					Kind:       r.kind,
+					Repository: repository,
+				}
+				b, _ := yaml.Marshal(repositoryDto)
 				b = v1.AddRootIndent(b, 4)
 				r.cmd.Println(string(b))
 			}
@@ -75,22 +86,29 @@ func (r repositoryService) Apply() {
 		} else if code != 200 {
 			r.cmd.Println("[ERROR]: ", "Something went wrong! Status Code: ", code)
 		} else if data != nil {
-			var applications v1.Applications
-			err := json.Unmarshal(data, &applications)
+			var responseDTO v1.ResponseDTO
+			err := json.Unmarshal(data, &responseDTO)
 			if err != nil {
 				r.cmd.Println("[ERROR]: ", err.Error())
 			} else {
-				table := tablewriter.NewWriter(os.Stdout)
-				table.SetHeader([]string{"Labels", "Id", "Name", "IsWebhookEnabled", "Url"})
-				for _, eachApp := range applications {
-					var labels string
-					for key, val := range eachApp.MetaData.Labels {
-						labels += key + ": " + val + "\n"
+				jsonString, _ := json.Marshal(responseDTO.Data)
+				var applications v1.Applications
+				err := json.Unmarshal(jsonString, &applications)
+				if err != nil {
+					r.cmd.Println("[ERROR]: ", err.Error())
+				} else {
+					table := tablewriter.NewWriter(os.Stdout)
+					table.SetHeader([]string{"Api Version", "Kind", "Id", "Name", "Labels", "IsWebhookEnabled", "Url"})
+					for _, eachApp := range applications {
+						var labels string
+						for key, val := range eachApp.MetaData.Labels {
+							labels += key + ": " + val + "\n"
+						}
+						application := []string{"api/v1", r.kind, eachApp.MetaData.Id, eachApp.MetaData.Name, labels, eachApp.MetaData.IsWebhookEnabled, eachApp.Url}
+						table.Append(application)
 					}
-					application := []string{labels, eachApp.MetaData.Id, eachApp.MetaData.Name, eachApp.MetaData.IsWebhookEnabled, eachApp.Url}
-					table.Append(application)
+					table.Render()
 				}
-				table.Render()
 			}
 		}
 	}

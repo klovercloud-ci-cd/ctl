@@ -1,10 +1,13 @@
 package business
 
 import (
+	"encoding/json"
 	"github.com/klovercloud-ci/ctl/config"
 	"github.com/klovercloud-ci/ctl/enums"
+	v1 "github.com/klovercloud-ci/ctl/v1"
 	"github.com/klovercloud-ci/ctl/v1/service"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 	"os"
 )
 
@@ -16,6 +19,7 @@ type applicationService struct {
 	applicationId string
 	option string
 	cmd *cobra.Command
+	kind string
 }
 
 func (a applicationService) Apply() {
@@ -27,9 +31,30 @@ func (a applicationService) Apply() {
 		} else if code != 200 {
 			a.cmd.Println("[ERROR]: ", "Something went wrong! Status Code: ", code)
 		} else if data != nil {
-			a.cmd.Println(string(data))
+			var responseDTO v1.ResponseDTO
+			err := json.Unmarshal(data, &responseDTO)
+			if err != nil {
+				a.cmd.Println("[ERROR]: ", err.Error())
+			} else {
+				jsonString, _ := json.Marshal(responseDTO.Data)
+				var application v1.Application
+				json.Unmarshal(jsonString, &application)
+				applicationDto := v1.ApplicationDto{
+					ApiVersion:  "api/v1",
+					Kind:        a.kind,
+					Application: application,
+				}
+				b, _ := yaml.Marshal(applicationDto)
+				b = v1.AddRootIndent(b, 4)
+				a.cmd.Println(string(b))
+			}
 		}
 	}
+}
+
+func (a applicationService) Kind(kind string) service.Application {
+	a.kind = kind
+	return a
 }
 
 func (a applicationService) Cmd(cmd *cobra.Command) service.Application {
@@ -66,7 +91,7 @@ func (a applicationService) GetApplication(companyId, repoId, applicationId stri
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + os.Getenv("CTL_TOKEN")
 	header["Content-Type"] = "application/json"
-	return a.httpClient.Get(config.ApiServerUrl+"application/"+applicationId+"?companyId="+companyId+"&repositoryId="+repoId, header)
+	return a.httpClient.Get(config.ApiServerUrl+"applications/"+applicationId+"?&repositoryId="+repoId, header)
 }
 
 // NewApplicationService returns application type service

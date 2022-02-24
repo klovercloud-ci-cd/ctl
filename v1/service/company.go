@@ -11,4 +11,5 @@ type Company interface {
 	RepoId(repoId string) Company
 	Option(option string) Company
 	Cmd(cmd *cobra.Command) Company
+	Kind(kind string) Company
 }

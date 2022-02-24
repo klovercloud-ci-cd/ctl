@@ -11,4 +11,5 @@ type Application interface {
 	ApplicationId(applicationId string) Application
 	Option(option string) Application
 	Cmd(cmd *cobra.Command) Application
+	Kind(kind string) Application
 }

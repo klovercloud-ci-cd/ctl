@@ -22,6 +22,12 @@ type companyService struct {
 	repoId string
 	option string
 	cmd *cobra.Command
+	kind string
+}
+
+func (c companyService) Kind(kind string) service.Company {
+	c.kind=kind
+	return c
 }
 
 func (c companyService) Cmd(cmd *cobra.Command) service.Company {
@@ -85,7 +91,13 @@ func (c companyService) Apply() {
 				jsonString, _ := json.Marshal(responseDTO.Data)
 				var company v1.Company
 				json.Unmarshal(jsonString, &company)
-				b, _ := yaml.Marshal(company)
+				companyDto := v1.CompanyDto{
+					ApiVersion: "api/v1",
+					Kind:       c.kind,
+					Company:    company,
+				}
+				c.cmd.Println(responseDTO.Data)
+				b, _ := yaml.Marshal(companyDto)
 				b = v1.AddRootIndent(b, 4)
 				c.cmd.Println(string(b))
 			}
@@ -114,17 +126,18 @@ func (c companyService) Apply() {
 				jsonString, _ := json.Marshal(responseDTO.Data)
 				var repositories v1.Repositories
 				json.Unmarshal(jsonString, &repositories)
+				c.cmd.Println(responseDTO)
 				table := tablewriter.NewWriter(os.Stdout)
 				if c.option == "loadApplications=false" {
-					table.SetHeader([]string{"Id", "Type"})
+					table.SetHeader([]string{"Api Version", "Kind", "Id", "Type"})
 					for _, eachRepo := range repositories {
-						repository := []string{eachRepo.Id, eachRepo.Type}
+						repository := []string{"api/v1", c.kind, eachRepo.Id, eachRepo.Type}
 						table.Append(repository)
 					}
 				} else {
-					table.SetHeader([]string{"Id", "Type", "Applications Count"})
+					table.SetHeader([]string{"Api Version", "Kind", "Id", "Type", "Applications Count"})
 					for _, eachRepo := range repositories {
-						repository := []string{eachRepo.Id, eachRepo.Type, strconv.Itoa(len(eachRepo.Applications))}
+						repository := []string{"api/v1", c.kind, eachRepo.Id, eachRepo.Type, strconv.Itoa(len(eachRepo.Applications))}
 						table.Append(repository)
 					}
 				}

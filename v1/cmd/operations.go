@@ -105,7 +105,7 @@ func Describe() *cobra.Command{
 					}
 				}
 				companyService := dependency_manager.GetCompanyService()
-				companyService.Cmd(cmd).Flag(string(enums.GET_COMPANY_BY_ID)).CompanyId(companyId).Option("loadRepositories="+strconv.FormatBool(loadRepo)+"&loadApplications="+strconv.FormatBool(loadApp)).Apply()
+				companyService.Kind("Company").Cmd(cmd).Flag(string(enums.GET_COMPANY_BY_ID)).CompanyId(companyId).Option("loadRepositories="+strconv.FormatBool(loadRepo)+"&loadApplications="+strconv.FormatBool(loadApp)).Apply()
 			}else if args[0]=="repository" || args[0]=="repo"{
 				if len(args)<2 {
 					log.Fatalf("[ERROR]: %v", "please provide repository id!")
@@ -134,7 +134,7 @@ func Describe() *cobra.Command{
 					}
 				}
 				repositoryService := dependency_manager.GetRepositoryService()
-				repositoryService.Cmd(cmd).Flag(string(enums.GET_REPOSITORY)).Repo(repoId).Option("loadApplications="+strconv.FormatBool(loadApp)).Apply()
+				repositoryService.Kind("Repository").Cmd(cmd).Flag(string(enums.GET_REPOSITORY)).Repo(repoId).Option("loadApplications="+strconv.FormatBool(loadApp)).Apply()
 			}else if args[0]=="application" || args[0]=="app" {
 				var repoId string
 				var appId string
@@ -160,7 +160,7 @@ func Describe() *cobra.Command{
 					return nil
 				}
 				applicationService := dependency_manager.GetApplicationService()
-				applicationService.Cmd(cmd).Flag(string(enums.GET_APPLICATION)).CompanyId(companyId).RepoId(repoId).ApplicationId(appId).Apply()
+				applicationService.Kind("Application").Cmd(cmd).Flag(string(enums.GET_APPLICATION)).CompanyId(companyId).RepoId(repoId).ApplicationId(appId).Apply()
 			}
 			return nil
 		},
@@ -170,7 +170,7 @@ func Describe() *cobra.Command{
 func List() *cobra.Command{
 	return &cobra.Command{
 		Use:       "list",
-		Short:     "Describe resource [company/repository/application]",
+		Short:     "Describe resource [company/repository/application/process]",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1{
@@ -200,7 +200,7 @@ func List() *cobra.Command{
 					}
 				}
 				companyService := dependency_manager.GetCompanyService()
-				companyService.Cmd(cmd).Flag(string(enums.GET_REPOSITORIES)).CompanyId(companyId).Option("loadApplications="+strconv.FormatBool(loadApp)).Apply()
+				companyService.Kind("Repository").Cmd(cmd).Flag(string(enums.GET_REPOSITORIES)).CompanyId(companyId).Option("loadApplications="+strconv.FormatBool(loadApp)).Apply()
 			} else if args[0]=="applications" || args[0]=="apps"{
 				var repoId string
 				for _, each := range args {
@@ -216,7 +216,33 @@ func List() *cobra.Command{
 					return nil
 				}
 				repositoryService := dependency_manager.GetRepositoryService()
-				repositoryService.Cmd(cmd).Flag(string(enums.GET_APPLICATIONS)).Repo(repoId).Apply()
+				repositoryService.Kind("Application").Cmd(cmd).Flag(string(enums.GET_APPLICATIONS)).Repo(repoId).Apply()
+			} else if args[0]=="process" {
+				var repoId string
+				var appId string
+				for _, each := range args {
+					if strings.Contains(strings.ToLower(each), "repositoryid") || strings.Contains(strings.ToLower(each), "repoid") {
+						strs := strings.Split(strings.ToLower(each), "=")
+						if len(strs) > 1 {
+							repoId = strs[1]
+						}
+					} else if strings.Contains(strings.ToLower(each), "applicationid") || strings.Contains(strings.ToLower(each), "appid") {
+						strs := strings.Split(strings.ToLower(each), "=")
+						if len(strs) > 1 {
+							appId = strs[1]
+						}
+					}
+				}
+				if repoId == "" {
+					log.Fatalf("[ERROR]: %v", "please provide repository id!")
+					return nil
+				}
+				if appId == "" {
+					log.Fatalf("[ERROR]: %v", "please provide application id!")
+					return nil
+				}
+				processService := dependency_manager.GetProcessService()
+				processService.Kind("Process").Cmd(cmd).RepoId(repoId).ApplicationId(appId).Apply()
 			}
 			return nil
 		},
