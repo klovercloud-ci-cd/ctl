@@ -139,11 +139,9 @@ func AddRootIndent(b []byte, n int) []byte {
 func SetCtlToken(token string) error {
 	apiServerUrl := GetApiServerUrl()
 	securityUrl := GetSecurityUrl()
-	if securityUrl == "" {
-		err := AddToConfigFile(token, apiServerUrl, securityUrl)
-		if err != nil {
-			return  err
-		}
+	err := AddToConfigFile(token, apiServerUrl, securityUrl)
+	if err != nil {
+		return  err
 	}
 	return nil
 }
