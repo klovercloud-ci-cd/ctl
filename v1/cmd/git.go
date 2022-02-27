@@ -36,6 +36,7 @@ func Trigger() *cobra.Command {
 				log.Printf("data.Get err   #%v ", err)
 				return nil
 			}
+			log.Println(string(data))
 			webhook := new(v1.GitWebHookEvent)
 			if strings.HasSuffix(file, ".yaml") {
 				err = yaml.Unmarshal(data, webhook)
