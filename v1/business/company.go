@@ -64,16 +64,22 @@ func (c companyService) Apply() {
 		err := c.CreateCompany(c.company)
 		if err != nil {
 			log.Fatalf("[ERROR]: %v", err)
+		} else {
+			c.cmd.Println("Successfully Created Company")
 		}
 	case string(enums.UPDATE_REPOSITORIES):
 		err :=  c.UpdateRepositoriesByCompanyId(c.company, c.companyId, c.option)
 		if err != nil {
 			log.Fatalf("[ERROR]: %v", err)
+		} else {
+			c.cmd.Println("Successfully Updated Repositories")
 		}
 	case string(enums.UPDATE_APPLICATIONS):
 		err :=  c.UpdateApplicationsByRepositoryId(c.company, c.companyId, c.repoId, c.option)
 		if err != nil {
 			log.Fatalf("[ERROR]: %v", err)
+		} else {
+			c.cmd.Println("Successfully Updated Applications")
 		}
 	case string(enums.GET_COMPANY_BY_ID):
 		code, data, err := c.GetCompanyById(c.companyId, c.option)

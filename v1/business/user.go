@@ -56,26 +56,36 @@ func (u userService) Apply() {
 		err := u.CreateUser(u.user)
 		if err != nil {
 			log.Fatalf("[ERROR]: %v", err)
+		} else {
+			u.cmd.Println("Successfully Created User")
 		}
 	case string(enums.CREATE_ADMIN):
 		err := u.CreateAdmin(u.user)
 		if err != nil {
 			log.Fatalf("[ERROR]: %v", err)
+		} else {
+			u.cmd.Println("Successfully Created User")
 		}
 	case string(enums.ATTACH_COMPANY):
 		err := u.AttachCompany(u.company)
 		if err != nil {
 			log.Fatalf("[ERROR]: %v", err)
+		} else {
+			u.cmd.Println("Successfully Attached Company")
 		}
 	case string(enums.RESET_PASSWORD):
 		err := u.ResetPassword(u.passwordResetDto)
 		if err != nil {
 			log.Fatalf("[ERROR]: %v", err)
+		} else {
+			u.cmd.Println("Successfully Reset Password")
 		}
 	case string(enums.FORGOT_PASSWORD):
 		err := u.ForgotPassword(u.email)
 		if err != nil {
 			log.Fatalf("[ERROR]: %v", err)
+		} else {
+			u.cmd.Println("Successfully Forgot Password")
 		}
 	default:
 		u.cmd.Println("[ERROR]: ", "Please provide valid options")
