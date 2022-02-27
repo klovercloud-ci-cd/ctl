@@ -26,27 +26,27 @@ func Login() *cobra.Command{
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var apiServerUrl string
 			var securityUrl string
-			for idx, each := range args {
-				if strings.Contains(strings.ToLower(each), "option") {
-					if idx + 1 < len(args) {
-						if strings.Contains(strings.ToLower(args[idx+1]), "apiserver") {
-							strs := strings.Split(strings.ToLower(args[idx+1]), "=")
-							if len(strs) > 1 {
-								apiServerUrl = strs[1]
-							}
-						} else if strings.Contains(strings.ToLower(args[idx+1]), "security") {
-							strs := strings.Split(strings.ToLower(args[idx+1]), "=")
-							if len(strs) > 1 {
-								securityUrl = strs[1]
-							}
-						}
-					}
-				}
-			}
-			err := v1.AddToConfigFile("", apiServerUrl, securityUrl)
-			if err != nil {
-				cmd.Println("[ERROR]: ", err.Error())
-			}
+			//for idx, each := range args {
+				//if strings.Contains(strings.ToLower(each), "option") {
+				//	if idx + 1 < len(args) {
+				//		if strings.Contains(strings.ToLower(args[idx+1]), "apiserver") {
+				//			strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+				//			if len(strs) > 1 {
+				//				apiServerUrl = strs[1]
+				//			}
+				//		} else if strings.Contains(strings.ToLower(args[idx+1]), "security") {
+				//			strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+				//			if len(strs) > 1 {
+				//				securityUrl = strs[1]
+				//			}
+				//		}
+				//	}
+				//}
+			//}
+			//err := v1.AddToConfigFile("", apiServerUrl, securityUrl)
+			//if err != nil {
+			//	cmd.Println("[ERROR]: ", err.Error())
+			//}
 			email, password := credentials()
 			loginDto := LoginDto{
 				Email:    email,
