@@ -139,3 +139,11 @@ type Config struct {
 	SecurityUrl 	string `json:"security_url" bson:"security_url"`
 }
 
+// PasswordResetDto contains data for password reset
+type PasswordResetDto struct {
+	Otp             string `json:"otp" bson:"otp"`
+	Email           string `json:"email" bson:"email"`
+	CurrentPassword string `json:"current_password" bson:"current_password"`
+	NewPassword     string `json:"new_password" bson:"new_password"`
+}
+

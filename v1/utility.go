@@ -131,3 +131,17 @@ func AddRootIndent(b []byte, n int) []byte {
 	b = append(prefix[1:], b...)
 	return bytes.ReplaceAll(b, []byte("\n"), prefix)
 }
+
+func AddOrGetSecurityUrl() (string, error){
+	token, _ := GetToken()
+	apiServerUrl := GetApiServerUrl()
+	securityUrl := GetSecurityUrl()
+	if securityUrl == "" {
+		err := AddToConfigFile(token, apiServerUrl, securityUrl)
+		if err != nil {
+			return "", err
+		}
+		securityUrl = GetSecurityUrl()
+	}
+	return securityUrl, nil
+}

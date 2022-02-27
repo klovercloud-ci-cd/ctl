@@ -74,7 +74,7 @@ const (
 	GET_APPLICATION = APPLICATION_FLAG("GET_APPLICATION")
 )
 
-// COMPANY_FLAG company flag types to apply
+// USER_FLAG company flag types to apply
 type USER_FLAG string
 
 const (
@@ -82,4 +82,18 @@ const (
 	CREATE_USER = USER_FLAG("CREATE_USER")
 	// CREATE_ADMIN create admin flag
 	CREATE_ADMIN = USER_FLAG("CREATE_ADMIN")
+)
+
+// CUSER_UPDATE_ACTION user update action flag types to apply
+type USER_UPDATE_ACTION string
+
+const (
+	// RESET_PASSWORD refers to password reset action
+	RESET_PASSWORD = USER_UPDATE_ACTION("reset_password")
+	// FORGOT_PASSWORD refers to password forgot action
+	FORGOT_PASSWORD = USER_UPDATE_ACTION("forgot_password")
+	// ATTACH_COMPANY refers to company attachment action
+	ATTACH_COMPANY = USER_UPDATE_ACTION("attach_company")
+	// UPDATE_STATUS refers to status update action
+	UPDATE_STATUS = USER_UPDATE_ACTION("update_status")
 )

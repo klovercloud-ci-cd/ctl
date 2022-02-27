@@ -12,7 +12,7 @@ func main() {
 func cli() {
 	commands := &cobra.Command{
 		Use:          "ctl",
-		Short:        "Cli to use klovercloud-ci apis!",
+		Short:        "Cli to use klovercloud-ci apis! \n\nFind more information at: https://github.com/klovercloud-ci-cd/ctl",
 		Version:      "v1",
 		SilenceUsage: true,
 	}

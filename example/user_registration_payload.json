@@ -1,7 +1,8 @@
 {
-	"first_name": "Dristy",
-	"last_name": "Pagli",
-	"email": "dristy.pagli@klovercloud.com",
+	"first_name": "Tasmim",
+	"last_name": "Rashid",
+	"email": "tasmim.rashid@klovercloud.com",
 	"phone": "01707007007",
-	"auth_type": "password"
+	"auth_type": "password",
+	"password": "password"
 }

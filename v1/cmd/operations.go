@@ -71,7 +71,7 @@ func Create() *cobra.Command{
 func Registration() *cobra.Command{
 	return &cobra.Command{
 		Use:       "register",
-		Short:     "Register User",
+		Short:     "Register user",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var file string
@@ -82,8 +82,14 @@ func Registration() *cobra.Command{
 					if len(strs) > 0 {
 						file = strs[1]
 					}
-				} else if strings.ToLower(each) == "user"{
+				} else if strings.ToLower(each) == "user" {
 					actionType = "user"
+				}
+			}
+			if actionType == "user" {
+				if err := v1.IsUserLoggedIn(); err != nil {
+					log.Printf("[ERROR]: %v", err.Error())
+					return nil
 				}
 			}
 			if file == "" {
@@ -104,7 +110,6 @@ func Registration() *cobra.Command{
 				}
 			} else {
 				err = json.Unmarshal(data, &user)
-				cmd.Println(user)
 				if err != nil {
 					log.Fatalf("json Unmarshal: %v", err)
 					return nil
@@ -112,19 +117,9 @@ func Registration() *cobra.Command{
 			}
 			userService := dependency_manager.GetUserService()
 			if strings.ToLower(actionType) == "user" {
-				if err := v1.IsUserLoggedIn(); err != nil {
-					log.Printf("[ERROR]: %v", err.Error())
-					return nil
-				}
-				userMetadata, err := v1.GetUserMetadataFromBearerToken()
-				if err != nil {
-					log.Fatalf("[ERROR]: %v", err.Error())
-					return nil
-				}
-				companyId := userMetadata.CompanyId
-				userService.Cmd(cmd).Flag(string(enums.CREATE_USER)).CompanyId(companyId).Apply()
+				userService.Cmd(cmd).Flag(string(enums.CREATE_USER)).User(user).Apply()
 			} else {
-				userService.Cmd(cmd).Flag(string(enums.CREATE_ADMIN)).Apply()
+				userService.Cmd(cmd).Flag(string(enums.CREATE_ADMIN)).User(user).Apply()
 			}
 			return nil
 		},
@@ -328,28 +323,107 @@ func List() *cobra.Command{
 func Update() *cobra.Command{
 	return &cobra.Command{
 		Use:       "update",
-		Short:     "Update resource [repository/application]",
+		Short:     "Update resource [user/repository/application]",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := v1.IsUserLoggedIn(); err != nil {
-				log.Printf("[ERROR]: %v", err.Error())
-				return nil
-			}
 			if len(args) < 1{
 				log.Fatalf("[ERROR]: %v", "please provide a resource name!")
 				return nil
 			}
-			userMetadata, err := v1.GetUserMetadataFromBearerToken()
-			if err != nil {
-				log.Fatalf("[ERROR]: %v", err.Error())
-				return nil
-			}
-			companyId := userMetadata.CompanyId
-
 			var file string
 			var option string
 			var repoId string
-			if args[0]=="repositories" || args[0]=="repos"{
+			var email string
+			if args[0]=="user" {
+				for _, each := range args {
+					if strings.Contains(strings.ToLower(each), "file") || strings.Contains(strings.ToLower(each), "-f") {
+						strs := strings.Split(strings.ToLower(each), "=")
+						if len(strs) > 0 {
+							file = strs[1]
+						}
+					} else if strings.Contains(strings.ToLower(each), "option") {
+						strs := strings.Split(strings.ToLower(each), "=")
+						if len(strs) > 1 {
+							option = strs[1]
+						}
+					} else if strings.Contains(strings.ToLower(each), "email") {
+						strs := strings.Split(strings.ToLower(each), "=")
+						if len(strs) > 1 {
+							email = strs[1]
+						}
+					}
+				}
+				if option == string(enums.ATTACH_COMPANY) || option == "ac" {
+					if err := v1.IsUserLoggedIn(); err != nil {
+						log.Printf("[ERROR]: %v", err.Error())
+						return nil
+					}
+					if file == "" {
+						log.Fatalf("[ERROR]: %v", "please provide a file!")
+						return nil
+					}
+					data, err := ioutil.ReadFile(file)
+					if err != nil {
+						log.Printf("data.Get err   #%v ", err)
+						return nil
+					}
+					company := new(v1.Company)
+					if strings.HasSuffix(file, ".yaml") {
+						err = yaml.Unmarshal(data, company)
+						if err != nil {
+							log.Fatalf("yaml Unmarshal: %v", err)
+							return nil
+						}
+					} else {
+						err = json.Unmarshal(data, company)
+						if err != nil {
+							log.Fatalf("json Unmarshal: %v", err)
+							return nil
+						}
+					}
+					userService := dependency_manager.GetUserService()
+					userService.Cmd(cmd).Flag(string(enums.ATTACH_COMPANY)).Company(company).Apply()
+				} else if option == string(enums.RESET_PASSWORD) || option == "rp" {
+					if file == "" {
+						log.Fatalf("[ERROR]: %v", "please provide a file!")
+						return nil
+					}
+					data, err := ioutil.ReadFile(file)
+					if err != nil {
+						log.Printf("data.Get err   #%v ", err)
+						return nil
+					}
+					var passwordResetDto v1.PasswordResetDto
+					if strings.HasSuffix(file, ".yaml") {
+						err = yaml.Unmarshal(data, passwordResetDto)
+						if err != nil {
+							log.Fatalf("yaml Unmarshal: %v", err)
+							return nil
+						}
+					} else {
+						err = json.Unmarshal(data, &passwordResetDto)
+						if err != nil {
+							log.Fatalf("json Unmarshal: %v", err)
+							return nil
+						}
+					}
+					userService := dependency_manager.GetUserService()
+					userService.Cmd(cmd).Flag(string(enums.RESET_PASSWORD)).PasswordResetDto(passwordResetDto).Apply()
+				} else if option == string(enums.FORGOT_PASSWORD) || option == "fp" {
+					userService := dependency_manager.GetUserService()
+					userService.Cmd(cmd).Flag(string(enums.FORGOT_PASSWORD)).Email(email).Apply()
+				}
+			} else if args[0]=="repositories" || args[0]=="repos"{
+				if err := v1.IsUserLoggedIn(); err != nil {
+					log.Printf("[ERROR]: %v", err.Error())
+					return nil
+				}
+				userMetadata, err := v1.GetUserMetadataFromBearerToken()
+				if err != nil {
+					log.Fatalf("[ERROR]: %v", err.Error())
+					return nil
+				}
+				companyId := userMetadata.CompanyId
 				for _, each := range args {
 					if strings.Contains(strings.ToLower(each), "file") || strings.Contains(strings.ToLower(each), "-f") {
 						strs := strings.Split(strings.ToLower(each), "=")

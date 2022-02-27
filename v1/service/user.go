@@ -10,6 +10,8 @@ type User interface {
 	Apply()
 	User(user v1.UserRegistrationDto) User
 	Flag(flag string) User
-	CompanyId(companyId string) User
 	Cmd(cmd *cobra.Command) User
+	Company(company interface{}) User
+	PasswordResetDto(passwordResetDto interface{}) User
+	Email(email string) User
 }
