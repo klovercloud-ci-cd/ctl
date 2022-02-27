@@ -76,7 +76,9 @@ func Registration() *cobra.Command{
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var file string
 			var actionType string
-			for _, each := range args {
+			var apiServerUrl string
+			var securityUrl string
+			for idx, each := range args {
 				if strings.Contains(strings.ToLower(each), "file") || strings.Contains(strings.ToLower(each), "-f") {
 					strs := strings.Split(strings.ToLower(each), "=")
 					if len(strs) > 0 {
@@ -84,6 +86,20 @@ func Registration() *cobra.Command{
 					}
 				} else if strings.ToLower(each) == "user" {
 					actionType = "user"
+				} else if strings.Contains(strings.ToLower(each), "option") {
+					if idx + 1 < len(args) {
+						if strings.Contains(strings.ToLower(args[idx+1]), "apiserver") {
+							strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+							if len(strs) > 1 {
+								apiServerUrl = strs[1]
+							}
+						} else if strings.Contains(strings.ToLower(args[idx+1]), "security") {
+							strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+							if len(strs) > 1 {
+								securityUrl = strs[1]
+							}
+						}
+					}
 				}
 			}
 			if actionType == "user" {
@@ -114,6 +130,10 @@ func Registration() *cobra.Command{
 					log.Fatalf("json Unmarshal: %v", err)
 					return nil
 				}
+			}
+			err = v1.AddToConfigFile("", apiServerUrl, securityUrl)
+			if err != nil {
+				cmd.Println("[ERROR]: ", err.Error())
 			}
 			userService := dependency_manager.GetUserService()
 			if strings.ToLower(actionType) == "user" {
