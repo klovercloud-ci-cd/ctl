@@ -92,7 +92,7 @@ func Registration() *cobra.Command{
 			}
 			data, err := ioutil.ReadFile(file)
 			if err != nil {
-				log.Printf("data.Get err   #%v ", err)
+				log.Printf("data.Get err   #%v ", err.Error())
 				return nil
 			}
 			var user v1.UserRegistrationDto
@@ -104,7 +104,7 @@ func Registration() *cobra.Command{
 				}
 			} else {
 				err = json.Unmarshal(data, &user)
-				cmd.Println(string(data))
+				cmd.Println(user)
 				if err != nil {
 					log.Fatalf("json Unmarshal: %v", err)
 					return nil

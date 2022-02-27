@@ -31,6 +31,7 @@ func Trigger() *cobra.Command {
 					}
 				}
 			}
+
 			data, err := ioutil.ReadFile(file)
 			if err != nil {
 				log.Printf("data.Get err   #%v ", err)
