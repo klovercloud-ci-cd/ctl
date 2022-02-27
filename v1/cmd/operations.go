@@ -236,7 +236,7 @@ func Describe() *cobra.Command{
 func List() *cobra.Command{
 	return &cobra.Command{
 		Use:       "list",
-		Short:     "Describe resource [company/repository/application/process]",
+		Short:     "List resources [company/repository/application/process]",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := v1.IsUserLoggedIn(); err != nil {
