@@ -7,7 +7,6 @@ import (
 )
 
 func main() {
-	//config.InitEnvironmentVariables()
 	cli()
 }
 func cli() {
