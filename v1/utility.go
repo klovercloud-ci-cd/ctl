@@ -99,12 +99,16 @@ func AddToConfigFile(token, apiServerUrl, securityUrl string) error {
 		Token:        token,
 	}
 	if apiServerUrl == "" {
-		configFile.ApiServerUrl = "http://localhost:8080/api/v1/"
+		if GetApiServerUrl() == "" {
+			configFile.ApiServerUrl = "http://localhost:8080/api/v1/"
+		}
 	} else {
 		configFile.ApiServerUrl = apiServerUrl
 	}
 	if securityUrl == "" {
-		configFile.SecurityUrl = "http://localhost:8085/api/v1/"
+		if GetSecurityUrl() == "" {
+			configFile.SecurityUrl = "http://localhost:8085/api/v1/"
+		}
 	} else {
 		configFile.SecurityUrl = securityUrl
 	}
@@ -136,7 +140,7 @@ func AddOrGetUrl() (string, error){
 	token, _ := GetToken()
 	apiServerUrl := GetApiServerUrl()
 	securityUrl := GetSecurityUrl()
-	if securityUrl == "" || apiServerUrl == "" {
+	if securityUrl == "" {
 		err := AddToConfigFile(token, apiServerUrl, securityUrl)
 		if err != nil {
 			return "", err
