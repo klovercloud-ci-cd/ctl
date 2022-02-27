@@ -10,24 +10,6 @@ import (
 	"os"
 )
 
-// UserMetadata holds users metadata
-type UserMetadata struct {
-	CompanyId string `json:"company_id" bson:"company_id"`
-}
-
-// UserResourcePermissionDto holds metadata and user
-type UserResourcePermissionDto struct {
-	Metadata  UserMetadata           `json:"metadata" bson:"-"`
-	UserId    string                 `json:"user_id" bson:"user_id"`
-}
-
-// Config contains config file struct
-type Config struct {
-	Token 			string `json:"token" bson:"token"`
-	ApiServerUrl 	string `json:"api_server_url" bson:"api_server_url"`
-	SecurityUrl 	string `json:"security_url" bson:"security_url"`
-}
-
 func GetUserMetadataFromBearerToken() (UserMetadata, error) {
 	token, err := GetToken()
 	if err != nil {

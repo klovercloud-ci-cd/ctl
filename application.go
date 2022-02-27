@@ -16,6 +16,7 @@ func cli() {
 		Version:      "v1",
 		SilenceUsage: true,
 	}
+	commands.AddCommand(cmd.Registration())
 	commands.AddCommand(cmd.Login())
 	commands.AddCommand(cmd.GetLogs())
 	commands.AddCommand(cmd.Trigger())

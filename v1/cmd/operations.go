@@ -68,6 +68,70 @@ func Create() *cobra.Command{
 	}
 }
 
+func Registration() *cobra.Command{
+	return &cobra.Command{
+		Use:       "register",
+		Short:     "Register User",
+		ValidArgs: []string{},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			var file string
+			var actionType string
+			for _, each := range args {
+				if strings.Contains(strings.ToLower(each), "file") || strings.Contains(strings.ToLower(each), "-f") {
+					strs := strings.Split(strings.ToLower(each), "=")
+					if len(strs) > 0 {
+						file = strs[1]
+					}
+				} else if strings.Contains(strings.ToLower(each), "type"){
+					strs := strings.Split(strings.ToLower(each), "=")
+					actionType = strs[1]
+				}
+			}
+			if file == "" {
+				log.Fatalf("[ERROR]: %v", "please provide a file!")
+				return nil
+			}
+			data, err := ioutil.ReadFile(file)
+			if err != nil {
+				log.Printf("data.Get err   #%v ", err)
+				return nil
+			}
+			var user v1.UserRegistrationDto
+			if strings.HasSuffix(file, ".yaml") {
+				err = yaml.Unmarshal(data, &user)
+				if err != nil {
+					log.Fatalf("yaml Unmarshal: %v", err)
+					return nil
+				}
+			} else {
+				err = json.Unmarshal(data, &user)
+				cmd.Println(string(data))
+				if err != nil {
+					log.Fatalf("json Unmarshal: %v", err)
+					return nil
+				}
+			}
+			userService := dependency_manager.GetUserService()
+			if strings.ToLower(actionType) == "user" {
+				if err := v1.IsUserLoggedIn(); err != nil {
+					log.Printf("[ERROR]: %v", err.Error())
+					return nil
+				}
+				userMetadata, err := v1.GetUserMetadataFromBearerToken()
+				if err != nil {
+					log.Fatalf("[ERROR]: %v", err.Error())
+					return nil
+				}
+				companyId := userMetadata.CompanyId
+				userService.Cmd(cmd).Flag(string(enums.CREATE_USER)).CompanyId(companyId).Apply()
+			} else if strings.ToLower(actionType) == "" || strings.ToLower(actionType) == "admin"{
+				userService.Cmd(cmd).Flag(string(enums.CREATE_ADMIN)).Apply()
+			}
+			return nil
+		},
+	}
+}
+
 func Describe() *cobra.Command{
 	return &cobra.Command{
 		Use:       "describe",

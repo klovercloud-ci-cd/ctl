@@ -1,5 +1,7 @@
 package v1
 
+import "time"
+
 // ResponseDTO Http response dto
 type ResponseDTO struct {
 	Metadata interface{}      `json:"_metadata"`
@@ -86,3 +88,54 @@ type Processes []struct {
 	RepositoryId string                 `bson:"repository_id" json:"repository_id"`
 	Data         map[string]interface{} `bson:"data" json:"data"`
 }
+
+// UserRegistrationDto dto that holds user registration info.
+type UserRegistrationDto struct {
+	Metadata           UserMetadata           `json:"metadata"`
+	ID                 string                 `json:"id" bson:"id"`
+	FirstName          string                 `json:"first_name" bson:"first_name" `
+	LastName           string                 `json:"last_name" bson:"last_name"`
+	Email              string                 `json:"email" bson:"email" `
+	Phone              string                 `json:"phone" bson:"phone"`
+	Password           string                 `json:"password" bson:"password" `
+	Status             string           	  `json:"status" bson:"status"`
+	CreatedDate        time.Time              `json:"created_date" bson:"created_date"`
+	UpdatedDate        time.Time              `json:"updated_date" bson:"updated_date"`
+	AuthType           string       		  `json:"auth_type" bson:"auth_type"`
+	ResourcePermission UserResourcePermission `json:"resource_permission" bson:"resource_permission"`
+}
+
+// UserResourcePermission dto that holds metadata, user and resource wise roles.
+type UserResourcePermission struct {
+	Resources []ResourceWiseRoles `json:"resources" bson:"resources"`
+}
+
+// ResourceWiseRoles dto that holds resource wise role dtos.
+type ResourceWiseRoles struct {
+	Name  string `json:"name" bson:"name"`
+	Roles []Role `json:"roles" bson:"roles"`
+}
+
+// Role dto that holds role name.
+type Role struct {
+	Name string `json:"name" bson:"name"`
+}
+
+// UserMetadata holds users metadata
+type UserMetadata struct {
+	CompanyId string `json:"company_id" bson:"company_id"`
+}
+
+// UserResourcePermissionDto holds metadata and user
+type UserResourcePermissionDto struct {
+	Metadata  UserMetadata           `json:"metadata" bson:"-"`
+	UserId    string                 `json:"user_id" bson:"user_id"`
+}
+
+// Config contains config file struct
+type Config struct {
+	Token 			string `json:"token" bson:"token"`
+	ApiServerUrl 	string `json:"api_server_url" bson:"api_server_url"`
+	SecurityUrl 	string `json:"security_url" bson:"security_url"`
+}
+

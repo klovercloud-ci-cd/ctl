@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"github.com/klovercloud-ci/ctl/dependency_manager"
 	v1 "github.com/klovercloud-ci/ctl/v1"
 	"github.com/spf13/cobra"
@@ -80,7 +81,12 @@ func getLogs(cmd *cobra.Command, processId string, page string, limit string, fo
 		cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", code)
 		return nil
 	} else if data != nil {
-		cmd.Println(data)
+		byteBody, _ := json.Marshal(data)
+		var result []string
+		json.Unmarshal(byteBody, &result)
+		for _, logData := range result {
+			cmd.Println(logData)
+		}
 	}
 	if follow {
 		if data == nil {

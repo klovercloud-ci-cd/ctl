@@ -73,3 +73,13 @@ const (
 	// GET_APPLICATION get application flag
 	GET_APPLICATION = APPLICATION_FLAG("GET_APPLICATION")
 )
+
+// COMPANY_FLAG company flag types to apply
+type USER_FLAG string
+
+const (
+	// CREATE_USER create user flag
+	CREATE_USER = USER_FLAG("CREATE_USER")
+	// CREATE_ADMIN create admin flag
+	CREATE_ADMIN = USER_FLAG("CREATE_ADMIN")
+)

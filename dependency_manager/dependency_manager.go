@@ -31,3 +31,7 @@ func GetOauthService() service.Oauth {
 func GetProcessService() service.Process {
 	return business.NewProcessService(business.NewHttpClientService())
 }
+
+func GetUserService() service.User {
+	return business.NewUserService(business.NewHttpClientService())
+}
