@@ -82,9 +82,8 @@ func Registration() *cobra.Command{
 					if len(strs) > 0 {
 						file = strs[1]
 					}
-				} else if strings.Contains(strings.ToLower(each), "type"){
-					strs := strings.Split(strings.ToLower(each), "=")
-					actionType = strs[1]
+				} else if strings.ToLower(each) == "user"{
+					actionType = "user"
 				}
 			}
 			if file == "" {
@@ -124,7 +123,7 @@ func Registration() *cobra.Command{
 				}
 				companyId := userMetadata.CompanyId
 				userService.Cmd(cmd).Flag(string(enums.CREATE_USER)).CompanyId(companyId).Apply()
-			} else if strings.ToLower(actionType) == "" || strings.ToLower(actionType) == "admin"{
+			} else {
 				userService.Cmd(cmd).Flag(string(enums.CREATE_ADMIN)).Apply()
 			}
 			return nil
