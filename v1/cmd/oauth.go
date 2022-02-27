@@ -24,8 +24,6 @@ func Login() *cobra.Command{
 		Short:     "Login using email and password",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			var apiServerUrl string
-			var securityUrl string
 			//for idx, each := range args {
 				//if strings.Contains(strings.ToLower(each), "option") {
 				//	if idx + 1 < len(args) {
@@ -62,7 +60,7 @@ func Login() *cobra.Command{
 				cmd.Println("[ERROR]: Something went wrong!")
 				return nil
 			}
-			err = v1.AddToConfigFile(ctlToken, apiServerUrl, securityUrl)
+			err = v1.SetCtlToken(ctlToken)
 			if err != nil {
 				cmd.Println("[ERROR]: ", err.Error())
 			}
