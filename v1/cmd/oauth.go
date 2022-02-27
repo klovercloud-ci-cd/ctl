@@ -43,7 +43,7 @@ func Login() *cobra.Command{
 					}
 				}
 			}
-			err := v1.AddToConfigFile("", apiServerUrl, securityUrl)
+			_, err := v1.AddOrGetUrl()
 			if err != nil {
 				cmd.Println("[ERROR]: ", err.Error())
 			}

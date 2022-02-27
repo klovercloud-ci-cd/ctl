@@ -99,7 +99,7 @@ func (u userService) CreateUser(user v1.UserRegistrationDto) error {
 }
 
 func (u userService) CreateAdmin(user interface{}) error {
-	securityUrl, err := v1.AddOrGetSecurityUrl()
+	securityUrl, err := v1.AddOrGetUrl()
 	if err != nil {
 		return err
 	}
@@ -133,7 +133,7 @@ func (u userService) AttachCompany(company interface{}) error {
 }
 
 func (u userService) ResetPassword(passwordResetDto interface{}) interface{} {
-	securityUrl, err := v1.AddOrGetSecurityUrl()
+	securityUrl, err := v1.AddOrGetUrl()
 	if err != nil {
 		return err
 	}
@@ -151,7 +151,7 @@ func (u userService) ResetPassword(passwordResetDto interface{}) interface{} {
 }
 
 func (u userService) ForgotPassword(email string) error {
-	securityUrl, err := v1.AddOrGetSecurityUrl()
+	securityUrl, err := v1.AddOrGetUrl()
 	if err != nil {
 		return err
 	}
