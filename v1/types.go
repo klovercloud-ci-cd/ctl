@@ -1,6 +1,10 @@
 package v1
 
-import "time"
+import (
+	"encoding/json"
+	"io/ioutil"
+	"time"
+)
 
 // ResponseDTO Http response dto
 type ResponseDTO struct {
@@ -145,5 +149,17 @@ type PasswordResetDto struct {
 	Email           string `json:"email" bson:"email"`
 	CurrentPassword string `json:"current_password" bson:"current_password"`
 	NewPassword     string `json:"new_password" bson:"new_password"`
+}
+
+func (cfg Config) Store() error {
+	data, err := json.MarshalIndent(cfg, "", "")
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile("config.cfg", data, 0644)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 

@@ -130,6 +130,20 @@ func AddToConfigFile(token, apiServerUrl, securityUrl string) error {
 	return nil
 }
 
+func GetConfigFile() Config {
+	jsonFile, err := os.Open("config.cfg")
+	if err != nil {
+		return Config{}
+	}
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	var configFile Config
+	err = json.Unmarshal(byteValue, &configFile)
+	if err != nil {
+		return Config{}
+	}
+	return configFile
+}
+
 func AddRootIndent(b []byte, n int) []byte {
 	prefix := append([]byte("\n"), bytes.Repeat([]byte(" "), n)...)
 	b = append(prefix[1:], b...)
@@ -137,9 +151,9 @@ func AddRootIndent(b []byte, n int) []byte {
 }
 
 func SetCtlToken(token string) error {
-	apiServerUrl := GetApiServerUrl()
-	securityUrl := GetSecurityUrl()
-	err := AddToConfigFile(token, apiServerUrl, securityUrl)
+	cfg := GetConfigFile()
+	cfg.Token = token
+	err := cfg.Store()
 	if err != nil {
 		return  err
 	}
