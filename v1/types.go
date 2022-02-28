@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
-	"log"
 	"os"
 	"time"
 )
@@ -168,7 +167,6 @@ func (cfg Config) Store() error {
 
 func GetConfigFile() Config {
 	jsonFile, err := os.Open(os.Getenv("CONFIG_FILE_PATH"))
-	log.Println(os.Getenv("abc"))
 	if err != nil {
 		return Config{}
 	}
