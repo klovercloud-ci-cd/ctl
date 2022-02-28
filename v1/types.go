@@ -154,11 +154,20 @@ type Config struct {
 }
 
 func (cfg Config) Store() error {
+	cfg.ApiServerUrl = FixUrl(cfg.ApiServerUrl)
+	cfg.SecurityUrl = FixUrl(cfg.SecurityUrl)
 	data, err := json.MarshalIndent(cfg, "", "")
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(os.Getenv("CONFIG_FILE_PATH"), data, 0644)
+	path := GetCfgPath()
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		err := os.MkdirAll(path, os.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
+	err = ioutil.WriteFile(path+"config.cfg", data, 0644)
 	if err != nil {
 		return err
 	}
@@ -166,7 +175,7 @@ func (cfg Config) Store() error {
 }
 
 func GetConfigFile() Config {
-	jsonFile, err := os.Open(os.Getenv("CONFIG_FILE_PATH"))
+	jsonFile, err := os.Open(GetCfgPath()+"config.cfg")
 	if err != nil {
 		return Config{}
 	}

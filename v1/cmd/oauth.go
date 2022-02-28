@@ -87,6 +87,25 @@ func Login() *cobra.Command{
 	}
 }
 
+func Logout() *cobra.Command{
+	return &cobra.Command{
+		Use:       "logout",
+		Short:     "Logout user from the ctl",
+		ValidArgs: []string{},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cfg := v1.GetConfigFile()
+			cfg.Token = ""
+			err := cfg.Store()
+			if err != nil {
+				cmd.Println("[ERROR]: ", err.Error())
+				return nil
+			}
+			cmd.Println("[SUCCESS]: Successfully logged-out!")
+			return nil
+		},
+	}
+}
+
 func credentials() (string, string) {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Enter email: ")

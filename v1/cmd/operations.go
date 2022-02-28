@@ -523,13 +523,13 @@ func Update() *cobra.Command{
 			var email string
 			var apiServerUrl string
 			if args[0]=="user" {
-				for idx, each := range args {
+				for _, each := range args {
 					if strings.Contains(strings.ToLower(each), "file") || strings.Contains(strings.ToLower(each), "-f") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 0 {
 							file = strs[1]
 						}
-					} else if strings.Contains(strings.ToLower(each), "update") {
+					} else if strings.Contains(strings.ToLower(each), "option") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
 							option = strs[1]
@@ -539,14 +539,10 @@ func Update() *cobra.Command{
 						if len(strs) > 1 {
 							email = strs[1]
 						}
-					} else if strings.Contains(strings.ToLower(each), "option") {
-						if idx + 1 < len(args) {
-							if strings.Contains(strings.ToLower(args[idx+1]), "apiserver") {
-								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
-								if len(strs) > 1 {
-									apiServerUrl = strs[1]
-								}
-							}
+					} else if strings.Contains(strings.ToLower(each), "apiserver") {
+						strs := strings.Split(strings.ToLower(each), "=")
+						if len(strs) > 1 {
+							apiServerUrl = strs[1]
 						}
 					}
 				}
@@ -635,25 +631,21 @@ func Update() *cobra.Command{
 					return nil
 				}
 				companyId := userMetadata.CompanyId
-				for idx, each := range args {
+				for _, each := range args {
 					if strings.Contains(strings.ToLower(each), "file") || strings.Contains(strings.ToLower(each), "-f") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 0 {
 							file = strs[1]
 						}
-					} else if strings.Contains(strings.ToLower(each), "update") {
+					} else if strings.Contains(strings.ToLower(each), "option") {
 						strs := strings.Split(strings.ToUpper(each), "=")
 						if len(strs) > 1 {
 							option = strs[1]
 						}
-					} else if strings.Contains(strings.ToLower(each), "option") {
-						if idx + 1 < len(args) {
-							if strings.Contains(strings.ToLower(args[idx+1]), "apiserver") {
-								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
-								if len(strs) > 1 {
-									apiServerUrl = strs[1]
-								}
-							}
+					} else if strings.Contains(strings.ToLower(each), "apiserver") {
+						strs := strings.Split(strings.ToLower(each), "=")
+						if len(strs) > 1 {
+							apiServerUrl = strs[1]
 						}
 					}
 				}
@@ -702,13 +694,13 @@ func Update() *cobra.Command{
 				companyService.Cmd(cmd).Flag(string(enums.UPDATE_REPOSITORIES)).Company(*repos).CompanyId(companyId).Option(option).Apply()
 				return nil
 			} else if args[0]=="applications" || args[0]=="apps"{
-				for idx, each := range args {
+				for _, each := range args {
 					if strings.Contains(strings.ToLower(each), "file") || strings.Contains(strings.ToLower(each), "-f") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
 							file = strs[1]
 						}
-					} else if strings.Contains(strings.ToLower(each), "update") {
+					} else if strings.Contains(strings.ToLower(each), "option") {
 						strs := strings.Split(strings.ToUpper(each), "=")
 						if len(strs) > 1 {
 							option = strs[1]
@@ -718,14 +710,10 @@ func Update() *cobra.Command{
 						if len(strs) > 1 {
 							repoId = strs[1]
 						}
-					} else if strings.Contains(strings.ToLower(each), "option") {
-						if idx + 1 < len(args) {
-							if strings.Contains(strings.ToLower(args[idx+1]), "apiserver") {
-								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
-								if len(strs) > 1 {
-									apiServerUrl = strs[1]
-								}
-							}
+					} else if strings.Contains(strings.ToLower(each), "apiserver") {
+						strs := strings.Split(strings.ToLower(each), "=")
+						if len(strs) > 1 {
+							apiServerUrl = strs[1]
 						}
 					}
 				}

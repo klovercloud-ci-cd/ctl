@@ -71,21 +71,21 @@ func (u userService) Apply() {
 		if err != nil {
 			log.Fatalf("[ERROR]: %v", err)
 		} else {
-			u.cmd.Println("Successfully Attached Company")
+			u.cmd.Println("[SUCCESS]: Successfully Attached Company")
 		}
 	case string(enums.RESET_PASSWORD):
 		err := u.ResetPassword(u.passwordResetDto)
 		if err != nil {
 			log.Fatalf("[ERROR]: %v", err)
 		} else {
-			u.cmd.Println("Successfully Reset Password")
+			u.cmd.Println("[SUCCESS]: Successfully Reset Password")
 		}
 	case string(enums.FORGOT_PASSWORD):
 		err := u.ForgotPassword(u.email)
 		if err != nil {
 			log.Fatalf("[ERROR]: %v", err)
 		} else {
-			u.cmd.Println("Successfully Forgot Password")
+			u.cmd.Println("[SUCCESS]: Otp sent sucessfully")
 		}
 	default:
 		u.cmd.Println("[ERROR]: ", "Please provide valid options")

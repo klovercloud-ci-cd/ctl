@@ -23,6 +23,7 @@ func cli() {
 	commands.AddCommand(cmd.Describe())
 	commands.AddCommand(cmd.List())
 	commands.AddCommand(cmd.Update())
+	commands.AddCommand(cmd.Logout())
 	if err := commands.Execute(); err != nil {
 		os.Exit(1)
 	}
