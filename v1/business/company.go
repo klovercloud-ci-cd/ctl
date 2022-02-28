@@ -156,14 +156,14 @@ func (c companyService) Apply() {
 
 func (c companyService) CreateCompany(company interface{}) error {
 	header := make(map[string]string)
-	token, _ := v1.GetToken()
-	header["Authorization"] = "Bearer " + token
+	cfg := v1.GetConfigFile()
+	header["Authorization"] = "Bearer " + cfg.Token
 	header["Content-Type"] = "application/json"
 	b, err := json.Marshal(company)
 	if err != nil {
 		return err
 	}
-	_, _, err = c.httpClient.Post(v1.GetApiServerUrl()+"companies", header, b)
+	_, _, err = c.httpClient.Post(cfg.ApiServerUrl+"companies", header, b)
 	if err != nil {
 		return err
 	}
@@ -172,14 +172,14 @@ func (c companyService) CreateCompany(company interface{}) error {
 
 func (c companyService) UpdateRepositoriesByCompanyId(company interface{}, companyId string, option string) error {
 	header := make(map[string]string)
-	token, _ := v1.GetToken()
-	header["Authorization"] = "Bearer " + token
+	cfg := v1.GetConfigFile()
+	header["Authorization"] = "Bearer " + cfg.Token
 	header["Content-Type"] = "application/json"
 	b, err := json.Marshal(company)
 	if err != nil {
 		return err
 	}
-	_, err = c.httpClient.Put(v1.GetApiServerUrl()+"companies/"+companyId+"/repositories?companyUpdateOption="+option, header, b)
+	_, err = c.httpClient.Put(cfg.ApiServerUrl+"companies/"+companyId+"/repositories?companyUpdateOption="+option, header, b)
 	if err != nil {
 		return err
 	}
@@ -188,14 +188,14 @@ func (c companyService) UpdateRepositoriesByCompanyId(company interface{}, compa
 
 func (c companyService) UpdateApplicationsByRepositoryId(company interface{}, companyId string, repoId string, option string) error {
 	header := make(map[string]string)
-	token, _ := v1.GetToken()
-	header["Authorization"] = "Bearer " + token
+	cfg := v1.GetConfigFile()
+	header["Authorization"] = "Bearer " + cfg.Token
 	header["Content-Type"] = "application/json"
 	b, err := json.Marshal(company)
 	if err != nil {
 		return err
 	}
-	_, _, err = c.httpClient.Post(v1.GetApiServerUrl()+"applications?companyId="+companyId+"&repositoryId="+repoId+"&companyUpdateOption="+option, header, b)
+	_, _, err = c.httpClient.Post(cfg.ApiServerUrl+"applications?companyId="+companyId+"&repositoryId="+repoId+"&companyUpdateOption="+option, header, b)
 	if err != nil {
 		return err
 	}
@@ -204,26 +204,26 @@ func (c companyService) UpdateApplicationsByRepositoryId(company interface{}, co
 
 func (c companyService) GetCompanyById(companyId string, option string) (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
-	token, _ := v1.GetToken()
-	header["Authorization"] = "Bearer " + token
+	cfg := v1.GetConfigFile()
+	header["Authorization"] = "Bearer " + cfg.Token
 	header["Content-Type"] = "application/json"
-	return c.httpClient.Get(v1.GetApiServerUrl()+"companies/"+companyId+"?"+option, header)
+	return c.httpClient.Get(cfg.ApiServerUrl+"companies/"+companyId+"?"+option, header)
 }
 
 func (c companyService) GetCompanies() (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
-	token, _ := v1.GetToken()
-	header["Authorization"] = "Bearer " + token
+	cfg := v1.GetConfigFile()
+	header["Authorization"] = "Bearer " + cfg.Token
 	header["Content-Type"] = "application/json"
-	return c.httpClient.Get(v1.GetApiServerUrl()+"companies", header)
+	return c.httpClient.Get(cfg.ApiServerUrl+"companies", header)
 }
 
 func (c companyService) GetRepositoriesByCompanyId(companyId string) (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
-	token, _ := v1.GetToken()
-	header["Authorization"] = "Bearer " + token
+	cfg := v1.GetConfigFile()
+	header["Authorization"] = "Bearer " + cfg.Token
 	header["Content-Type"] = "application/json"
-	return c.httpClient.Get(v1.GetApiServerUrl()+"companies/"+companyId+"/repositories?"+c.option, header)
+	return c.httpClient.Get(cfg.ApiServerUrl+"companies/"+companyId+"/repositories?"+c.option, header)
 }
 
 // NewCompanyService returns company type service

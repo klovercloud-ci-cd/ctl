@@ -23,26 +23,24 @@ func GetLogs() *cobra.Command {
 			}
 			var processId, page, limit string
 			var follow bool
-			for _, each := range args {
+			var apiServerUrl string
+			for idx, each := range args {
 				if strings.Contains(strings.ToLower(each), "page") {
 					strs := strings.Split(strings.ToLower(each), "=")
 					if len(strs) > 0 {
 						page = strs[1]
 					}
-				}
-				if strings.Contains(strings.ToLower(each), "limit") {
+				} else if strings.Contains(strings.ToLower(each), "limit") {
 					strs := strings.Split(strings.ToLower(each), "=")
 					if len(strs) > 0 {
 						limit = strs[1]
 					}
-				}
-				if strings.Contains(strings.ToLower(each), "processid") {
+				} else if strings.Contains(strings.ToLower(each), "processid") {
 					strs := strings.Split(strings.ToLower(each), "=")
 					if len(strs) > 0 {
 						processId = strs[1]
 					}
-				}
-				if strings.Contains(strings.ToLower(each), "follow") {
+				} else if strings.Contains(strings.ToLower(each), "follow") {
 					strs := strings.Split(strings.ToLower(each), "=")
 					if len(strs) > 0 {
 						if strings.ToLower(strs[1]) == "true" {
@@ -51,12 +49,33 @@ func GetLogs() *cobra.Command {
 							follow = false
 						}
 					}
-				}
-				if strings.Contains(strings.ToLower(each), "-f") {
+				} else if strings.Contains(strings.ToLower(each), "-f") {
 					follow = true
+				} else if strings.Contains(strings.ToLower(each), "option") {
+					if idx + 1 < len(args) {
+						if strings.Contains(strings.ToLower(args[idx+1]), "apiserver") {
+							strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+							if len(strs) > 1 {
+								apiServerUrl = strs[1]
+							}
+						}
+					}
 				}
 			}
-
+			cfg := v1.GetConfigFile()
+			if apiServerUrl == "" {
+				if cfg.ApiServerUrl == "" {
+					cmd.Println("[ERROR]: Api server url not found!")
+					return nil
+				}
+			} else {
+				cfg.ApiServerUrl = apiServerUrl
+			}
+			err := cfg.Store()
+			if err != nil {
+				cmd.Println("[ERROR]: ", err.Error())
+				return nil
+			}
 			if page == "" {
 				page = "0"
 			}
@@ -72,8 +91,9 @@ func GetLogs() *cobra.Command {
 }
 
 func getLogs(cmd *cobra.Command, processId string, page string, limit string, follow bool) error {
+	cfg := v1.GetConfigFile()
 	pipelineService := dependency_manager.GetPipelineService()
-	code, data, err := pipelineService.Logs(v1.GetApiServerUrl()+"pipelines/"+processId, page, limit)
+	code, data, err := pipelineService.Logs(cfg.ApiServerUrl+"pipelines/"+processId, page, limit)
 	if err != nil {
 		cmd.Println("[ERROR]: ", err.Error())
 		return nil

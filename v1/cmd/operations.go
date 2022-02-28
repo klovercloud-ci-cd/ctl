@@ -27,15 +27,39 @@ func Create() *cobra.Command{
 				log.Fatalf("[ERROR]: %v", "please provide a resource name!")
 				return nil
 			}
+			var apiServerUrl string
 			if args[0]=="company"{
 				var file string
-				for _, each := range args {
+				for idx, each := range args {
 					if strings.Contains(strings.ToLower(each), "file") || strings.Contains(strings.ToLower(each), "-f") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 0 {
 							file = strs[1]
 						}
+					} else if strings.Contains(strings.ToLower(each), "option") {
+						if idx + 1 < len(args) {
+							if strings.Contains(strings.ToLower(args[idx+1]), "apiserver") {
+								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+								if len(strs) > 1 {
+									apiServerUrl = strs[1]
+								}
+							}
+						}
 					}
+				}
+				cfg := v1.GetConfigFile()
+				if apiServerUrl == "" {
+					if cfg.ApiServerUrl == "" {
+						cmd.Println("[ERROR]: Api server url not found!")
+						return nil
+					}
+				} else {
+					cfg.ApiServerUrl = apiServerUrl
+				}
+				err := cfg.Store()
+				if err != nil {
+					cmd.Println("[ERROR]: ", err.Error())
+					return nil
 				}
 				if file == "" {
 					log.Fatalf("[ERROR]: %v", "please provide a file!")
@@ -131,7 +155,22 @@ func Registration() *cobra.Command{
 					return nil
 				}
 			}
-			err = v1.AddToConfigFile("", apiServerUrl, securityUrl)
+			cfg := v1.GetConfigFile()
+			if apiServerUrl == "" {
+				if cfg.ApiServerUrl == "" {
+					cfg.ApiServerUrl = "http://localhost:8080/api/v1/"
+				}
+			} else {
+				cfg.ApiServerUrl = apiServerUrl
+			}
+			if securityUrl == "" {
+				if cfg.SecurityUrl == "" {
+					cfg.SecurityUrl = "http://localhost:8085/api/v1/"
+				}
+			} else {
+				cfg.SecurityUrl = securityUrl
+			}
+			err = cfg.Store()
 			if err != nil {
 				cmd.Println("[ERROR]: ", err.Error())
 			}
@@ -166,6 +205,7 @@ func Describe() *cobra.Command{
 				return nil
 			}
 			companyId := userMetadata.CompanyId
+			var apiServerUrl string
 			if args[0]=="company"{
 				loadRepo := false
 				loadApp := false
@@ -186,9 +226,28 @@ func Describe() *cobra.Command{
 										loadApp = true
 									}
 								}
+							} else if strings.Contains(strings.ToLower(args[idx+1]), "apiserver") {
+								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+								if len(strs) > 1 {
+									apiServerUrl = strs[1]
+								}
 							}
 						}
 					}
+				}
+				cfg := v1.GetConfigFile()
+				if apiServerUrl == "" {
+					if cfg.ApiServerUrl == "" {
+						cmd.Println("[ERROR]: Api server url not found!")
+						return nil
+					}
+				} else {
+					cfg.ApiServerUrl = apiServerUrl
+				}
+				err := cfg.Store()
+				if err != nil {
+					cmd.Println("[ERROR]: ", err.Error())
+					return nil
 				}
 				companyService := dependency_manager.GetCompanyService()
 				companyService.Kind("Company").Cmd(cmd).Flag(string(enums.GET_COMPANY_BY_ID)).CompanyId(companyId).Option("loadRepositories="+strconv.FormatBool(loadRepo)+"&loadApplications="+strconv.FormatBool(loadApp)).Apply()
@@ -215,16 +274,35 @@ func Describe() *cobra.Command{
 										loadApp = true
 									}
 								}
+							} else if strings.Contains(strings.ToLower(args[idx+1]), "apiserver") {
+								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+								if len(strs) > 1 {
+									apiServerUrl = strs[1]
+								}
 							}
 						}
 					}
+				}
+				cfg := v1.GetConfigFile()
+				if apiServerUrl == "" {
+					if cfg.ApiServerUrl == "" {
+						cmd.Println("[ERROR]: Api server url not found!")
+						return nil
+					}
+				} else {
+					cfg.ApiServerUrl = apiServerUrl
+				}
+				err := cfg.Store()
+				if err != nil {
+					cmd.Println("[ERROR]: ", err.Error())
+					return nil
 				}
 				repositoryService := dependency_manager.GetRepositoryService()
 				repositoryService.Kind("Repository").Cmd(cmd).Flag(string(enums.GET_REPOSITORY)).Repo(repoId).Option("loadApplications="+strconv.FormatBool(loadApp)).Apply()
 			}else if args[0]=="application" || args[0]=="app" {
 				var repoId string
 				var appId string
-				for _, each := range args {
+				for idx, each := range args {
 					if strings.Contains(strings.ToLower(each), "repositoryid") || strings.Contains(strings.ToLower(each), "repoid") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
@@ -235,6 +313,15 @@ func Describe() *cobra.Command{
 						if len(strs) > 1 {
 							appId = strs[1]
 						}
+					} else if strings.Contains(strings.ToLower(each), "option") {
+						if idx + 1 < len(args) {
+							if strings.Contains(strings.ToLower(args[idx+1]), "apiserver") {
+								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+								if len(strs) > 1 {
+									apiServerUrl = strs[1]
+								}
+							}
+						}
 					}
 				}
 				if repoId == "" {
@@ -243,6 +330,20 @@ func Describe() *cobra.Command{
 				}
 				if appId == "" {
 					log.Fatalf("[ERROR]: %v", "please provide application id!")
+					return nil
+				}
+				cfg := v1.GetConfigFile()
+				if apiServerUrl == "" {
+					if cfg.ApiServerUrl == "" {
+						cmd.Println("[ERROR]: Api server url not found!")
+						return nil
+					}
+				} else {
+					cfg.ApiServerUrl = apiServerUrl
+				}
+				err = cfg.Store()
+				if err != nil {
+					cmd.Println("[ERROR]: ", err.Error())
 					return nil
 				}
 				applicationService := dependency_manager.GetApplicationService()
@@ -273,6 +374,7 @@ func List() *cobra.Command{
 				return nil
 			}
 			companyId := userMetadata.CompanyId
+			var apiServerUrl string
 			if args[0]=="repositories" || args[0]=="repos"{
 				loadApp := false
 				for idx, each := range args {
@@ -285,19 +387,47 @@ func List() *cobra.Command{
 										loadApp = true
 									}
 								}
+							} else if strings.Contains(strings.ToLower(args[idx+1]), "apiserver") {
+								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+								if len(strs) > 1 {
+									apiServerUrl = strs[1]
+								}
 							}
 						}
 					}
+				}
+				cfg := v1.GetConfigFile()
+				if apiServerUrl == "" {
+					if cfg.ApiServerUrl == "" {
+						cmd.Println("[ERROR]: Api server url not found!")
+						return nil
+					}
+				} else {
+					cfg.ApiServerUrl = apiServerUrl
+				}
+				err = cfg.Store()
+				if err != nil {
+					cmd.Println("[ERROR]: ", err.Error())
+					return nil
 				}
 				companyService := dependency_manager.GetCompanyService()
 				companyService.Kind("Repository").Cmd(cmd).Flag(string(enums.GET_REPOSITORIES)).CompanyId(companyId).Option("loadApplications="+strconv.FormatBool(loadApp)).Apply()
 			} else if args[0]=="applications" || args[0]=="apps"{
 				var repoId string
-				for _, each := range args {
+				for idx, each := range args {
 					if strings.Contains(strings.ToLower(each), "repositoryid") || strings.Contains(strings.ToLower(each), "repoid") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
 							repoId = strs[1]
+						}
+					} else if strings.Contains(strings.ToLower(each), "option") {
+						if idx + 1 < len(args) {
+							if strings.Contains(strings.ToLower(args[idx+1]), "apiserver") {
+								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+								if len(strs) > 1 {
+									apiServerUrl = strs[1]
+								}
+							}
 						}
 					}
 				}
@@ -305,12 +435,26 @@ func List() *cobra.Command{
 					log.Fatalf("[ERROR]: %v", "please provide repository id!")
 					return nil
 				}
+				cfg := v1.GetConfigFile()
+				if apiServerUrl == "" {
+					if cfg.ApiServerUrl == "" {
+						cmd.Println("[ERROR]: Api server url not found!")
+						return nil
+					}
+				} else {
+					cfg.ApiServerUrl = apiServerUrl
+				}
+				err = cfg.Store()
+				if err != nil {
+					cmd.Println("[ERROR]: ", err.Error())
+					return nil
+				}
 				repositoryService := dependency_manager.GetRepositoryService()
 				repositoryService.Kind("Application").Cmd(cmd).Flag(string(enums.GET_APPLICATIONS)).Repo(repoId).Apply()
 			} else if args[0]=="process" {
 				var repoId string
 				var appId string
-				for _, each := range args {
+				for idx, each := range args {
 					if strings.Contains(strings.ToLower(each), "repositoryid") || strings.Contains(strings.ToLower(each), "repoid") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
@@ -321,6 +465,15 @@ func List() *cobra.Command{
 						if len(strs) > 1 {
 							appId = strs[1]
 						}
+					} else if strings.Contains(strings.ToLower(each), "option") {
+						if idx + 1 < len(args) {
+							if strings.Contains(strings.ToLower(args[idx+1]), "apiserver") {
+								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+								if len(strs) > 1 {
+									apiServerUrl = strs[1]
+								}
+							}
+						}
 					}
 				}
 				if repoId == "" {
@@ -329,6 +482,20 @@ func List() *cobra.Command{
 				}
 				if appId == "" {
 					log.Fatalf("[ERROR]: %v", "please provide application id!")
+					return nil
+				}
+				cfg := v1.GetConfigFile()
+				if apiServerUrl == "" {
+					if cfg.ApiServerUrl == "" {
+						cmd.Println("[ERROR]: Api server url not found!")
+						return nil
+					}
+				} else {
+					cfg.ApiServerUrl = apiServerUrl
+				}
+				err = cfg.Store()
+				if err != nil {
+					cmd.Println("[ERROR]: ", err.Error())
 					return nil
 				}
 				processService := dependency_manager.GetProcessService()
@@ -354,14 +521,15 @@ func Update() *cobra.Command{
 			var option string
 			var repoId string
 			var email string
+			var apiServerUrl string
 			if args[0]=="user" {
-				for _, each := range args {
+				for idx, each := range args {
 					if strings.Contains(strings.ToLower(each), "file") || strings.Contains(strings.ToLower(each), "-f") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 0 {
 							file = strs[1]
 						}
-					} else if strings.Contains(strings.ToLower(each), "option") {
+					} else if strings.Contains(strings.ToLower(each), "update") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
 							option = strs[1]
@@ -371,7 +539,30 @@ func Update() *cobra.Command{
 						if len(strs) > 1 {
 							email = strs[1]
 						}
+					} else if strings.Contains(strings.ToLower(each), "option") {
+						if idx + 1 < len(args) {
+							if strings.Contains(strings.ToLower(args[idx+1]), "apiserver") {
+								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+								if len(strs) > 1 {
+									apiServerUrl = strs[1]
+								}
+							}
+						}
 					}
+				}
+				cfg := v1.GetConfigFile()
+				if apiServerUrl == "" {
+					if cfg.ApiServerUrl == "" {
+						cmd.Println("[ERROR]: Api server url not found!")
+						return nil
+					}
+				} else {
+					cfg.ApiServerUrl = apiServerUrl
+				}
+				err := cfg.Store()
+				if err != nil {
+					cmd.Println("[ERROR]: ", err.Error())
+					return nil
 				}
 				if option == string(enums.ATTACH_COMPANY) || option == "ac" {
 					if err := v1.IsUserLoggedIn(); err != nil {
@@ -444,19 +635,41 @@ func Update() *cobra.Command{
 					return nil
 				}
 				companyId := userMetadata.CompanyId
-				for _, each := range args {
+				for idx, each := range args {
 					if strings.Contains(strings.ToLower(each), "file") || strings.Contains(strings.ToLower(each), "-f") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 0 {
 							file = strs[1]
 						}
-					}
-					if strings.Contains(strings.ToLower(each), "option") {
+					} else if strings.Contains(strings.ToLower(each), "update") {
 						strs := strings.Split(strings.ToUpper(each), "=")
 						if len(strs) > 1 {
 							option = strs[1]
 						}
+					} else if strings.Contains(strings.ToLower(each), "option") {
+						if idx + 1 < len(args) {
+							if strings.Contains(strings.ToLower(args[idx+1]), "apiserver") {
+								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+								if len(strs) > 1 {
+									apiServerUrl = strs[1]
+								}
+							}
+						}
 					}
+				}
+				cfg := v1.GetConfigFile()
+				if apiServerUrl == "" {
+					if cfg.ApiServerUrl == "" {
+						cmd.Println("[ERROR]: Api server url not found!")
+						return nil
+					}
+				} else {
+					cfg.ApiServerUrl = apiServerUrl
+				}
+				err = cfg.Store()
+				if err != nil {
+					cmd.Println("[ERROR]: ", err.Error())
+					return nil
 				}
 				if file == "" {
 					log.Fatalf("[ERROR]: %v", "please provide update file!")
@@ -488,14 +701,14 @@ func Update() *cobra.Command{
 				companyService := dependency_manager.GetCompanyService()
 				companyService.Cmd(cmd).Flag(string(enums.UPDATE_REPOSITORIES)).Company(*repos).CompanyId(companyId).Option(option).Apply()
 				return nil
-			}else if args[0]=="applications" || args[0]=="apps"{
-				for _, each := range args {
+			} else if args[0]=="applications" || args[0]=="apps"{
+				for idx, each := range args {
 					if strings.Contains(strings.ToLower(each), "file") || strings.Contains(strings.ToLower(each), "-f") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
 							file = strs[1]
 						}
-					} else if strings.Contains(strings.ToLower(each), "option") {
+					} else if strings.Contains(strings.ToLower(each), "update") {
 						strs := strings.Split(strings.ToUpper(each), "=")
 						if len(strs) > 1 {
 							option = strs[1]
@@ -505,7 +718,30 @@ func Update() *cobra.Command{
 						if len(strs) > 1 {
 							repoId = strs[1]
 						}
+					} else if strings.Contains(strings.ToLower(each), "option") {
+						if idx + 1 < len(args) {
+							if strings.Contains(strings.ToLower(args[idx+1]), "apiserver") {
+								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+								if len(strs) > 1 {
+									apiServerUrl = strs[1]
+								}
+							}
+						}
 					}
+				}
+				cfg := v1.GetConfigFile()
+				if apiServerUrl == "" {
+					if cfg.ApiServerUrl == "" {
+						cmd.Println("[ERROR]: Api server url not found!")
+						return nil
+					}
+				} else {
+					cfg.ApiServerUrl = apiServerUrl
+				}
+				err := cfg.Store()
+				if err != nil {
+					cmd.Println("[ERROR]: ", err.Error())
+					return nil
 				}
 				if file == "" {
 					log.Fatalf("[ERROR]: %v", "please provide update file!")

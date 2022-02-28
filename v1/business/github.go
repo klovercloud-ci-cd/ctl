@@ -16,14 +16,14 @@ func (g githubService) Apply(git v1.Git, companyId string) error {
 		return err
 	}
 	header := make(map[string]string)
-	token, _ := v1.GetToken()
-	header["Authorization"] = "Bearer " + token
+	cfg := v1.GetConfigFile()
+	header["Authorization"] = "Bearer " + cfg.Token
 	header["Content-Type"] = "application/json"
 	b, err := json.Marshal(git)
 	if err != nil {
 		return err
 	}
-	_, _, err = g.httpClient.Post(v1.GetApiServerUrl()+"githubs?companyId="+companyId, header, b)
+	_, _, err = g.httpClient.Post(cfg.ApiServerUrl+"githubs?companyId="+companyId, header, b)
 	if err != nil {
 		return err
 	}

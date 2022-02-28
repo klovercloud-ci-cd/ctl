@@ -117,18 +117,18 @@ func (r repositoryService) Apply() {
 
 func (r repositoryService) GetRepositoryById(repositoryId string) (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
-	token, _ := v1.GetToken()
-	header["Authorization"] = "Bearer " + token
+	cfg := v1.GetConfigFile()
+	header["Authorization"] = "Bearer " + cfg.Token
 	header["Content-Type"] = "application/json"
-	return r.httpClient.Get(v1.GetApiServerUrl()+"repositories/"+repositoryId+"?"+r.option, header)
+	return r.httpClient.Get(cfg.ApiServerUrl+"repositories/"+repositoryId+"?"+r.option, header)
 }
 
 func (r repositoryService) GetApplicationsByRepositoryId(repositoryId string) (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
-	token, _ := v1.GetToken()
-	header["Authorization"] = "Bearer " + token
+	cfg := v1.GetConfigFile()
+	header["Authorization"] = "Bearer " + cfg.Token
 	header["Content-Type"] = "application/json"
-	return r.httpClient.Get(v1.GetApiServerUrl()+"repositories/"+repositoryId+"/applications?status=ACTIVE", header)
+	return r.httpClient.Get(cfg.ApiServerUrl+"repositories/"+repositoryId+"/applications?status=ACTIVE", header)
 }
 
 // NewRepositoryService returns repository type service

@@ -87,10 +87,10 @@ func (a applicationService) Option(option string) service.Application {
 
 func (a applicationService) GetApplication(companyId, repoId, applicationId string) (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
-	token, _ := v1.GetToken()
-	header["Authorization"] = "Bearer " + token
+	cfg := v1.GetConfigFile()
+	header["Authorization"] = "Bearer " + cfg.Token
 	header["Content-Type"] = "application/json"
-	return a.httpClient.Get(v1.GetApiServerUrl()+"applications/"+applicationId+"?&repositoryId="+repoId, header)
+	return a.httpClient.Get(cfg.ApiServerUrl+"applications/"+applicationId+"?&repositoryId="+repoId, header)
 }
 
 // NewApplicationService returns application type service

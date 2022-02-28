@@ -84,10 +84,10 @@ func (p processService) Apply() {
 
 func (p processService) GetByCompanyIdAndRepositoryIdAndAppName() (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
-	token, _ := v1.GetToken()
-	header["Authorization"] = "Bearer " + token
+	cfg := v1.GetConfigFile()
+	header["Authorization"] = "Bearer " + cfg.Token
 	header["Content-Type"] = "application/json"
-	return p.httpClient.Get(v1.GetApiServerUrl()+"processes?repositoryId="+p.repoId+"&appId="+p.appId, header)
+	return p.httpClient.Get(cfg.ApiServerUrl+"processes?repositoryId="+p.repoId+"&appId="+p.appId, header)
 }
 
 // NewProcessService returns process type service

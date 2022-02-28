@@ -2,7 +2,10 @@ package v1
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
+	"log"
+	"os"
 	"time"
 )
 
@@ -136,13 +139,6 @@ type UserResourcePermissionDto struct {
 	UserId    string                 `json:"user_id" bson:"user_id"`
 }
 
-// Config contains config file struct
-type Config struct {
-	Token 			string `json:"token" bson:"token"`
-	ApiServerUrl 	string `json:"api_server_url" bson:"api_server_url"`
-	SecurityUrl 	string `json:"security_url" bson:"security_url"`
-}
-
 // PasswordResetDto contains data for password reset
 type PasswordResetDto struct {
 	Otp             string `json:"otp" bson:"otp"`
@@ -151,15 +147,44 @@ type PasswordResetDto struct {
 	NewPassword     string `json:"new_password" bson:"new_password"`
 }
 
+// Config contains config file struct
+type Config struct {
+	Token 			string `json:"token" bson:"token"`
+	ApiServerUrl 	string `json:"api_server_url" bson:"api_server_url"`
+	SecurityUrl 	string `json:"security_url" bson:"security_url"`
+}
+
 func (cfg Config) Store() error {
 	data, err := json.MarshalIndent(cfg, "", "")
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile("config.cfg", data, 0644)
+	err = ioutil.WriteFile(os.Getenv("CONFIG_FILE_PATH"), data, 0644)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
+func GetConfigFile() Config {
+	jsonFile, err := os.Open(os.Getenv("CONFIG_FILE_PATH"))
+	log.Println(os.Getenv("abc"))
+	if err != nil {
+		return Config{}
+	}
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	var configFile Config
+	err = json.Unmarshal(byteValue, &configFile)
+	if err != nil {
+		return Config{}
+	}
+	return configFile
+}
+
+func IsUserLoggedIn() error {
+	cfg := GetConfigFile()
+	if cfg.Token == "" {
+		return errors.New("user is not logged in")
+	}
+	return nil
+}

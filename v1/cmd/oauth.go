@@ -24,27 +24,42 @@ func Login() *cobra.Command{
 		Short:     "Login using email and password",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			//for idx, each := range args {
-				//if strings.Contains(strings.ToLower(each), "option") {
-				//	if idx + 1 < len(args) {
-				//		if strings.Contains(strings.ToLower(args[idx+1]), "apiserver") {
-				//			strs := strings.Split(strings.ToLower(args[idx+1]), "=")
-				//			if len(strs) > 1 {
-				//				apiServerUrl = strs[1]
-				//			}
-				//		} else if strings.Contains(strings.ToLower(args[idx+1]), "security") {
-				//			strs := strings.Split(strings.ToLower(args[idx+1]), "=")
-				//			if len(strs) > 1 {
-				//				securityUrl = strs[1]
-				//			}
-				//		}
-				//	}
-				//}
-			//}
-			//err := v1.AddToConfigFile("", apiServerUrl, securityUrl)
-			//if err != nil {
-			//	cmd.Println("[ERROR]: ", err.Error())
-			//}
+			var apiServerUrl string
+			var securityUrl string
+			for idx, each := range args {
+				if strings.Contains(strings.ToLower(each), "option") {
+					if idx + 1 < len(args) {
+						if strings.Contains(strings.ToLower(args[idx+1]), "apiserver") {
+							strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+							if len(strs) > 1 {
+								apiServerUrl = strs[1]
+							}
+						} else if strings.Contains(strings.ToLower(args[idx+1]), "security") {
+							strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+							if len(strs) > 1 {
+								securityUrl = strs[1]
+							}
+						}
+					}
+				}
+			}
+			cfg := v1.GetConfigFile()
+			if apiServerUrl != "" {
+				cfg.ApiServerUrl = apiServerUrl
+			}
+			if securityUrl != "" {
+				cfg.SecurityUrl = securityUrl
+			} else {
+				if cfg.SecurityUrl == "" {
+					cmd.Println("[ERROR]: Security server url not found!")
+					return nil
+				}
+			}
+			err := cfg.Store()
+			if err != nil {
+				cmd.Println("[ERROR]: ", err.Error())
+				return nil
+			}
 			email, password := credentials()
 			loginDto := LoginDto{
 				Email:    email,
@@ -60,9 +75,11 @@ func Login() *cobra.Command{
 				cmd.Println("[ERROR]: Something went wrong!")
 				return nil
 			}
-			err = v1.SetCtlToken(ctlToken)
+			cfg.Token = ctlToken
+			err = cfg.Store()
 			if err != nil {
 				cmd.Println("[ERROR]: ", err.Error())
+				return nil
 			}
 			cmd.Println("[SUCCESS]: Successfully logged in!")
 			return nil
@@ -76,6 +93,7 @@ func credentials() (string, string) {
 	email, _ := reader.ReadString('\n')
 	fmt.Print("Enter Password: ")
 	bytePassword, _ := term.ReadPassword(int(syscall.Stdin))
+	fmt.Println()
 	password := string(bytePassword)
 	return strings.TrimSpace(email), strings.TrimSpace(password)
 }

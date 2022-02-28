@@ -94,14 +94,14 @@ func (u userService) Apply() {
 
 func (u userService) CreateUser(user v1.UserRegistrationDto) error {
 	header := make(map[string]string)
-	token, _ := v1.GetToken()
-	header["Authorization"] = "Bearer " + token
+	cfg := v1.GetConfigFile()
+	header["Authorization"] = "Bearer " + cfg.Token
 	header["Content-Type"] = "application/json"
 	b, err := json.Marshal(user)
 	if err != nil {
 		return err
 	}
-	_, _, err = u.httpClient.Post(v1.GetSecurityUrl()+"users?action=create_user", header, b)
+	_, _, err = u.httpClient.Post(cfg.SecurityUrl+"users?action=create_user", header, b)
 	if err != nil {
 		return err
 	}
@@ -109,17 +109,14 @@ func (u userService) CreateUser(user v1.UserRegistrationDto) error {
 }
 
 func (u userService) CreateAdmin(user interface{}) error {
-	securityUrl, err := v1.AddOrGetUrl()
-	if err != nil {
-		return err
-	}
 	header := make(map[string]string)
 	header["Content-Type"] = "application/json"
 	b, err := json.Marshal(u.user)
 	if err != nil {
 		return err
 	}
-	_, _, err = u.httpClient.Post(securityUrl+"users", header, b)
+	cfg := v1.GetConfigFile()
+	_, _, err = u.httpClient.Post(cfg.SecurityUrl+"users", header, b)
 	if err != nil {
 		return err
 	}
@@ -128,32 +125,29 @@ func (u userService) CreateAdmin(user interface{}) error {
 
 func (u userService) AttachCompany(company interface{}) error {
 	header := make(map[string]string)
-	token, _ := v1.GetToken()
-	header["Authorization"] = "Bearer " + token
+	cfg := v1.GetConfigFile()
+	header["Authorization"] = "Bearer " + cfg.Token
 	header["Content-Type"] = "application/json"
 	b, err := json.Marshal(company)
 	if err != nil {
 		return err
 	}
-	_, err = u.httpClient.Put(v1.GetSecurityUrl()+"users?action="+string(enums.ATTACH_COMPANY), header, b)
+	_, err = u.httpClient.Put(cfg.SecurityUrl+"users?action="+string(enums.ATTACH_COMPANY), header, b)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (u userService) ResetPassword(passwordResetDto interface{}) interface{} {
-	securityUrl, err := v1.AddOrGetUrl()
-	if err != nil {
-		return err
-	}
+func (u userService) ResetPassword(passwordResetDto interface{}) error {
 	header := make(map[string]string)
 	header["Content-Type"] = "application/json"
 	b, err := json.Marshal(passwordResetDto)
 	if err != nil {
 		return err
 	}
-	_, err = u.httpClient.Put(securityUrl+"users?action="+string(enums.RESET_PASSWORD), header, b)
+	cfg := v1.GetConfigFile()
+	_, err = u.httpClient.Put(cfg.SecurityUrl+"users?action="+string(enums.RESET_PASSWORD), header, b)
 	if err != nil {
 		return err
 	}
@@ -161,13 +155,10 @@ func (u userService) ResetPassword(passwordResetDto interface{}) interface{} {
 }
 
 func (u userService) ForgotPassword(email string) error {
-	securityUrl, err := v1.AddOrGetUrl()
-	if err != nil {
-		return err
-	}
 	header := make(map[string]string)
 	header["Content-Type"] = "application/json"
-	_, err = u.httpClient.Put(securityUrl+"users?action="+string(enums.FORGOT_PASSWORD)+"&media="+email, header, nil)
+	cfg := v1.GetConfigFile()
+	_, err := u.httpClient.Put(cfg.SecurityUrl+"users?action="+string(enums.FORGOT_PASSWORD)+"&media="+email, header, nil)
 	if err != nil {
 		return err
 	}

@@ -14,8 +14,8 @@ type pipelineService struct {
 func (p pipelineService) Logs(url, page, limit string) (httpCode int, data interface{}, err error) {
 	var response common.ResponseDTO
 	header := make(map[string]string)
-	token, _ := v1.GetToken()
-	header["Authorization"] = "Bearer " + token
+	cfg := v1.GetConfigFile()
+	header["Authorization"] = "Bearer " + cfg.Token
 	header["Content-Type"] = "application/json"
 	url = url + "?order=&page=" + page + "&limit=" + limit
 	code, b, err := p.httpClient.Get(url, header)

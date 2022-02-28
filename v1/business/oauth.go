@@ -27,7 +27,8 @@ func (o oauthService) Apply(loginDto interface{}) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	_, data, err := o.httpClient.Post(v1.GetSecurityUrl()+"oauth/login?grant_type=password&token_type=ctl", header, b)
+	cfg := v1.GetConfigFile()
+	_, data, err := o.httpClient.Post(cfg.SecurityUrl+"oauth/login?grant_type=password&token_type=ctl", header, b)
 	if err != nil {
 		return "", err
 	}
