@@ -68,7 +68,7 @@ func Login() *cobra.Command{
 			oauthService := dependency_manager.GetOauthService()
 			ctlToken, err := oauthService.Apply(loginDto)
 			if err != nil {
-				cmd.Println("[ERROR]: ", err.Error())
+				cmd.Println(err.Error())
 				return nil
 			}
 			if ctlToken == "" {

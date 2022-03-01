@@ -2,6 +2,7 @@ package business
 
 import (
 	"encoding/json"
+	"errors"
 	v1 "github.com/klovercloud-ci/ctl/v1"
 	"github.com/klovercloud-ci/ctl/v1/service"
 )
@@ -20,6 +21,12 @@ type ResponseDTOWithPagination struct {
 	Message  string      `json:"message" msgpack:"message" xml:"message"`
 }
 
+type ErrorDTOWithPagination struct {
+	Data     string `json:"data" msgpack:"data" xml:"data"`
+	Status   string      `json:"status" msgpack:"status" xml:"status"`
+	Message  string      `json:"message" msgpack:"message" xml:"message"`
+}
+
 func (o oauthService) Apply(loginDto interface{}) (string, error) {
 	header := make(map[string]string)
 	header["Content-Type"] = "application/json"
@@ -30,7 +37,12 @@ func (o oauthService) Apply(loginDto interface{}) (string, error) {
 	cfg := v1.GetConfigFile()
 	_, data, err := o.httpClient.Post(cfg.SecurityUrl+"oauth/login?grant_type=password&token_type=ctl", header, b)
 	if err != nil {
-		return "", err
+		var errorData ErrorDTOWithPagination
+		err = json.Unmarshal([]byte(err.Error()), &errorData)
+		if err != nil {
+			return "", err
+		}
+		return "", errors.New(errorData.Data+" "+errorData.Message)
 	}
 	var payload ResponseDTOWithPagination
 	err = json.Unmarshal(data, &payload)
