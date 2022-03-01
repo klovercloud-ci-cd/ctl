@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"log"
 	"strconv"
 	"strings"
 )
@@ -20,11 +19,11 @@ func Create() *cobra.Command{
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := v1.IsUserLoggedIn(); err != nil {
-				log.Printf("[ERROR]: %v", err.Error())
+				cmd.Printf("[ERROR]: %v", err.Error())
 				return nil
 			}
 			if len(args) < 1{
-				log.Fatalf("[ERROR]: %v", "please provide a resource name!")
+				cmd.Printf("[ERROR]: %v", "please provide a resource name!")
 				return nil
 			}
 			var apiServerUrl string
@@ -62,25 +61,25 @@ func Create() *cobra.Command{
 					return nil
 				}
 				if file == "" {
-					log.Fatalf("[ERROR]: %v", "please provide a file!")
+					cmd.Printf("[ERROR]: %v", "please provide a file!")
 					return nil
 				}
 				data, err := ioutil.ReadFile(file)
 				if err != nil {
-					log.Printf("data.Get err   #%v ", err)
+					cmd.Printf("data.Get err   #%v ", err)
 					return nil
 				}
 				company := new(v1.Company)
 				if strings.HasSuffix(file, ".yaml") {
 					err = yaml.Unmarshal(data, company)
 					if err != nil {
-						log.Fatalf("yaml Unmarshal: %v", err)
+						cmd.Printf("yaml Unmarshal: %v", err)
 						return nil
 					}
 				} else {
 					err = json.Unmarshal(data, company)
 					if err != nil {
-						log.Fatalf("json Unmarshal: %v", err)
+						cmd.Printf("json Unmarshal: %v", err)
 						return nil
 					}
 				}
@@ -128,30 +127,30 @@ func Registration() *cobra.Command{
 			}
 			if actionType == "user" {
 				if err := v1.IsUserLoggedIn(); err != nil {
-					log.Printf("[ERROR]: %v", err.Error())
+					cmd.Printf("[ERROR]: %v", err.Error())
 					return nil
 				}
 			}
 			if file == "" {
-				log.Fatalf("[ERROR]: %v", "please provide a file!")
+				cmd.Printf("[ERROR]: %v", "please provide a file!")
 				return nil
 			}
 			data, err := ioutil.ReadFile(file)
 			if err != nil {
-				log.Printf("data.Get err   #%v ", err.Error())
+				cmd.Printf("data.Get err   #%v ", err.Error())
 				return nil
 			}
 			var user v1.UserRegistrationDto
 			if strings.HasSuffix(file, ".yaml") {
 				err = yaml.Unmarshal(data, &user)
 				if err != nil {
-					log.Fatalf("yaml Unmarshal: %v", err)
+					cmd.Printf("yaml Unmarshal: %v", err)
 					return nil
 				}
 			} else {
 				err = json.Unmarshal(data, &user)
 				if err != nil {
-					log.Fatalf("json Unmarshal: %v", err)
+					cmd.Printf("json Unmarshal: %v", err)
 					return nil
 				}
 			}
@@ -192,16 +191,16 @@ func Describe() *cobra.Command{
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := v1.IsUserLoggedIn(); err != nil {
-				log.Printf("[ERROR]: %v", err.Error())
+				cmd.Printf("[ERROR]: %v", err.Error())
 				return nil
 			}
 			if len(args) < 1{
-				log.Fatalf("[ERROR]: %v", "please provide a resource name!")
+				cmd.Printf("[ERROR]: %v", "please provide a resource name!")
 				return nil
 			}
 			userMetadata, err := v1.GetUserMetadataFromBearerToken()
 			if err != nil {
-				log.Fatalf("[ERROR]: %v", err.Error())
+				cmd.Printf("[ERROR]: %v", err.Error())
 				return nil
 			}
 			companyId := userMetadata.CompanyId
@@ -253,7 +252,7 @@ func Describe() *cobra.Command{
 				companyService.Kind("Company").Cmd(cmd).Flag(string(enums.GET_COMPANY_BY_ID)).CompanyId(companyId).Option("loadRepositories="+strconv.FormatBool(loadRepo)+"&loadApplications="+strconv.FormatBool(loadApp)).Apply()
 			}else if args[0]=="repository" || args[0]=="repo"{
 				if len(args)<2 {
-					log.Fatalf("[ERROR]: %v", "please provide repository id!")
+					cmd.Printf("[ERROR]: %v", "please provide repository id!")
 					return nil
 				}
 				var repoId string
@@ -325,11 +324,11 @@ func Describe() *cobra.Command{
 					}
 				}
 				if repoId == "" {
-					log.Fatalf("[ERROR]: %v", "please provide repository id!")
+					cmd.Printf("[ERROR]: %v", "please provide repository id!")
 					return nil
 				}
 				if appId == "" {
-					log.Fatalf("[ERROR]: %v", "please provide application id!")
+					cmd.Printf("[ERROR]: %v", "please provide application id!")
 					return nil
 				}
 				cfg := v1.GetConfigFile()
@@ -361,16 +360,16 @@ func List() *cobra.Command{
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := v1.IsUserLoggedIn(); err != nil {
-				log.Printf("[ERROR]: %v", err.Error())
+				cmd.Printf("[ERROR]: %v", err.Error())
 				return nil
 			}
 			if len(args) < 1{
-				log.Fatalf("[ERROR]: %v", "please provide a resource name!")
+				cmd.Printf("[ERROR]: %v", "please provide a resource name!")
 				return nil
 			}
 			userMetadata, err := v1.GetUserMetadataFromBearerToken()
 			if err != nil {
-				log.Fatalf("[ERROR]: %v", err.Error())
+				cmd.Printf("[ERROR]: %v", err.Error())
 				return nil
 			}
 			companyId := userMetadata.CompanyId
@@ -432,7 +431,7 @@ func List() *cobra.Command{
 					}
 				}
 				if repoId == "" {
-					log.Fatalf("[ERROR]: %v", "please provide repository id!")
+					cmd.Printf("[ERROR]: %v", "please provide repository id!")
 					return nil
 				}
 				cfg := v1.GetConfigFile()
@@ -477,11 +476,11 @@ func List() *cobra.Command{
 					}
 				}
 				if repoId == "" {
-					log.Fatalf("[ERROR]: %v", "please provide repository id!")
+					cmd.Printf("[ERROR]: %v", "please provide repository id!")
 					return nil
 				}
 				if appId == "" {
-					log.Fatalf("[ERROR]: %v", "please provide application id!")
+					cmd.Printf("[ERROR]: %v", "please provide application id!")
 					return nil
 				}
 				cfg := v1.GetConfigFile()
@@ -514,7 +513,7 @@ func Update() *cobra.Command{
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1{
-				log.Fatalf("[ERROR]: %v", "please provide a resource name!")
+				cmd.Printf("[ERROR]: %v", "please provide a resource name!")
 				return nil
 			}
 			var file string
@@ -562,29 +561,29 @@ func Update() *cobra.Command{
 				}
 				if option == string(enums.ATTACH_COMPANY) || option == "ac" {
 					if err := v1.IsUserLoggedIn(); err != nil {
-						log.Printf("[ERROR]: %v", err.Error())
+						cmd.Printf("[ERROR]: %v", err.Error())
 						return nil
 					}
 					if file == "" {
-						log.Fatalf("[ERROR]: %v", "please provide a file!")
+						cmd.Printf("[ERROR]: %v", "please provide a file!")
 						return nil
 					}
 					data, err := ioutil.ReadFile(file)
 					if err != nil {
-						log.Printf("data.Get err   #%v ", err)
+						cmd.Printf("data.Get err   #%v ", err)
 						return nil
 					}
 					company := new(v1.Company)
 					if strings.HasSuffix(file, ".yaml") {
 						err = yaml.Unmarshal(data, company)
 						if err != nil {
-							log.Fatalf("yaml Unmarshal: %v", err)
+							cmd.Printf("yaml Unmarshal: %v", err)
 							return nil
 						}
 					} else {
 						err = json.Unmarshal(data, company)
 						if err != nil {
-							log.Fatalf("json Unmarshal: %v", err)
+							cmd.Printf("json Unmarshal: %v", err)
 							return nil
 						}
 					}
@@ -592,25 +591,25 @@ func Update() *cobra.Command{
 					userService.Cmd(cmd).Flag(string(enums.ATTACH_COMPANY)).Company(company).Apply()
 				} else if option == string(enums.RESET_PASSWORD) || option == "rp" {
 					if file == "" {
-						log.Fatalf("[ERROR]: %v", "please provide a file!")
+						cmd.Printf("[ERROR]: %v", "please provide a file!")
 						return nil
 					}
 					data, err := ioutil.ReadFile(file)
 					if err != nil {
-						log.Printf("data.Get err   #%v ", err)
+						cmd.Printf("data.Get err   #%v ", err)
 						return nil
 					}
 					var passwordResetDto v1.PasswordResetDto
 					if strings.HasSuffix(file, ".yaml") {
 						err = yaml.Unmarshal(data, passwordResetDto)
 						if err != nil {
-							log.Fatalf("yaml Unmarshal: %v", err)
+							cmd.Printf("yaml Unmarshal: %v", err)
 							return nil
 						}
 					} else {
 						err = json.Unmarshal(data, &passwordResetDto)
 						if err != nil {
-							log.Fatalf("json Unmarshal: %v", err)
+							cmd.Printf("json Unmarshal: %v", err)
 							return nil
 						}
 					}
@@ -622,12 +621,12 @@ func Update() *cobra.Command{
 				}
 			} else if args[0]=="repositories" || args[0]=="repos"{
 				if err := v1.IsUserLoggedIn(); err != nil {
-					log.Printf("[ERROR]: %v", err.Error())
+					cmd.Printf("[ERROR]: %v", err.Error())
 					return nil
 				}
 				userMetadata, err := v1.GetUserMetadataFromBearerToken()
 				if err != nil {
-					log.Fatalf("[ERROR]: %v", err.Error())
+					cmd.Printf("[ERROR]: %v", err.Error())
 					return nil
 				}
 				companyId := userMetadata.CompanyId
@@ -664,29 +663,29 @@ func Update() *cobra.Command{
 					return nil
 				}
 				if file == "" {
-					log.Fatalf("[ERROR]: %v", "please provide update file!")
+					cmd.Printf("[ERROR]: %v", "please provide update file!")
 					return nil
 				}
 				if option == "" {
-					log.Fatalf("[ERROR]: %v", "please provide update option!")
+					cmd.Printf("[ERROR]: %v", "please provide update option!")
 					return nil
 				}
 				data, err := ioutil.ReadFile(file)
 				if err != nil {
-					log.Printf("data.Get err   #%v ", err)
+					cmd.Printf("data.Get err   #%v ", err)
 					return nil
 				}
 				repos := new(interface{})
 				if strings.HasSuffix(file, ".yaml") {
 					err = yaml.Unmarshal(data, repos)
 					if err != nil {
-						log.Fatalf("yaml Unmarshal: %v", err)
+						cmd.Printf("yaml Unmarshal: %v", err)
 						return nil
 					}
 				} else {
 					err = json.Unmarshal(data, repos)
 					if err != nil {
-						log.Fatalf("json Unmarshal: %v", err)
+						cmd.Printf("json Unmarshal: %v", err)
 						return nil
 					}
 				}
@@ -732,33 +731,33 @@ func Update() *cobra.Command{
 					return nil
 				}
 				if file == "" {
-					log.Fatalf("[ERROR]: %v", "please provide update file!")
+					cmd.Printf("[ERROR]: %v", "please provide update file!")
 					return nil
 				}
 				if repoId == "" {
-					log.Fatalf("[ERROR]: %v", "please provide repository id!")
+					cmd.Printf("[ERROR]: %v", "please provide repository id!")
 					return nil
 				}
 				if option == "" {
-					log.Fatalf("[ERROR]: %v", "please provide update option!")
+					cmd.Printf("[ERROR]: %v", "please provide update option!")
 					return nil
 				}
 				data, err := ioutil.ReadFile(file)
 				if err != nil {
-					log.Printf("data.Get err   #%v ", err)
+					cmd.Printf("data.Get err   #%v ", err)
 					return nil
 				}
 				company := new(interface{})
 				if strings.HasSuffix(file, ".yaml") {
 					err = yaml.Unmarshal(data, company)
 					if err != nil {
-						log.Fatalf("yaml Unmarshal: %v", err)
+						cmd.Printf("yaml Unmarshal: %v", err)
 						return nil
 					}
 				} else {
 					err = json.Unmarshal(data, company)
 					if err != nil {
-						log.Fatalf("json Unmarshal: %v", err)
+						cmd.Printf("json Unmarshal: %v", err)
 						return nil
 					}
 				}

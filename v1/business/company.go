@@ -8,7 +8,6 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
-	"log"
 	"os"
 	"strconv"
 )
@@ -63,21 +62,21 @@ func (c companyService) Apply() {
 	case string(enums.CREATE_COMPANY):
 		err := c.CreateCompany(c.company)
 		if err != nil {
-			log.Fatalf("[ERROR]: %v", err)
+			c.cmd.Printf("[ERROR]: %v", err)
 		} else {
 			c.cmd.Println("Successfully Created Company")
 		}
 	case string(enums.UPDATE_REPOSITORIES):
 		err :=  c.UpdateRepositoriesByCompanyId(c.company, c.companyId, c.option)
 		if err != nil {
-			log.Fatalf("[ERROR]: %v", err)
+			c.cmd.Printf("[ERROR]: %v", err)
 		} else {
 			c.cmd.Println("Successfully Updated Repositories")
 		}
 	case string(enums.UPDATE_APPLICATIONS):
 		err :=  c.UpdateApplicationsByRepositoryId(c.company, c.companyId, c.repoId, c.option)
 		if err != nil {
-			log.Fatalf("[ERROR]: %v", err)
+			c.cmd.Printf("[ERROR]: %v", err)
 		} else {
 			c.cmd.Println("Successfully Updated Applications")
 		}

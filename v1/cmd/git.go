@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"log"
 	"strings"
 )
 
@@ -19,7 +18,7 @@ func Trigger() *cobra.Command {
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := v1.IsUserLoggedIn(); err != nil {
-				log.Printf("[ERROR]: %v", err.Error())
+				cmd.Printf("[ERROR]: %v", err.Error())
 				return nil
 			}
 			var file string
@@ -57,21 +56,20 @@ func Trigger() *cobra.Command {
 			}
 			data, err := ioutil.ReadFile(file)
 			if err != nil {
-				log.Printf("data.Get err   #%v ", err)
+				cmd.Printf("data.Get err   #%v ", err)
 				return nil
 			}
-			log.Println(string(data))
 			webhook := new(v1.GitWebHookEvent)
 			if strings.HasSuffix(file, ".yaml") {
 				err = yaml.Unmarshal(data, webhook)
 				if err != nil {
-					log.Fatalf("yaml Unmarshal: %v", err)
+					cmd.Printf("yaml Unmarshal: %v", err)
 					return nil
 				}
 			} else {
 				err = json.Unmarshal(data, webhook)
 				if err != nil {
-					log.Fatalf("json Unmarshal: %v", err)
+					cmd.Printf("json Unmarshal: %v", err)
 					return nil
 				}
 			}
@@ -83,12 +81,12 @@ func Trigger() *cobra.Command {
 				event := new(v1.GithubWebHookEvent)
 				b, err := json.Marshal(webhook.Event)
 				if err != nil {
-					log.Fatalf("failed to json marshal: %v", err.Error())
+					cmd.Printf("failed to json marshal: %v", err.Error())
 					return nil
 				}
 				err = json.Unmarshal(b, event)
 				if err != nil {
-					log.Fatalf("failed to convert byte int any of the git: %v", err)
+					cmd.Printf("failed to convert byte int any of the git: %v", err)
 					return nil
 				}
 				git.Apply(event, webhook.CompanyId)
@@ -100,12 +98,12 @@ func Trigger() *cobra.Command {
 				event := new(v1.BitbucketWebHookEvent)
 				b, err := json.Marshal(webhook.Event)
 				if err != nil {
-					log.Fatalf("failed to json marshal: %v", err.Error())
+					cmd.Printf("failed to json marshal: %v", err.Error())
 					return nil
 				}
 				err = json.Unmarshal(b, event)
 				if err != nil {
-					log.Fatalf("failed to convert byte int any of the git: %v", err)
+					cmd.Printf("failed to convert byte int any of the git: %v", err)
 					return nil
 				}
 				git.Apply(event, webhook.CompanyId)

@@ -5,7 +5,6 @@ import (
 	"github.com/klovercloud-ci/ctl/dependency_manager"
 	v1 "github.com/klovercloud-ci/ctl/v1"
 	"github.com/spf13/cobra"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -18,7 +17,7 @@ func GetLogs() *cobra.Command {
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := v1.IsUserLoggedIn(); err != nil {
-				log.Printf("[ERROR]: %v", err.Error())
+				cmd.Printf("[ERROR]: %v", err.Error())
 				return nil
 			}
 			var processId, page, limit string
