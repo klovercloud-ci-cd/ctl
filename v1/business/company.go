@@ -129,7 +129,6 @@ func (c companyService) Apply() {
 				jsonString, _ := json.Marshal(responseDTO.Data)
 				var repositories v1.Repositories
 				json.Unmarshal(jsonString, &repositories)
-				c.cmd.Println(responseDTO)
 				table := tablewriter.NewWriter(os.Stdout)
 				if c.option == "loadApplications=false" {
 					table.SetHeader([]string{"Api Version", "Kind", "Id", "Type"})

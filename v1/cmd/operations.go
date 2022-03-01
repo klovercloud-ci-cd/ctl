@@ -489,7 +489,6 @@ func List() *cobra.Command{
 	}
 }
 
-
 func Update() *cobra.Command{
 	return &cobra.Command{
 		Use:       "update",
