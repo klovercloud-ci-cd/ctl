@@ -346,7 +346,7 @@ func Describe() *cobra.Command{
 					return nil
 				}
 				applicationService := dependency_manager.GetApplicationService()
-				applicationService.Kind("Application").Cmd(cmd).Flag(string(enums.GET_APPLICATION)).CompanyId(companyId).RepoId(repoId).ApplicationId(appId).Apply()
+				applicationService.Kind("Application").Cmd(cmd).Flag(string(enums.GET_APPLICATION)).RepoId(repoId).ApplicationId(appId).Apply()
 			}
 			return nil
 		},

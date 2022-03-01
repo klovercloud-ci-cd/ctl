@@ -23,7 +23,7 @@ type applicationService struct {
 func (a applicationService) Apply() {
 	switch a.flag {
 	case string(enums.GET_APPLICATION):
-		code, data, err := a.GetApplication(a.companyId, a.repoId, a.applicationId)
+		code, data, err := a.GetApplication(a.repoId, a.applicationId)
 		if err != nil {
 			a.cmd.Println("[ERROR]: ", err.Error())
 		} else if code != 200 {
@@ -85,7 +85,7 @@ func (a applicationService) Option(option string) service.Application {
 	return a
 }
 
-func (a applicationService) GetApplication(companyId, repoId, applicationId string) (httpCode int, data []byte, err error) {
+func (a applicationService) GetApplication(repoId, applicationId string) (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
 	cfg := v1.GetConfigFile()
 	header["Authorization"] = "Bearer " + cfg.Token

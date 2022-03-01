@@ -74,7 +74,7 @@ func (c companyService) Apply() {
 			c.cmd.Println("Successfully Updated Repositories")
 		}
 	case string(enums.UPDATE_APPLICATIONS):
-		err :=  c.UpdateApplicationsByRepositoryId(c.company, c.companyId, c.repoId, c.option)
+		err :=  c.UpdateApplicationsByRepositoryId(c.company, c.repoId, c.option)
 		if err != nil {
 			c.cmd.Printf("[ERROR]: %v", err)
 		} else {
@@ -185,7 +185,7 @@ func (c companyService) UpdateRepositoriesByCompanyId(company interface{}, compa
 	return nil
 }
 
-func (c companyService) UpdateApplicationsByRepositoryId(company interface{}, companyId string, repoId string, option string) error {
+func (c companyService) UpdateApplicationsByRepositoryId(company interface{}, repoId string, option string) error {
 	header := make(map[string]string)
 	cfg := v1.GetConfigFile()
 	header["Authorization"] = "Bearer " + cfg.Token
@@ -194,7 +194,7 @@ func (c companyService) UpdateApplicationsByRepositoryId(company interface{}, co
 	if err != nil {
 		return err
 	}
-	_, _, err = c.httpClient.Post(cfg.ApiServerUrl+"applications?companyId="+companyId+"&repositoryId="+repoId+"&companyUpdateOption="+option, header, b)
+	_, _, err = c.httpClient.Post(cfg.ApiServerUrl+"applications?repositoryId="+repoId+"&companyUpdateOption="+option, header, b)
 	if err != nil {
 		return err
 	}
