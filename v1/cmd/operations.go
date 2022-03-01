@@ -693,6 +693,10 @@ func Update() *cobra.Command{
 				companyService.Cmd(cmd).Flag(string(enums.UPDATE_REPOSITORIES)).Company(*repos).CompanyId(companyId).Option(option).Apply()
 				return nil
 			} else if args[0]=="applications" || args[0]=="apps"{
+				if err := v1.IsUserLoggedIn(); err != nil {
+					cmd.Printf("[ERROR]: %v", err.Error())
+					return nil
+				}
 				for _, each := range args {
 					if strings.Contains(strings.ToLower(each), "file=") || strings.Contains(strings.ToLower(each), "-f=") {
 						strs := strings.Split(strings.ToLower(each), "=")
