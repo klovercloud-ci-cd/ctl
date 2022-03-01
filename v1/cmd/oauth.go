@@ -29,12 +29,12 @@ func Login() *cobra.Command{
 			for idx, each := range args {
 				if strings.Contains(strings.ToLower(each), "option") {
 					if idx + 1 < len(args) {
-						if strings.Contains(strings.ToLower(args[idx+1]), "apiserver") {
+						if strings.Contains(strings.ToLower(args[idx+1]), "apiserver=") {
 							strs := strings.Split(strings.ToLower(args[idx+1]), "=")
 							if len(strs) > 1 {
 								apiServerUrl = strs[1]
 							}
-						} else if strings.Contains(strings.ToLower(args[idx+1]), "security") {
+						} else if strings.Contains(strings.ToLower(args[idx+1]), "security=") {
 							strs := strings.Split(strings.ToLower(args[idx+1]), "=")
 							if len(strs) > 1 {
 								securityUrl = strs[1]
