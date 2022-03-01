@@ -28,13 +28,12 @@ func (h httpClientService) Put(url string, header map[string]string, body []byte
 		return http.StatusBadRequest, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
+	if resp.StatusCode >= 300 || resp.StatusCode < 200 {
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			log.Println("[ERROR] Failed communicate ", err.Error())
 			return resp.StatusCode, err
 		} else {
-			log.Println("[SUCCESS] Successful :", string(body))
+			return resp.StatusCode, errors.New(string(body))
 		}
 	}
 	return resp.StatusCode, nil
@@ -48,19 +47,16 @@ func (h httpClientService) Get(url string, header map[string]string) (httpCode i
 		req.Header.Set(k, v)
 	}
 	if err != nil {
-		log.Println(err.Error())
 		return http.StatusBadRequest, nil, err
 	}
 	res, err := client.Do(req)
 	if err != nil {
-		log.Println(err.Error())
 		return res.StatusCode, nil, err
 	}
 	defer res.Body.Close()
-	if res.StatusCode == http.StatusOK {
+	if res.StatusCode >= 200 && res.StatusCode < 300 {
 		jsonDataFromHttp, err := ioutil.ReadAll(res.Body)
 		if err != nil {
-			log.Println(err.Error())
 			return res.StatusCode, nil, err
 		}
 		return res.StatusCode, jsonDataFromHttp, nil
@@ -77,7 +73,6 @@ func (h httpClientService) Post(url string, header map[string]string, body []byt
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Println("[ERROR] Failed communicate :", err.Error())
 		return http.StatusBadRequest, nil, err
 	}
 	defer func(Body io.ReadCloser) {
@@ -86,19 +81,16 @@ func (h httpClientService) Post(url string, header map[string]string, body []byt
 
 		}
 	}(resp.Body)
-	if resp.StatusCode != 200 {
+	if resp.StatusCode >= 300 || resp.StatusCode < 200 {
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			log.Println("[ERROR] Failed communicate ", err.Error())
 			return resp.StatusCode, nil, err
 		} else {
-			log.Println(resp.StatusCode)
-			log.Println("[ERROR] Failed communicate :", string(body))
+			return resp.StatusCode, nil, errors.New(string(body))
 		}
 	}
 	body, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Println("[ERROR] Failed communicate ", err.Error())
 		return resp.StatusCode, nil, err
 	}
 	return resp.StatusCode, body, nil
