@@ -29,20 +29,16 @@ func Create() *cobra.Command{
 			var apiServerUrl string
 			if args[0]=="company"{
 				var file string
-				for idx, each := range args {
+				for _, each := range args {
 					if strings.Contains(strings.ToLower(each), "file=") || strings.Contains(strings.ToLower(each), "-f=") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 0 {
 							file = strs[1]
 						}
-					} else if strings.Contains(strings.ToLower(each), "option") {
-						if idx + 1 < len(args) {
-							if strings.Contains(strings.ToLower(args[idx+1]), "apiserver=") {
-								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
-								if len(strs) > 1 {
-									apiServerUrl = strs[1]
-								}
-							}
+					} else if strings.Contains(strings.ToLower(each), "apiserver=") {
+						strs := strings.Split(strings.ToLower(each), "=")
+						if len(strs) > 1 {
+							apiServerUrl = strs[1]
 						}
 					}
 				}
@@ -301,7 +297,7 @@ func Describe() *cobra.Command{
 			}else if args[0]=="application" || args[0]=="app" {
 				var repoId string
 				var appId string
-				for idx, each := range args {
+				for _, each := range args {
 					if strings.Contains(strings.ToLower(each), "repositoryid=") || strings.Contains(strings.ToLower(each), "repoid=") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
@@ -312,14 +308,10 @@ func Describe() *cobra.Command{
 						if len(strs) > 1 {
 							appId = strs[1]
 						}
-					} else if strings.Contains(strings.ToLower(each), "option") {
-						if idx + 1 < len(args) {
-							if strings.Contains(strings.ToLower(args[idx+1]), "apiserver=") {
-								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
-								if len(strs) > 1 {
-									apiServerUrl = strs[1]
-								}
-							}
+					} else if strings.Contains(strings.ToLower(each), "apiserver=") {
+						strs := strings.Split(strings.ToLower(each), "=")
+						if len(strs) > 1 {
+							apiServerUrl = strs[1]
 						}
 					}
 				}
@@ -413,20 +405,16 @@ func List() *cobra.Command{
 				companyService.Kind("Repository").Cmd(cmd).Flag(string(enums.GET_REPOSITORIES)).CompanyId(companyId).Option("loadApplications="+strconv.FormatBool(loadApp)).Apply()
 			} else if args[0]=="applications" || args[0]=="apps"{
 				var repoId string
-				for idx, each := range args {
+				for _, each := range args {
 					if strings.Contains(strings.ToLower(each), "repositoryid=") || strings.Contains(strings.ToLower(each), "repoid=") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
 							repoId = strs[1]
 						}
-					} else if strings.Contains(strings.ToLower(each), "option") {
-						if idx + 1 < len(args) {
-							if strings.Contains(strings.ToLower(args[idx+1]), "apiserver=") {
-								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
-								if len(strs) > 1 {
-									apiServerUrl = strs[1]
-								}
-							}
+					} else if strings.Contains(strings.ToLower(each), "apiserver=") {
+						strs := strings.Split(strings.ToLower(each), "=")
+						if len(strs) > 1 {
+							apiServerUrl = strs[1]
 						}
 					}
 				}
@@ -453,7 +441,7 @@ func List() *cobra.Command{
 			} else if args[0]=="process" {
 				var repoId string
 				var appId string
-				for idx, each := range args {
+				for _, each := range args {
 					if strings.Contains(strings.ToLower(each), "repositoryid=") || strings.Contains(strings.ToLower(each), "repoid=") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
@@ -464,14 +452,10 @@ func List() *cobra.Command{
 						if len(strs) > 1 {
 							appId = strs[1]
 						}
-					} else if strings.Contains(strings.ToLower(each), "option") {
-						if idx + 1 < len(args) {
-							if strings.Contains(strings.ToLower(args[idx+1]), "apiserver=") {
-								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
-								if len(strs) > 1 {
-									apiServerUrl = strs[1]
-								}
-							}
+					} else if strings.Contains(strings.ToLower(each), "apiserver=") {
+						strs := strings.Split(strings.ToLower(each), "=")
+						if len(strs) > 1 {
+							apiServerUrl = strs[1]
 						}
 					}
 				}

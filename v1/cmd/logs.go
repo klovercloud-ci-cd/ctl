@@ -23,7 +23,7 @@ func GetLogs() *cobra.Command {
 			var processId, page, limit string
 			var follow bool
 			var apiServerUrl string
-			for idx, each := range args {
+			for _, each := range args {
 				if strings.Contains(strings.ToLower(each), "page=") {
 					strs := strings.Split(strings.ToLower(each), "=")
 					if len(strs) > 0 {
@@ -50,14 +50,10 @@ func GetLogs() *cobra.Command {
 					}
 				} else if strings.Contains(strings.ToLower(each), "-f") {
 					follow = true
-				} else if strings.Contains(strings.ToLower(each), "option") {
-					if idx + 1 < len(args) {
-						if strings.Contains(strings.ToLower(args[idx+1]), "apiserver=") {
-							strs := strings.Split(strings.ToLower(args[idx+1]), "=")
-							if len(strs) > 1 {
-								apiServerUrl = strs[1]
-							}
-						}
+				} else if strings.Contains(strings.ToLower(each), "apiserver=") {
+					strs := strings.Split(strings.ToLower(each), "=")
+					if len(strs) > 1 {
+						apiServerUrl = strs[1]
 					}
 				}
 			}
