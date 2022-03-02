@@ -69,14 +69,14 @@ func (c companyService) Apply() {
 	case string(enums.UPDATE_REPOSITORIES):
 		err :=  c.UpdateRepositoriesByCompanyId(c.company, c.companyId, c.option)
 		if err != nil {
-			c.cmd.Printf("[ERROR]: %v", err)
+			c.cmd.Println("[ERROR]: Repository Update Failed")
 		} else {
 			c.cmd.Println("Successfully Updated Repositories")
 		}
 	case string(enums.UPDATE_APPLICATIONS):
 		err :=  c.UpdateApplicationsByRepositoryId(c.company, c.repoId, c.option)
 		if err != nil {
-			c.cmd.Printf("[ERROR]: %v", err)
+			c.cmd.Println("[ERROR]: Application Update Failed")
 		} else {
 			c.cmd.Println("Successfully Updated Applications")
 		}
