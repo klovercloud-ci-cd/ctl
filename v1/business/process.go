@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"log"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -58,14 +59,14 @@ func (p processService) Apply() {
 			table.SetHeader([]string{"Api Version", "Kind", "Process Id", "Application Id", "Repository Id", "Created At"})
 			if len(processes) < 5 {
 				for _, eachProcess := range processes {
-					createdAt := eachProcess.CreatedAt.Local().Format(time.Kitchen)
+					createdAt := strconv.Itoa(eachProcess.CreatedAt.Local().Day()) + "-" + strconv.Itoa(int(eachProcess.CreatedAt.Local().Month())) + "-" + strconv.Itoa(eachProcess.CreatedAt.Local().Year()) + " " + eachProcess.CreatedAt.Local().Format(time.Kitchen)
 					process := []string{"api/v1", p.kind, eachProcess.ProcessId, eachProcess.AppId, eachProcess.RepositoryId, createdAt}
 					table.Append(process)
 				}
 			} else {
 				processes = processes[len(processes) - 5 :]
 				for _, eachProcess := range processes {
-					createdAt := eachProcess.CreatedAt.Local().Format(time.Kitchen)
+					createdAt := strconv.Itoa(eachProcess.CreatedAt.Local().Day()) + "-" + strconv.Itoa(int(eachProcess.CreatedAt.Local().Month())) + "-" + strconv.Itoa(eachProcess.CreatedAt.Local().Year()) + " " + eachProcess.CreatedAt.Local().Format(time.Kitchen)
 					process := []string{"api/v1", p.kind, eachProcess.ProcessId, eachProcess.AppId, eachProcess.RepositoryId, createdAt}
 					table.Append(process)
 				}
