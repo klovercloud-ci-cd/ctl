@@ -15,7 +15,7 @@ import (
 func Create() *cobra.Command{
 	return &cobra.Command{
 		Use:       "create",
-		Short:     "Create resource [Company]",
+		Short:     "Create resource [user/repositories/applications]",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := v1.IsUserLoggedIn(); err != nil {
@@ -27,13 +27,156 @@ func Create() *cobra.Command{
 				return nil
 			}
 			var apiServerUrl string
-			if args[0]=="company"{
-				var file string
+			var securityUrl string
+			var file string
+			if args[0] == "user" {
+				for idx, each := range args {
+					if strings.Contains(strings.ToLower(each), "file=") || strings.Contains(strings.ToLower(each), "-f=") {
+						strs := strings.Split(strings.ToLower(each), "=")
+						if len(strs) > 0 {
+							file = strs[1]
+						}
+					} else if strings.Contains(strings.ToLower(each), "option") {
+						if idx + 1 < len(args) {
+							if strings.Contains(strings.ToLower(args[idx+1]), "apiserver=") {
+								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+								if len(strs) > 1 {
+									apiServerUrl = strs[1]
+								}
+							} else if strings.Contains(strings.ToLower(args[idx+1]), "security=") {
+								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+								if len(strs) > 1 {
+									securityUrl = strs[1]
+								}
+							}
+						}
+					}
+				}
+				if file == "" {
+					cmd.Printf("[ERROR]: %v", "please provide a file!")
+					return nil
+				}
+				data, err := ioutil.ReadFile(file)
+				if err != nil {
+					cmd.Printf("data.Get err   #%v ", err.Error())
+					return nil
+				}
+				var user v1.UserRegistrationDto
+				if strings.HasSuffix(file, ".yaml") {
+					err = yaml.Unmarshal(data, &user)
+					if err != nil {
+						cmd.Printf("yaml Unmarshal: %v", err)
+						return nil
+					}
+				} else {
+					err = json.Unmarshal(data, &user)
+					if err != nil {
+						cmd.Printf("json Unmarshal: %v", err)
+						return nil
+					}
+				}
+				cfg := v1.GetConfigFile()
+				if apiServerUrl == "" {
+					if cfg.ApiServerUrl == "" {
+						cfg.ApiServerUrl = "http://localhost:8080/api/v1/"
+					}
+				} else {
+					cfg.ApiServerUrl = apiServerUrl
+				}
+				if securityUrl == "" {
+					if cfg.SecurityUrl == "" {
+						cfg.SecurityUrl = "http://localhost:8085/api/v1/"
+					}
+				} else {
+					cfg.SecurityUrl = securityUrl
+				}
+				err = cfg.Store()
+				if err != nil {
+					cmd.Println("[ERROR]: ", err.Error())
+				}
+				userService := dependency_manager.GetUserService()
+				userService.Cmd(cmd).Flag(string(enums.CREATE_USER)).User(user).Apply()
+				return nil
+			} else if args[0]=="repositories" || args[0]=="repos"{
+				if err := v1.IsUserLoggedIn(); err != nil {
+					cmd.Printf("[ERROR]: %v", err.Error())
+					return nil
+				}
+				userMetadata, err := v1.GetUserMetadataFromBearerToken()
+				if err != nil {
+					cmd.Printf("[ERROR]: %v", err.Error())
+					return nil
+				}
+				companyId := userMetadata.CompanyId
 				for _, each := range args {
 					if strings.Contains(strings.ToLower(each), "file=") || strings.Contains(strings.ToLower(each), "-f=") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 0 {
 							file = strs[1]
+						}
+					} else if strings.Contains(strings.ToLower(each), "apiserver=") {
+						strs := strings.Split(strings.ToLower(each), "=")
+						if len(strs) > 1 {
+							apiServerUrl = strs[1]
+						}
+					}
+				}
+				cfg := v1.GetConfigFile()
+				if apiServerUrl == "" {
+					if cfg.ApiServerUrl == "" {
+						cmd.Println("[ERROR]: Api server url not found!")
+						return nil
+					}
+				} else {
+					cfg.ApiServerUrl = apiServerUrl
+				}
+				err = cfg.Store()
+				if err != nil {
+					cmd.Println("[ERROR]: ", err.Error())
+					return nil
+				}
+				if file == "" {
+					cmd.Printf("[ERROR]: %v", "please provide update file!")
+					return nil
+				}
+				data, err := ioutil.ReadFile(file)
+				if err != nil {
+					cmd.Printf("data.Get err   #%v ", err)
+					return nil
+				}
+				repos := new(interface{})
+				if strings.HasSuffix(file, ".yaml") {
+					err = yaml.Unmarshal(data, repos)
+					if err != nil {
+						cmd.Printf("yaml Unmarshal: %v", err)
+						return nil
+					}
+				} else {
+					err = json.Unmarshal(data, repos)
+					if err != nil {
+						cmd.Printf("json Unmarshal: %v", err)
+						return nil
+					}
+				}
+				companyService := dependency_manager.GetCompanyService()
+				companyService.Cmd(cmd).Flag(string(enums.UPDATE_REPOSITORIES)).Company(*repos).CompanyId(companyId).Option("APPEND_REPOSITORY").Apply()
+				return nil
+			} else if args[0]=="applications" || args[0]=="apps"{
+				var repoId string
+				if err := v1.IsUserLoggedIn(); err != nil {
+					cmd.Printf("[ERROR]: %v", err.Error())
+					return nil
+				}
+				for _, each := range args {
+					if strings.Contains(strings.ToLower(each), "file=") || strings.Contains(strings.ToLower(each), "-f=") {
+						strs := strings.Split(strings.ToLower(each), "=")
+						if len(strs) > 1 {
+							file = strs[1]
+						}
+					} else if strings.Contains(strings.ToLower(each), "repoid=") {
+						strs := strings.Split(each, "=")
+						if len(strs) > 1 {
+							repoId = strs[1]
 						}
 					} else if strings.Contains(strings.ToLower(each), "apiserver=") {
 						strs := strings.Split(strings.ToLower(each), "=")
@@ -57,7 +200,11 @@ func Create() *cobra.Command{
 					return nil
 				}
 				if file == "" {
-					cmd.Printf("[ERROR]: %v", "please provide a file!")
+					cmd.Printf("[ERROR]: %v", "please provide update file!")
+					return nil
+				}
+				if repoId == "" {
+					cmd.Printf("[ERROR]: %v", "please provide repository id!")
 					return nil
 				}
 				data, err := ioutil.ReadFile(file)
@@ -65,7 +212,7 @@ func Create() *cobra.Command{
 					cmd.Printf("data.Get err   #%v ", err)
 					return nil
 				}
-				company := new(v1.Company)
+				company := new(interface{})
 				if strings.HasSuffix(file, ".yaml") {
 					err = yaml.Unmarshal(data, company)
 					if err != nil {
@@ -80,9 +227,12 @@ func Create() *cobra.Command{
 					}
 				}
 				companyService := dependency_manager.GetCompanyService()
-				companyService.Cmd(cmd).Flag(string(enums.CREATE_COMPANY)).Company(company).Apply()
+				companyService.Cmd(cmd).Flag(string(enums.UPDATE_APPLICATIONS)).Company(*company).RepoId(repoId).Option("APPEND_APPLICATION").Apply()
+				return nil
+			} else {
+				cmd.Println("[ERROR]: Wrong command")
+				return nil
 			}
-			return nil
 		},
 	}
 }
@@ -339,6 +489,9 @@ func Describe() *cobra.Command{
 				}
 				applicationService := dependency_manager.GetApplicationService()
 				applicationService.Kind("Application").Cmd(cmd).Flag(string(enums.GET_APPLICATION)).RepoId(repoId).ApplicationId(appId).Apply()
+			} else {
+				cmd.Println("[ERROR]: Wrong command")
+				return nil
 			}
 			return nil
 		},
@@ -483,6 +636,9 @@ func List() *cobra.Command{
 				}
 				processService := dependency_manager.GetProcessService()
 				processService.Kind("Process").Cmd(cmd).RepoId(repoId).ApplicationId(appId).Apply()
+			} else {
+				cmd.Println("[ERROR]: Wrong command")
+				return nil
 			}
 			return nil
 		},
@@ -750,6 +906,9 @@ func Update() *cobra.Command{
 				}
 				companyService := dependency_manager.GetCompanyService()
 				companyService.Cmd(cmd).Flag(string(enums.UPDATE_APPLICATIONS)).Company(*company).RepoId(repoId).Option(option).Apply()
+				return nil
+			} else {
+				cmd.Println("[ERROR]: Wrong command")
 				return nil
 			}
 			return nil
