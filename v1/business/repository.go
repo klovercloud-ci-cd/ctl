@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 	"os"
-	"strconv"
 )
 
 type repositoryService struct {
@@ -98,13 +97,17 @@ func (r repositoryService) Apply() {
 					r.cmd.Println("[ERROR]: ", err.Error())
 				} else {
 					table := tablewriter.NewWriter(os.Stdout)
-					table.SetHeader([]string{"Api Version", "Kind", "Id", "Name", "Labels", "IsWebhookEnabled", "Url"})
+					table.SetHeader([]string{"Api Version", "Kind", "Id", "Name", "Labels", "Webhook", "Url"})
 					for _, eachApp := range applications {
 						var labels string
 						for key, val := range eachApp.MetaData.Labels {
 							labels += key + ": " + val + "\n"
 						}
-						application := []string{"api/v1", r.kind, eachApp.MetaData.Id, eachApp.MetaData.Name, labels, strconv.FormatBool(eachApp.MetaData.IsWebhookEnabled), eachApp.Url}
+						webhook := "Disabled"
+						if eachApp.MetaData.IsWebhookEnabled {
+							webhook = "Enabled"
+						}
+						application := []string{"api/v1", r.kind, eachApp.MetaData.Id, eachApp.MetaData.Name, labels, webhook, eachApp.Url}
 						table.Append(application)
 					}
 					table.Render()

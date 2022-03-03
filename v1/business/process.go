@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"log"
 	"os"
+	"time"
 )
 
 type processService struct {
@@ -57,14 +58,14 @@ func (p processService) Apply() {
 			table.SetHeader([]string{"Api Version", "Kind", "Process Id", "Application Id", "Repository Id", "Created At"})
 			if len(processes) < 5 {
 				for _, eachProcess := range processes {
-					createdAt := eachProcess.CreatedAt.Local().Format("02 Jan 06 15:04 MST")
+					createdAt := eachProcess.CreatedAt.Local().Format(time.Kitchen)
 					process := []string{"api/v1", p.kind, eachProcess.ProcessId, eachProcess.AppId, eachProcess.RepositoryId, createdAt}
 					table.Append(process)
 				}
 			} else {
 				processes = processes[len(processes) - 5 :]
 				for _, eachProcess := range processes {
-					createdAt := eachProcess.CreatedAt.Local().Format("02 Jan 06 15:04 MST")
+					createdAt := eachProcess.CreatedAt.Local().Format(time.Kitchen)
 					process := []string{"api/v1", p.kind, eachProcess.ProcessId, eachProcess.AppId, eachProcess.RepositoryId, createdAt}
 					table.Append(process)
 				}
