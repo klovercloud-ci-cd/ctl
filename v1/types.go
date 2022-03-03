@@ -93,6 +93,7 @@ type Processes []struct {
 	AppId        string                 `bson:"app_id" json:"app_id"`
 	RepositoryId string                 `bson:"repository_id" json:"repository_id"`
 	Data         map[string]interface{} `bson:"data" json:"data"`
+	CreatedAt	 time.Time					`bson:"created_at" json:"created_at"`
 }
 
 // UserRegistrationDto dto that holds user registration info.

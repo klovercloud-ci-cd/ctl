@@ -54,26 +54,18 @@ func (p processService) Apply() {
 			var processes v1.Processes
 			json.Unmarshal(jsonString, &processes)
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Api Version", "Kind", "Process Id", "Application Id", "Repository Id", "Data"})
+			table.SetHeader([]string{"Api Version", "Kind", "Process Id", "Application Id", "Repository Id", "Created At"})
 			if len(processes) < 5 {
 				for _, eachProcess := range processes {
-					var data string
-					for key, val := range eachProcess.Data {
-						strVal, _ := json.Marshal(val)
-						data += key + ": " + string(strVal) + "\n"
-					}
-					process := []string{"api/v1", p.kind, eachProcess.ProcessId, eachProcess.AppId, eachProcess.RepositoryId, data}
+					createdAt := eachProcess.CreatedAt.Local().String()
+					process := []string{"api/v1", p.kind, eachProcess.ProcessId, eachProcess.AppId, eachProcess.RepositoryId, createdAt}
 					table.Append(process)
 				}
 			} else {
 				processes = processes[len(processes) - 5 :]
 				for _, eachProcess := range processes {
-					var data string
-					for key, val := range eachProcess.Data {
-						strVal, _ := json.Marshal(val)
-						data += key + ": " + string(strVal) + "\n"
-					}
-					process := []string{"api/v1", p.kind, eachProcess.ProcessId, eachProcess.AppId, eachProcess.RepositoryId, data}
+					createdAt := eachProcess.CreatedAt.Local().String()
+					process := []string{"api/v1", p.kind, eachProcess.ProcessId, eachProcess.AppId, eachProcess.RepositoryId, createdAt}
 					table.Append(process)
 				}
 			}
