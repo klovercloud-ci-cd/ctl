@@ -39,15 +39,8 @@ func GetLogs() *cobra.Command {
 					if len(strs) > 0 {
 						processId = strs[1]
 					}
-				} else if strings.Contains(strings.ToLower(each), "follow=") {
-					strs := strings.Split(strings.ToLower(each), "=")
-					if len(strs) > 0 {
-						if strings.ToLower(strs[1]) == "true" {
-							follow = true
-						} else {
-							follow = false
-						}
-					}
+				} else if strings.Contains(strings.ToLower(each), "follow") {
+					follow = true
 				} else if strings.Contains(strings.ToLower(each), "-f") {
 					follow = true
 				} else if strings.Contains(strings.ToLower(each), "apiserver=") {
