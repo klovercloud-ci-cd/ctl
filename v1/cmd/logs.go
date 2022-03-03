@@ -102,6 +102,8 @@ func getLogs(cmd *cobra.Command, processId string, page string, limit string, fo
 		for _, logData := range result {
 			cmd.Println(logData)
 		}
+	} else {
+		return nil
 	}
 	if follow {
 		if data == nil {
