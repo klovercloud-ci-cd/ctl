@@ -3,6 +3,7 @@ package v1
 import (
 	"encoding/json"
 	"errors"
+	"github.com/klovercloud-ci/ctl/v1/encryption"
 	"io/ioutil"
 	"os"
 	"time"
@@ -155,6 +156,14 @@ type Config struct {
 }
 
 func (cfg Config) Store() error {
+	if cfg.Token != "" {
+		aes := encryption.AES256()
+		encryptedToken, err := aes.Encrypt(cfg.Token)
+		if err != nil {
+			return err
+		}
+		cfg.Token = encryptedToken
+	}
 	cfg.ApiServerUrl = FixUrl(cfg.ApiServerUrl)
 	cfg.SecurityUrl = FixUrl(cfg.SecurityUrl)
 	data, err := json.MarshalIndent(cfg, "", "")
@@ -185,6 +194,14 @@ func GetConfigFile() Config {
 	err = json.Unmarshal(byteValue, &configFile)
 	if err != nil {
 		return Config{}
+	}
+	if configFile.Token != "" {
+		aes := encryption.AES256()
+		decryptedToken, err := aes.Decrypt(configFile.Token)
+		if err != nil {
+			return Config{}
+		}
+		configFile.Token = decryptedToken
 	}
 	return configFile
 }
