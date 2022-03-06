@@ -571,10 +571,6 @@ func List() *cobra.Command{
 						}
 					}
 				}
-				if repoId == "" {
-					cmd.Printf("[ERROR]: %v", "please provide repository id!")
-					return nil
-				}
 				cfg := v1.GetConfigFile()
 				if apiServerUrl == "" {
 					if cfg.ApiServerUrl == "" {
@@ -589,8 +585,13 @@ func List() *cobra.Command{
 					cmd.Println("[ERROR]: ", err.Error())
 					return nil
 				}
-				repositoryService := dependency_manager.GetRepositoryService()
-				repositoryService.Kind("Application").Cmd(cmd).Flag(string(enums.GET_APPLICATIONS)).Repo(repoId).Apply()
+				if repoId == "" {
+					applicationService := dependency_manager.GetApplicationService()
+					applicationService.Kind("Application").Cmd(cmd).Flag(string(enums.GET_All_APPLICATIONS)).Apply()
+				} else {
+					repositoryService := dependency_manager.GetRepositoryService()
+					repositoryService.Kind("Application").Cmd(cmd).Flag(string(enums.GET_APPLICATIONS)).Repo(repoId).Apply()
+				}
 			} else if args[0]=="process" {
 				var repoId string
 				var appId string
