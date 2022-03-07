@@ -18,6 +18,18 @@ type processService struct {
 	repoId string
 	appId string
 	kind string
+	apiServerUrl string
+	token string
+}
+
+func (p processService) ApiServerUrl(apiServerUrl string) service.Process {
+	p.apiServerUrl = apiServerUrl
+	return p
+}
+
+func (p processService) Token(token string) service.Process {
+	p.token = token
+	return p
 }
 
 func (p processService) Kind(kind string) service.Process {
@@ -78,10 +90,9 @@ func (p processService) Apply() {
 
 func (p processService) GetByCompanyIdAndRepositoryIdAndAppName() (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
-	cfg := v1.GetConfigFile()
-	header["Authorization"] = "Bearer " + cfg.Token
+	header["Authorization"] = "Bearer " + p.token
 	header["Content-Type"] = "application/json"
-	return p.httpClient.Get(cfg.ApiServerUrl+"processes?repositoryId="+p.repoId+"&appId="+p.appId, header)
+	return p.httpClient.Get(p.apiServerUrl+"processes?repositoryId="+p.repoId+"&appId="+p.appId, header)
 }
 
 // NewProcessService returns process type service

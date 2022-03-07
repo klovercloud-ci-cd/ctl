@@ -20,6 +20,18 @@ type applicationService struct {
 	option string
 	cmd *cobra.Command
 	kind string
+	apiServerUrl string
+	token string
+}
+
+func (a applicationService) ApiServerUrl(apiServerUrl string) service.Application {
+	a.apiServerUrl = apiServerUrl
+	return a
+}
+
+func (a applicationService) Token(token string) service.Application {
+	a.token = token
+	return a
 }
 
 func (a applicationService) Apply() {
@@ -125,18 +137,16 @@ func (a applicationService) Option(option string) service.Application {
 
 func (a applicationService) GetApplication(repoId, applicationId string) (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
-	cfg := v1.GetConfigFile()
-	header["Authorization"] = "Bearer " + cfg.Token
+	header["Authorization"] = "Bearer " + a.token
 	header["Content-Type"] = "application/json"
-	return a.httpClient.Get(cfg.ApiServerUrl+"applications/"+applicationId+"?repositoryId="+repoId, header)
+	return a.httpClient.Get(a.apiServerUrl+"applications/"+applicationId+"?repositoryId="+repoId, header)
 }
 
 func (a applicationService) GetAllApplication() (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
-	cfg := v1.GetConfigFile()
-	header["Authorization"] = "Bearer " + cfg.Token
+	header["Authorization"] = "Bearer " + a.token
 	header["Content-Type"] = "application/json"
-	return a.httpClient.Get(cfg.ApiServerUrl+"applications", header)
+	return a.httpClient.Get(a.apiServerUrl+"applications", header)
 }
 
 // NewApplicationService returns application type service

@@ -17,8 +17,9 @@ func Trigger() *cobra.Command {
 		Short:     "Notify git",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := v1.IsUserLoggedIn(); err != nil {
-				cmd.Printf("[ERROR]: %v", err.Error())
+			cfg := v1.GetConfigFile()
+			if cfg.Token == "" {
+				cmd.Printf("[ERROR]: %v", "user is not logged in")
 				return nil
 			}
 			var file string
@@ -36,7 +37,6 @@ func Trigger() *cobra.Command {
 					}
 				}
 			}
-			cfg := v1.GetConfigFile()
 			if apiServerUrl == "" {
 				if cfg.ApiServerUrl == "" {
 					cmd.Println("[ERROR]: Api server url not found!")
@@ -44,11 +44,11 @@ func Trigger() *cobra.Command {
 				}
 			} else {
 				cfg.ApiServerUrl = apiServerUrl
-			}
-			err := cfg.Store()
-			if err != nil {
-				cmd.Println("[ERROR]: ", err.Error())
-				return nil
+				err := cfg.Store()
+				if err != nil {
+					cmd.Println("[ERROR]: ", err.Error())
+					return nil
+				}
 			}
 			data, err := ioutil.ReadFile(file)
 			if err != nil {
@@ -85,11 +85,11 @@ func Trigger() *cobra.Command {
 					cmd.Printf("failed to convert byte int any of the git: %v", err)
 					return nil
 				}
-				git.Apply(event, webhook.CompanyId)
+				git.Apply(event, webhook.CompanyId, cfg.ApiServerUrl, cfg.Token)
 			}else if  webhook.Type == v1.BITBUCKET {
 				var git service.Git
 				if webhook.APIVersion == "v1" {
-					git = dependency_manager.GetV1GithubService()
+					git = dependency_manager.GetV1BitbucketService()
 				}
 				event := new(v1.BitbucketWebHookEvent)
 				b, err := json.Marshal(webhook.Event)
@@ -102,7 +102,7 @@ func Trigger() *cobra.Command {
 					cmd.Printf("failed to convert byte int any of the git: %v", err)
 					return nil
 				}
-				git.Apply(event, webhook.CompanyId)
+				git.Apply(event, webhook.CompanyId, cfg.ApiServerUrl, cfg.Token)
 			}
 			return nil
 		},

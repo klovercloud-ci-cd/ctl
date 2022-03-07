@@ -21,6 +21,18 @@ type companyService struct {
 	option string
 	cmd *cobra.Command
 	kind string
+	apiServerUrl string
+	token string
+}
+
+func (c companyService) ApiServerUrl(apiServerUrl string) service.Company {
+	c.apiServerUrl = apiServerUrl
+	return c
+}
+
+func (c companyService) Token(token string) service.Company {
+	c.token = token
+	return c
 }
 
 func (c companyService) Kind(kind string) service.Company {
@@ -81,7 +93,7 @@ func (c companyService) Apply() {
 			c.cmd.Println("Successfully Updated Applications")
 		}
 	case string(enums.GET_COMPANY_BY_ID):
-		code, data, err := c.GetCompanyById(c.companyId, c.option)
+		code, data, err := c.GetCompanyById()
 		if err != nil {
 			c.cmd.Println("[ERROR]: ", err.Error())
 		} else if code != 200 {
@@ -154,14 +166,13 @@ func (c companyService) Apply() {
 
 func (c companyService) CreateCompany(company interface{}) error {
 	header := make(map[string]string)
-	cfg := v1.GetConfigFile()
-	header["Authorization"] = "Bearer " + cfg.Token
+	header["Authorization"] = "Bearer " + c.token
 	header["Content-Type"] = "application/json"
 	b, err := json.Marshal(company)
 	if err != nil {
 		return err
 	}
-	_, _, err = c.httpClient.Post(cfg.ApiServerUrl+"companies", header, b)
+	_, _, err = c.httpClient.Post(c.apiServerUrl+"companies", header, b)
 	if err != nil {
 		return err
 	}
@@ -170,14 +181,13 @@ func (c companyService) CreateCompany(company interface{}) error {
 
 func (c companyService) UpdateRepositoriesByCompanyId(company interface{}, companyId string, option string) error {
 	header := make(map[string]string)
-	cfg := v1.GetConfigFile()
-	header["Authorization"] = "Bearer " + cfg.Token
+	header["Authorization"] = "Bearer " + c.token
 	header["Content-Type"] = "application/json"
 	b, err := json.Marshal(company)
 	if err != nil {
 		return err
 	}
-	_, err = c.httpClient.Put(cfg.ApiServerUrl+"companies/"+companyId+"/repositories?companyUpdateOption="+option, header, b)
+	_, err = c.httpClient.Put(c.apiServerUrl+"companies/"+companyId+"/repositories?companyUpdateOption="+option, header, b)
 	if err != nil {
 		return err
 	}
@@ -186,42 +196,38 @@ func (c companyService) UpdateRepositoriesByCompanyId(company interface{}, compa
 
 func (c companyService) UpdateApplicationsByRepositoryId(company interface{}, repoId string, option string) error {
 	header := make(map[string]string)
-	cfg := v1.GetConfigFile()
-	header["Authorization"] = "Bearer " + cfg.Token
+	header["Authorization"] = "Bearer " + c.token
 	header["Content-Type"] = "application/json"
 	b, err := json.Marshal(company)
 	if err != nil {
 		return err
 	}
-	_, _, err = c.httpClient.Post(cfg.ApiServerUrl+"applications?repositoryId="+repoId+"&companyUpdateOption="+option, header, b)
+	_, _, err = c.httpClient.Post(c.apiServerUrl+"applications?repositoryId="+repoId+"&companyUpdateOption="+option, header, b)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (c companyService) GetCompanyById(companyId string, option string) (httpCode int, data []byte, err error) {
+func (c companyService) GetCompanyById() (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
-	cfg := v1.GetConfigFile()
-	header["Authorization"] = "Bearer " + cfg.Token
+	header["Authorization"] = "Bearer " + c.token
 	header["Content-Type"] = "application/json"
-	return c.httpClient.Get(cfg.ApiServerUrl+"companies/"+companyId+"?"+option, header)
+	return c.httpClient.Get(c.apiServerUrl+"companies/"+c.companyId+"?"+c.option, header)
 }
 
 func (c companyService) GetCompanies() (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
-	cfg := v1.GetConfigFile()
-	header["Authorization"] = "Bearer " + cfg.Token
+	header["Authorization"] = "Bearer " + c.token
 	header["Content-Type"] = "application/json"
-	return c.httpClient.Get(cfg.ApiServerUrl+"companies", header)
+	return c.httpClient.Get(c.apiServerUrl+"companies", header)
 }
 
 func (c companyService) GetRepositoriesByCompanyId(companyId string) (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
-	cfg := v1.GetConfigFile()
-	header["Authorization"] = "Bearer " + cfg.Token
+	header["Authorization"] = "Bearer " + c.token
 	header["Content-Type"] = "application/json"
-	return c.httpClient.Get(cfg.ApiServerUrl+"companies/"+companyId+"/repositories?"+c.option, header)
+	return c.httpClient.Get(c.apiServerUrl+"companies/"+companyId+"/repositories?"+c.option, header)
 }
 
 // NewCompanyService returns company type service

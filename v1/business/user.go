@@ -16,6 +16,18 @@ type userService struct {
 	company interface{}
 	passwordResetDto interface{}
 	email string
+	securityUrl string
+	token string
+}
+
+func (u userService) SecurityUrl(securityUrl string) service.User {
+	u.securityUrl = securityUrl
+	return u
+}
+
+func (u userService) Token(token string) service.User {
+	u.token = token
+	return u
 }
 
 func (u userService) Email(email string) service.User {
@@ -59,7 +71,7 @@ func (u userService) Apply() {
 			u.cmd.Println("Successfully Created User")
 		}
 	case string(enums.CREATE_ADMIN):
-		err := u.CreateAdmin(u.user)
+		err := u.CreateAdmin()
 		if err != nil {
 			u.cmd.Printf("[ERROR]: %v", err)
 		} else {
@@ -93,29 +105,27 @@ func (u userService) Apply() {
 
 func (u userService) CreateUser(user v1.UserRegistrationDto) error {
 	header := make(map[string]string)
-	cfg := v1.GetConfigFile()
-	header["Authorization"] = "Bearer " + cfg.Token
+	header["Authorization"] = "Bearer " + u.token
 	header["Content-Type"] = "application/json"
 	b, err := json.Marshal(user)
 	if err != nil {
 		return err
 	}
-	_, _, err = u.httpClient.Post(cfg.SecurityUrl+"users?action=create_user", header, b)
+	_, _, err = u.httpClient.Post(u.securityUrl+"users?action=create_user", header, b)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (u userService) CreateAdmin(user interface{}) error {
+func (u userService) CreateAdmin() error {
 	header := make(map[string]string)
 	header["Content-Type"] = "application/json"
 	b, err := json.Marshal(u.user)
 	if err != nil {
 		return err
 	}
-	cfg := v1.GetConfigFile()
-	_, _, err = u.httpClient.Post(cfg.SecurityUrl+"users", header, b)
+	_, _, err = u.httpClient.Post(u.securityUrl+"users", header, b)
 	if err != nil {
 		return err
 	}
@@ -124,14 +134,13 @@ func (u userService) CreateAdmin(user interface{}) error {
 
 func (u userService) AttachCompany(company interface{}) error {
 	header := make(map[string]string)
-	cfg := v1.GetConfigFile()
-	header["Authorization"] = "Bearer " + cfg.Token
+	header["Authorization"] = "Bearer " + u.token
 	header["Content-Type"] = "application/json"
 	b, err := json.Marshal(company)
 	if err != nil {
 		return err
 	}
-	_, err = u.httpClient.Put(cfg.SecurityUrl+"users?action="+string(enums.ATTACH_COMPANY), header, b)
+	_, err = u.httpClient.Put(u.securityUrl+"users?action="+string(enums.ATTACH_COMPANY), header, b)
 	if err != nil {
 		return err
 	}
@@ -145,8 +154,7 @@ func (u userService) ResetPassword(passwordResetDto interface{}) error {
 	if err != nil {
 		return err
 	}
-	cfg := v1.GetConfigFile()
-	_, err = u.httpClient.Put(cfg.SecurityUrl+"users?action="+string(enums.RESET_PASSWORD), header, b)
+	_, err = u.httpClient.Put(u.securityUrl+"users?action="+string(enums.RESET_PASSWORD), header, b)
 	if err != nil {
 		return err
 	}
@@ -156,8 +164,7 @@ func (u userService) ResetPassword(passwordResetDto interface{}) error {
 func (u userService) ForgotPassword(email string) error {
 	header := make(map[string]string)
 	header["Content-Type"] = "application/json"
-	cfg := v1.GetConfigFile()
-	_, err := u.httpClient.Put(cfg.SecurityUrl+"users?action="+string(enums.FORGOT_PASSWORD)+"&media="+email, header, nil)
+	_, err := u.httpClient.Put(u.securityUrl+"users?action="+string(enums.FORGOT_PASSWORD)+"&media="+email, header, nil)
 	if err != nil {
 		return err
 	}

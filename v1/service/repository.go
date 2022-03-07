@@ -11,4 +11,6 @@ type Repository interface {
 	Cmd(cmd *cobra.Command) Repository
 	Option(option string) Repository
 	Kind(kind string) Repository
+	ApiServerUrl(apiServerUrl string) Repository
+	Token(token string) Repository
 }

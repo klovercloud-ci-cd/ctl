@@ -10,20 +10,19 @@ type bitbucketService struct {
 	httpClient service.HttpClient
 }
 
-func (b bitbucketService) Apply(git v1.Git, companyId string) error {
+func (b bitbucketService) Apply(git v1.Git, companyId, apiServerUrl, token string) error {
 	err := git.Validate()
-	cfg := v1.GetConfigFile()
 	if err != nil {
 		return err
 	}
 	header := make(map[string]string)
-	header["Authorization"] = "Bearer " + cfg.Token
+	header["Authorization"] = "Bearer " + token
 	header["Content-Type"] = "application/json"
 	body, err := json.Marshal(git)
 	if err != nil {
 		return err
 	}
-	_, _, err = b.httpClient.Post(cfg.ApiServerUrl+"bitbuckets?companyId="+companyId, header, body)
+	_, _, err = b.httpClient.Post(apiServerUrl+"bitbuckets?companyId="+companyId, header, body)
 	if err != nil {
 		return err
 	}

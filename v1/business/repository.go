@@ -19,6 +19,18 @@ type repositoryService struct {
 	cmd *cobra.Command
 	option string
 	kind string
+	apiServerUrl string
+	token string
+}
+
+func (r repositoryService) ApiServerUrl(apiServerUrl string) service.Repository {
+	r.apiServerUrl = apiServerUrl
+	return r
+}
+
+func (r repositoryService) Token(token string) service.Repository {
+	r.token = token
+	return r
 }
 
 func (r repositoryService) Kind(kind string) service.Repository {
@@ -120,18 +132,16 @@ func (r repositoryService) Apply() {
 
 func (r repositoryService) GetRepositoryById(repositoryId string) (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
-	cfg := v1.GetConfigFile()
-	header["Authorization"] = "Bearer " + cfg.Token
+	header["Authorization"] = "Bearer " + r.token
 	header["Content-Type"] = "application/json"
-	return r.httpClient.Get(cfg.ApiServerUrl+"repositories/"+repositoryId+"?"+r.option, header)
+	return r.httpClient.Get(r.apiServerUrl+"repositories/"+repositoryId+"?"+r.option, header)
 }
 
 func (r repositoryService) GetApplicationsByRepositoryId(repositoryId string) (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
-	cfg := v1.GetConfigFile()
-	header["Authorization"] = "Bearer " + cfg.Token
+	header["Authorization"] = "Bearer " + r.token
 	header["Content-Type"] = "application/json"
-	return r.httpClient.Get(cfg.ApiServerUrl+"repositories/"+repositoryId+"/applications?status=ACTIVE", header)
+	return r.httpClient.Get(r.apiServerUrl+"repositories/"+repositoryId+"/applications?status=ACTIVE", header)
 }
 
 // NewRepositoryService returns repository type service

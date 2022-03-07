@@ -12,4 +12,6 @@ type Application interface {
 	Option(option string) Application
 	Cmd(cmd *cobra.Command) Application
 	Kind(kind string) Application
+	ApiServerUrl(apiServerUrl string) Application
+	Token(token string) Application
 }

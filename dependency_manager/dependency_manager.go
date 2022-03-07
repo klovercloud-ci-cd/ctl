@@ -8,8 +8,13 @@ import (
 func GetPipelineService() service.Pipeline {
 	return business.NewPipelineService(business.NewHttpClientService())
 }
+
 func GetV1GithubService() service.Git {
 	return business.NewGithubService(business.NewHttpClientService())
+}
+
+func GetV1BitbucketService() service.Git {
+	return business.NewBitbucketService(business.NewHttpClientService())
 }
 
 func GetCompanyService() service.Company {

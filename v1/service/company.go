@@ -12,4 +12,6 @@ type Company interface {
 	Option(option string) Company
 	Cmd(cmd *cobra.Command) Company
 	Kind(kind string) Company
+	ApiServerUrl(apiServerUrl string) Company
+	Token(token string) Company
 }

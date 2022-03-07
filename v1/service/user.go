@@ -14,4 +14,6 @@ type User interface {
 	Company(company interface{}) User
 	PasswordResetDto(passwordResetDto interface{}) User
 	Email(email string) User
+	SecurityUrl(securityUrl string) User
+	Token(token string) User
 }

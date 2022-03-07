@@ -9,8 +9,7 @@ import (
 	"os"
 )
 
-func GetUserMetadataFromBearerToken() (UserMetadata, error) {
-	token := GetConfigFile().Token
+func GetUserMetadataFromBearerToken(token string) (UserMetadata, error) {
 	if token == "" {
 		return UserMetadata{}, errors.New("no token found")
 	}

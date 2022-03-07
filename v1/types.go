@@ -2,7 +2,6 @@ package v1
 
 import (
 	"encoding/json"
-	"errors"
 	"github.com/klovercloud-ci/ctl/v1/encryption"
 	"io/ioutil"
 	"os"
@@ -206,10 +205,10 @@ func GetConfigFile() Config {
 	return configFile
 }
 
-func IsUserLoggedIn() error {
-	cfg := GetConfigFile()
-	if cfg.Token == "" {
-		return errors.New("user is not logged in")
-	}
-	return nil
-}
+//func IsUserLoggedIn() error {
+//	cfg := GetConfigFile()
+//	if cfg.Token == "" {
+//		return errors.New("user is not logged in")
+//	}
+//	return nil
+//}

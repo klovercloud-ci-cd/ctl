@@ -18,8 +18,9 @@ func Create() *cobra.Command{
 		Short:     "Create resource [user/repositories/applications]",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := v1.IsUserLoggedIn(); err != nil {
-				cmd.Printf("[ERROR]: %v", err.Error())
+			cfg := v1.GetConfigFile()
+			if cfg.Token == "" {
+				cmd.Printf("[ERROR]: %v", "user is not logged in")
 				return nil
 			}
 			if len(args) < 1{
@@ -75,7 +76,6 @@ func Create() *cobra.Command{
 						return nil
 					}
 				}
-				cfg := v1.GetConfigFile()
 				if apiServerUrl == "" {
 					if cfg.ApiServerUrl == "" {
 						cfg.ApiServerUrl = "http://localhost:8080/api/v1/"
@@ -95,19 +95,19 @@ func Create() *cobra.Command{
 					cmd.Println("[ERROR]: ", err.Error())
 				}
 				userService := dependency_manager.GetUserService()
-				userService.Cmd(cmd).Flag(string(enums.CREATE_USER)).User(user).Apply()
+				userService.Cmd(cmd).SecurityUrl(cfg.SecurityUrl).Token(cfg.Token).Flag(string(enums.CREATE_USER)).User(user).Apply()
 				return nil
 			} else if args[0]=="repositories" || args[0]=="repos"{
-				if err := v1.IsUserLoggedIn(); err != nil {
-					cmd.Printf("[ERROR]: %v", err.Error())
-					return nil
-				}
-				userMetadata, err := v1.GetUserMetadataFromBearerToken()
+				userMetadata, err := v1.GetUserMetadataFromBearerToken(cfg.Token)
 				if err != nil {
 					cmd.Printf("[ERROR]: %v", err.Error())
 					return nil
 				}
 				companyId := userMetadata.CompanyId
+				if companyId == "" {
+					cmd.Printf("[ERROR]: %v", "User got no company attached!")
+					return nil
+				}
 				for _, each := range args {
 					if strings.Contains(strings.ToLower(each), "file=") || strings.Contains(strings.ToLower(each), "-f=") {
 						strs := strings.Split(strings.ToLower(each), "=")
@@ -121,7 +121,6 @@ func Create() *cobra.Command{
 						}
 					}
 				}
-				cfg := v1.GetConfigFile()
 				if apiServerUrl == "" {
 					if cfg.ApiServerUrl == "" {
 						cmd.Println("[ERROR]: Api server url not found!")
@@ -129,11 +128,11 @@ func Create() *cobra.Command{
 					}
 				} else {
 					cfg.ApiServerUrl = apiServerUrl
-				}
-				err = cfg.Store()
-				if err != nil {
-					cmd.Println("[ERROR]: ", err.Error())
-					return nil
+					err = cfg.Store()
+					if err != nil {
+						cmd.Println("[ERROR]: ", err.Error())
+						return nil
+					}
 				}
 				if file == "" {
 					cmd.Printf("[ERROR]: %v", "please provide update file!")
@@ -159,14 +158,10 @@ func Create() *cobra.Command{
 					}
 				}
 				companyService := dependency_manager.GetCompanyService()
-				companyService.Cmd(cmd).Flag(string(enums.UPDATE_REPOSITORIES)).Company(*repos).CompanyId(companyId).Option("APPEND_REPOSITORY").Apply()
+				companyService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Cmd(cmd).Flag(string(enums.UPDATE_REPOSITORIES)).Company(*repos).CompanyId(companyId).Option("APPEND_REPOSITORY").Apply()
 				return nil
 			} else if args[0]=="applications" || args[0]=="apps"{
 				var repoId string
-				if err := v1.IsUserLoggedIn(); err != nil {
-					cmd.Printf("[ERROR]: %v", err.Error())
-					return nil
-				}
 				for _, each := range args {
 					if strings.Contains(strings.ToLower(each), "file=") || strings.Contains(strings.ToLower(each), "-f=") {
 						strs := strings.Split(strings.ToLower(each), "=")
@@ -185,7 +180,6 @@ func Create() *cobra.Command{
 						}
 					}
 				}
-				cfg := v1.GetConfigFile()
 				if apiServerUrl == "" {
 					if cfg.ApiServerUrl == "" {
 						cmd.Println("[ERROR]: Api server url not found!")
@@ -193,11 +187,11 @@ func Create() *cobra.Command{
 					}
 				} else {
 					cfg.ApiServerUrl = apiServerUrl
-				}
-				err := cfg.Store()
-				if err != nil {
-					cmd.Println("[ERROR]: ", err.Error())
-					return nil
+					err := cfg.Store()
+					if err != nil {
+						cmd.Println("[ERROR]: ", err.Error())
+						return nil
+					}
 				}
 				if file == "" {
 					cmd.Printf("[ERROR]: %v", "please provide update file!")
@@ -227,7 +221,7 @@ func Create() *cobra.Command{
 					}
 				}
 				companyService := dependency_manager.GetCompanyService()
-				companyService.Cmd(cmd).Flag(string(enums.UPDATE_APPLICATIONS)).Company(*company).RepoId(repoId).Option("APPEND_APPLICATION").Apply()
+				companyService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Cmd(cmd).Flag(string(enums.UPDATE_APPLICATIONS)).Company(*company).RepoId(repoId).Option("APPEND_APPLICATION").Apply()
 				return nil
 			} else {
 				cmd.Println("[ERROR]: Wrong command")
@@ -244,7 +238,6 @@ func Registration() *cobra.Command{
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var file string
-			var actionType string
 			var apiServerUrl string
 			var securityUrl string
 			for idx, each := range args {
@@ -253,8 +246,6 @@ func Registration() *cobra.Command{
 					if len(strs) > 0 {
 						file = strs[1]
 					}
-				} else if strings.ToLower(each) == "user" {
-					actionType = "user"
 				} else if strings.Contains(strings.ToLower(each), "option") {
 					if idx + 1 < len(args) {
 						if strings.Contains(strings.ToLower(args[idx+1]), "apiserver=") {
@@ -269,12 +260,6 @@ func Registration() *cobra.Command{
 							}
 						}
 					}
-				}
-			}
-			if actionType == "user" {
-				if err := v1.IsUserLoggedIn(); err != nil {
-					cmd.Printf("[ERROR]: %v", err.Error())
-					return nil
 				}
 			}
 			if file == "" {
@@ -320,11 +305,7 @@ func Registration() *cobra.Command{
 				cmd.Println("[ERROR]: ", err.Error())
 			}
 			userService := dependency_manager.GetUserService()
-			if strings.ToLower(actionType) == "user" {
-				userService.Cmd(cmd).Flag(string(enums.CREATE_USER)).User(user).Apply()
-			} else {
-				userService.Cmd(cmd).Flag(string(enums.CREATE_ADMIN)).User(user).Apply()
-			}
+			userService.SecurityUrl(cfg.SecurityUrl).Cmd(cmd).Flag(string(enums.CREATE_ADMIN)).User(user).Apply()
 			return nil
 		},
 	}
@@ -336,20 +317,25 @@ func Describe() *cobra.Command{
 		Short:     "Describe resource [company/repository/application]",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := v1.IsUserLoggedIn(); err != nil {
-				cmd.Printf("[ERROR]: %v", err.Error())
+			cfg := v1.GetConfigFile()
+			if cfg.Token == "" {
+				cmd.Printf("[ERROR]: %v", "user is not logged in")
 				return nil
 			}
 			if len(args) < 1{
 				cmd.Printf("[ERROR]: %v", "please provide a resource name!")
 				return nil
 			}
-			userMetadata, err := v1.GetUserMetadataFromBearerToken()
+			userMetadata, err := v1.GetUserMetadataFromBearerToken(cfg.Token)
 			if err != nil {
 				cmd.Printf("[ERROR]: %v", err.Error())
 				return nil
 			}
 			companyId := userMetadata.CompanyId
+			if companyId == "" {
+				cmd.Printf("[ERROR]: %v", "User got no company attached!")
+				return nil
+			}
 			var apiServerUrl string
 			if args[0]=="company"{
 				loadRepo := false
@@ -380,7 +366,6 @@ func Describe() *cobra.Command{
 						}
 					}
 				}
-				cfg := v1.GetConfigFile()
 				if apiServerUrl == "" {
 					if cfg.ApiServerUrl == "" {
 						cmd.Println("[ERROR]: Api server url not found!")
@@ -388,14 +373,14 @@ func Describe() *cobra.Command{
 					}
 				} else {
 					cfg.ApiServerUrl = apiServerUrl
-				}
-				err := cfg.Store()
-				if err != nil {
-					cmd.Println("[ERROR]: ", err.Error())
-					return nil
+					err := cfg.Store()
+					if err != nil {
+						cmd.Println("[ERROR]: ", err.Error())
+						return nil
+					}
 				}
 				companyService := dependency_manager.GetCompanyService()
-				companyService.Kind("Company").Cmd(cmd).Flag(string(enums.GET_COMPANY_BY_ID)).CompanyId(companyId).Option("loadRepositories="+strconv.FormatBool(loadRepo)+"&loadApplications="+strconv.FormatBool(loadApp)).Apply()
+				companyService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Kind("Company").Cmd(cmd).Flag(string(enums.GET_COMPANY_BY_ID)).CompanyId(companyId).Option("loadRepositories="+strconv.FormatBool(loadRepo)+"&loadApplications="+strconv.FormatBool(loadApp)).Apply()
 			}else if args[0]=="repository" || args[0]=="repo"{
 				if len(args)<2 {
 					cmd.Printf("[ERROR]: %v", "please provide repository id!")
@@ -428,7 +413,6 @@ func Describe() *cobra.Command{
 						}
 					}
 				}
-				cfg := v1.GetConfigFile()
 				if apiServerUrl == "" {
 					if cfg.ApiServerUrl == "" {
 						cmd.Println("[ERROR]: Api server url not found!")
@@ -436,14 +420,14 @@ func Describe() *cobra.Command{
 					}
 				} else {
 					cfg.ApiServerUrl = apiServerUrl
-				}
-				err := cfg.Store()
-				if err != nil {
-					cmd.Println("[ERROR]: ", err.Error())
-					return nil
+					err := cfg.Store()
+					if err != nil {
+						cmd.Println("[ERROR]: ", err.Error())
+						return nil
+					}
 				}
 				repositoryService := dependency_manager.GetRepositoryService()
-				repositoryService.Kind("Repository").Cmd(cmd).Flag(string(enums.GET_REPOSITORY)).Repo(repoId).Option("loadApplications="+strconv.FormatBool(loadApp)).Apply()
+				repositoryService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Kind("Repository").Cmd(cmd).Flag(string(enums.GET_REPOSITORY)).Repo(repoId).Option("loadApplications="+strconv.FormatBool(loadApp)).Apply()
 			}else if args[0]=="application" || args[0]=="app" {
 				var repoId string
 				var appId string
@@ -473,7 +457,6 @@ func Describe() *cobra.Command{
 					cmd.Printf("[ERROR]: %v", "please provide application id!")
 					return nil
 				}
-				cfg := v1.GetConfigFile()
 				if apiServerUrl == "" {
 					if cfg.ApiServerUrl == "" {
 						cmd.Println("[ERROR]: Api server url not found!")
@@ -481,14 +464,14 @@ func Describe() *cobra.Command{
 					}
 				} else {
 					cfg.ApiServerUrl = apiServerUrl
-				}
-				err = cfg.Store()
-				if err != nil {
-					cmd.Println("[ERROR]: ", err.Error())
-					return nil
+					err = cfg.Store()
+					if err != nil {
+						cmd.Println("[ERROR]: ", err.Error())
+						return nil
+					}
 				}
 				applicationService := dependency_manager.GetApplicationService()
-				applicationService.Kind("Application").Cmd(cmd).Flag(string(enums.GET_APPLICATION)).RepoId(repoId).ApplicationId(appId).Apply()
+				applicationService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Kind("Application").Cmd(cmd).Flag(string(enums.GET_APPLICATION)).RepoId(repoId).ApplicationId(appId).Apply()
 			} else {
 				cmd.Println("[ERROR]: Wrong command")
 				return nil
@@ -504,20 +487,25 @@ func List() *cobra.Command{
 		Short:     "List resources [company/repository/application/process]",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := v1.IsUserLoggedIn(); err != nil {
-				cmd.Printf("[ERROR]: %v", err.Error())
+			cfg := v1.GetConfigFile()
+			if cfg.Token == "" {
+				cmd.Printf("[ERROR]: %v", "user is not logged in")
 				return nil
 			}
 			if len(args) < 1{
 				cmd.Printf("[ERROR]: %v", "please provide a resource name!")
 				return nil
 			}
-			userMetadata, err := v1.GetUserMetadataFromBearerToken()
+			userMetadata, err := v1.GetUserMetadataFromBearerToken(cfg.Token)
 			if err != nil {
 				cmd.Printf("[ERROR]: %v", err.Error())
 				return nil
 			}
 			companyId := userMetadata.CompanyId
+			if companyId == "" {
+				cmd.Printf("[ERROR]: %v", "User got no company attached!")
+				return nil
+			}
 			var apiServerUrl string
 			if args[0]=="repositories" || args[0]=="repos"{
 				loadApp := false
@@ -540,7 +528,6 @@ func List() *cobra.Command{
 						}
 					}
 				}
-				cfg := v1.GetConfigFile()
 				if apiServerUrl == "" {
 					if cfg.ApiServerUrl == "" {
 						cmd.Println("[ERROR]: Api server url not found!")
@@ -548,14 +535,14 @@ func List() *cobra.Command{
 					}
 				} else {
 					cfg.ApiServerUrl = apiServerUrl
-				}
-				err = cfg.Store()
-				if err != nil {
-					cmd.Println("[ERROR]: ", err.Error())
-					return nil
+					err = cfg.Store()
+					if err != nil {
+						cmd.Println("[ERROR]: ", err.Error())
+						return nil
+					}
 				}
 				companyService := dependency_manager.GetCompanyService()
-				companyService.Kind("Repository").Cmd(cmd).Flag(string(enums.GET_REPOSITORIES)).CompanyId(companyId).Option("loadApplications="+strconv.FormatBool(loadApp)).Apply()
+				companyService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Kind("Repository").Cmd(cmd).Flag(string(enums.GET_REPOSITORIES)).CompanyId(companyId).Option("loadApplications="+strconv.FormatBool(loadApp)).Apply()
 			} else if args[0]=="applications" || args[0]=="apps"{
 				var repoId string
 				for _, each := range args {
@@ -571,7 +558,6 @@ func List() *cobra.Command{
 						}
 					}
 				}
-				cfg := v1.GetConfigFile()
 				if apiServerUrl == "" {
 					if cfg.ApiServerUrl == "" {
 						cmd.Println("[ERROR]: Api server url not found!")
@@ -579,18 +565,18 @@ func List() *cobra.Command{
 					}
 				} else {
 					cfg.ApiServerUrl = apiServerUrl
-				}
-				err = cfg.Store()
-				if err != nil {
-					cmd.Println("[ERROR]: ", err.Error())
-					return nil
+					err = cfg.Store()
+					if err != nil {
+						cmd.Println("[ERROR]: ", err.Error())
+						return nil
+					}
 				}
 				if repoId == "" {
 					applicationService := dependency_manager.GetApplicationService()
-					applicationService.Kind("Application").Cmd(cmd).Flag(string(enums.GET_All_APPLICATIONS)).Apply()
+					applicationService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Kind("Application").Cmd(cmd).Flag(string(enums.GET_All_APPLICATIONS)).Apply()
 				} else {
 					repositoryService := dependency_manager.GetRepositoryService()
-					repositoryService.Kind("Application").Cmd(cmd).Flag(string(enums.GET_APPLICATIONS)).Repo(repoId).Apply()
+					repositoryService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Kind("Application").Cmd(cmd).Flag(string(enums.GET_APPLICATIONS)).Repo(repoId).Apply()
 				}
 			} else if args[0]=="process" {
 				var repoId string
@@ -621,7 +607,6 @@ func List() *cobra.Command{
 					cmd.Printf("[ERROR]: %v", "please provide application id!")
 					return nil
 				}
-				cfg := v1.GetConfigFile()
 				if apiServerUrl == "" {
 					if cfg.ApiServerUrl == "" {
 						cmd.Println("[ERROR]: Api server url not found!")
@@ -629,14 +614,14 @@ func List() *cobra.Command{
 					}
 				} else {
 					cfg.ApiServerUrl = apiServerUrl
-				}
-				err = cfg.Store()
-				if err != nil {
-					cmd.Println("[ERROR]: ", err.Error())
-					return nil
+					err = cfg.Store()
+					if err != nil {
+						cmd.Println("[ERROR]: ", err.Error())
+						return nil
+					}
 				}
 				processService := dependency_manager.GetProcessService()
-				processService.Kind("Process").Cmd(cmd).RepoId(repoId).ApplicationId(appId).Apply()
+				processService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Kind("Process").Cmd(cmd).RepoId(repoId).ApplicationId(appId).Apply()
 			} else {
 				cmd.Println("[ERROR]: Wrong command")
 				return nil
@@ -693,15 +678,15 @@ func Update() *cobra.Command{
 					}
 				} else {
 					cfg.ApiServerUrl = apiServerUrl
-				}
-				err := cfg.Store()
-				if err != nil {
-					cmd.Println("[ERROR]: ", err.Error())
-					return nil
+					err := cfg.Store()
+					if err != nil {
+						cmd.Println("[ERROR]: ", err.Error())
+						return nil
+					}
 				}
 				if option == string(enums.ATTACH_COMPANY) || option == "ac" {
-					if err := v1.IsUserLoggedIn(); err != nil {
-						cmd.Printf("[ERROR]: %v", err.Error())
+					if cfg.Token == "" {
+						cmd.Printf("[ERROR]: %v", "user is not logged in")
 						return nil
 					}
 					if file == "" {
@@ -728,7 +713,7 @@ func Update() *cobra.Command{
 						}
 					}
 					userService := dependency_manager.GetUserService()
-					userService.Cmd(cmd).Flag(string(enums.ATTACH_COMPANY)).Company(company).Apply()
+					userService.SecurityUrl(cfg.SecurityUrl).Token(cfg.Token).Cmd(cmd).Flag(string(enums.ATTACH_COMPANY)).Company(company).Apply()
 				} else if option == string(enums.RESET_PASSWORD) || option == "rp" {
 					if file == "" {
 						cmd.Printf("[ERROR]: %v", "please provide a file!")
@@ -754,22 +739,27 @@ func Update() *cobra.Command{
 						}
 					}
 					userService := dependency_manager.GetUserService()
-					userService.Cmd(cmd).Flag(string(enums.RESET_PASSWORD)).PasswordResetDto(passwordResetDto).Apply()
+					userService.SecurityUrl(cfg.SecurityUrl).Cmd(cmd).Flag(string(enums.RESET_PASSWORD)).PasswordResetDto(passwordResetDto).Apply()
 				} else if option == string(enums.FORGOT_PASSWORD) || option == "fp" {
 					userService := dependency_manager.GetUserService()
-					userService.Cmd(cmd).Flag(string(enums.FORGOT_PASSWORD)).Email(email).Apply()
+					userService.SecurityUrl(cfg.SecurityUrl).Cmd(cmd).Flag(string(enums.FORGOT_PASSWORD)).Email(email).Apply()
 				}
 			} else if args[0]=="repositories" || args[0]=="repos"{
-				if err := v1.IsUserLoggedIn(); err != nil {
-					cmd.Printf("[ERROR]: %v", err.Error())
+				cfg := v1.GetConfigFile()
+				if cfg.Token == "" {
+					cmd.Printf("[ERROR]: %v", "user is not logged in")
 					return nil
 				}
-				userMetadata, err := v1.GetUserMetadataFromBearerToken()
+				userMetadata, err := v1.GetUserMetadataFromBearerToken(cfg.Token)
 				if err != nil {
 					cmd.Printf("[ERROR]: %v", err.Error())
 					return nil
 				}
 				companyId := userMetadata.CompanyId
+				if companyId == "" {
+					cmd.Printf("[ERROR]: %v", "User got no company attached!")
+					return nil
+				}
 				for _, each := range args {
 					if strings.Contains(strings.ToLower(each), "file=") || strings.Contains(strings.ToLower(each), "-f=") {
 						strs := strings.Split(strings.ToLower(each), "=")
@@ -788,7 +778,6 @@ func Update() *cobra.Command{
 						}
 					}
 				}
-				cfg := v1.GetConfigFile()
 				if apiServerUrl == "" {
 					if cfg.ApiServerUrl == "" {
 						cmd.Println("[ERROR]: Api server url not found!")
@@ -796,11 +785,11 @@ func Update() *cobra.Command{
 					}
 				} else {
 					cfg.ApiServerUrl = apiServerUrl
-				}
-				err = cfg.Store()
-				if err != nil {
-					cmd.Println("[ERROR]: ", err.Error())
-					return nil
+					err = cfg.Store()
+					if err != nil {
+						cmd.Println("[ERROR]: ", err.Error())
+						return nil
+					}
 				}
 				if file == "" {
 					cmd.Printf("[ERROR]: %v", "please provide update file!")
@@ -830,11 +819,12 @@ func Update() *cobra.Command{
 					}
 				}
 				companyService := dependency_manager.GetCompanyService()
-				companyService.Cmd(cmd).Flag(string(enums.UPDATE_REPOSITORIES)).Company(*repos).CompanyId(companyId).Option(option).Apply()
+				companyService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Cmd(cmd).Flag(string(enums.UPDATE_REPOSITORIES)).Company(*repos).CompanyId(companyId).Option(option).Apply()
 				return nil
 			} else if args[0]=="applications" || args[0]=="apps"{
-				if err := v1.IsUserLoggedIn(); err != nil {
-					cmd.Printf("[ERROR]: %v", err.Error())
+				cfg := v1.GetConfigFile()
+				if cfg.Token == "" {
+					cmd.Printf("[ERROR]: %v", "user is not logged in")
 					return nil
 				}
 				for _, each := range args {
@@ -860,7 +850,6 @@ func Update() *cobra.Command{
 						}
 					}
 				}
-				cfg := v1.GetConfigFile()
 				if apiServerUrl == "" {
 					if cfg.ApiServerUrl == "" {
 						cmd.Println("[ERROR]: Api server url not found!")
@@ -868,11 +857,11 @@ func Update() *cobra.Command{
 					}
 				} else {
 					cfg.ApiServerUrl = apiServerUrl
-				}
-				err := cfg.Store()
-				if err != nil {
-					cmd.Println("[ERROR]: ", err.Error())
-					return nil
+					err := cfg.Store()
+					if err != nil {
+						cmd.Println("[ERROR]: ", err.Error())
+						return nil
+					}
 				}
 				if file == "" {
 					cmd.Printf("[ERROR]: %v", "please provide update file!")
@@ -906,7 +895,7 @@ func Update() *cobra.Command{
 					}
 				}
 				companyService := dependency_manager.GetCompanyService()
-				companyService.Cmd(cmd).Flag(string(enums.UPDATE_APPLICATIONS)).Company(*company).RepoId(repoId).Option(option).Apply()
+				companyService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Cmd(cmd).Flag(string(enums.UPDATE_APPLICATIONS)).Company(*company).RepoId(repoId).Option(option).Apply()
 				return nil
 			} else {
 				cmd.Println("[ERROR]: Wrong command")

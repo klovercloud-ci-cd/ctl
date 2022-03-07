@@ -16,8 +16,9 @@ func GetLogs() *cobra.Command {
 		Short:     "Get logs by process ID",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := v1.IsUserLoggedIn(); err != nil {
-				cmd.Printf("[ERROR]: %v", err.Error())
+			cfg := v1.GetConfigFile()
+			if cfg.Token == "" {
+				cmd.Printf("[ERROR]: %v", "user is not logged in")
 				return nil
 			}
 			var processId, page, limit string
@@ -50,7 +51,6 @@ func GetLogs() *cobra.Command {
 					}
 				}
 			}
-			cfg := v1.GetConfigFile()
 			if apiServerUrl == "" {
 				if cfg.ApiServerUrl == "" {
 					cmd.Println("[ERROR]: Api server url not found!")
@@ -58,11 +58,11 @@ func GetLogs() *cobra.Command {
 				}
 			} else {
 				cfg.ApiServerUrl = apiServerUrl
-			}
-			err := cfg.Store()
-			if err != nil {
-				cmd.Println("[ERROR]: ", err.Error())
-				return nil
+				err := cfg.Store()
+				if err != nil {
+					cmd.Println("[ERROR]: ", err.Error())
+					return nil
+				}
 			}
 			if page == "" {
 				page = "0"
@@ -73,15 +73,14 @@ func GetLogs() *cobra.Command {
 			if processId == "" {
 				return nil
 			}
-			return getLogs(cmd, processId, page, limit, follow)
+			return getLogs(cmd, cfg.ApiServerUrl, cfg.Token, processId, page, limit, follow)
 		},
 	}
 }
 
-func getLogs(cmd *cobra.Command, processId string, page string, limit string, follow bool) error {
-	cfg := v1.GetConfigFile()
+func getLogs(cmd *cobra.Command, apiServerUrl, token, processId, page, limit string, follow bool) error {
 	pipelineService := dependency_manager.GetPipelineService()
-	code, data, err := pipelineService.Logs(cfg.ApiServerUrl+"pipelines/"+processId, page, limit)
+	code, data, err := pipelineService.Token(token).Logs(apiServerUrl+"pipelines/"+processId, page, limit)
 	if err != nil {
 		cmd.Println("[ERROR]: ", err.Error())
 		return nil
@@ -106,7 +105,7 @@ func getLogs(cmd *cobra.Command, processId string, page string, limit string, fo
 			page = strconv.Itoa(i + 1)
 		}
 		time.Sleep(time.Millisecond * 500)
-		getLogs(cmd, processId, page, limit, follow)
+		getLogs(cmd, apiServerUrl, token, processId, page, limit, follow)
 	}
 	return nil
 }

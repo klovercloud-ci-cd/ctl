@@ -8,4 +8,6 @@ type Process interface {
 	RepoId(repoId string) Process
 	ApplicationId(appId string) Process
 	Kind(kind string) Process
+	ApiServerUrl(apiServerUrl string) Process
+	Token(token string) Process
 }
