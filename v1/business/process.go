@@ -76,7 +76,7 @@ func (p processService) Apply() {
 					table.Append(process)
 				}
 			} else {
-				processes = processes[len(processes) - 5 :]
+				processes = processes[0 : 5]
 				for _, eachProcess := range processes {
 					createdAt := strconv.Itoa(eachProcess.CreatedAt.Local().Day()) + "-" + strconv.Itoa(int(eachProcess.CreatedAt.Local().Month())) + "-" + strconv.Itoa(eachProcess.CreatedAt.Local().Year()) + " " + eachProcess.CreatedAt.Local().Format(time.Kitchen)
 					process := []string{"api/v1", p.kind, eachProcess.ProcessId, eachProcess.AppId, eachProcess.RepositoryId, createdAt}
