@@ -3,12 +3,17 @@ package business
 import (
 	"encoding/json"
 	"errors"
-	v1 "github.com/klovercloud-ci/ctl/v1"
 	"github.com/klovercloud-ci/ctl/v1/service"
 )
 
 type oauthService struct {
 	httpClient service.HttpClient
+	securityUrl   string
+}
+
+func (o oauthService) SecurityUrl(securityUrl string) service.Oauth {
+	o.securityUrl = securityUrl
+	return o
 }
 
 type JWTPayLoad struct {
@@ -34,8 +39,7 @@ func (o oauthService) Apply(loginDto interface{}) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	cfg := v1.GetConfigFile()
-	_, data, err := o.httpClient.Post(cfg.SecurityUrl+"oauth/login?grant_type=password&token_type=ctl", header, b)
+	_, data, err := o.httpClient.Post(o.securityUrl+"oauth/login?grant_type=password&token_type=ctl", header, b)
 	if err != nil {
 		var errorData ErrorDTOWithPagination
 		err = json.Unmarshal([]byte(err.Error()), &errorData)
