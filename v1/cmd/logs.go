@@ -73,12 +73,12 @@ func GetLogs() *cobra.Command {
 			if processId == "" {
 				return nil
 			}
-			return getLogs(cmd, cfg.ApiServerUrl, cfg.Token, processId, page, limit, follow)
+			return getLogs(cmd, cfg.ApiServerUrl, cfg.Token, processId, page, limit, follow, 0)
 		},
 	}
 }
 
-func getLogs(cmd *cobra.Command, apiServerUrl, token, processId, page, limit string, follow bool) error {
+func getLogs(cmd *cobra.Command, apiServerUrl, token, processId, page, limit string, follow bool, skip int64) error {
 	pipelineService := dependency_manager.GetPipelineService()
 	code, data, err := pipelineService.Token(token).Logs(apiServerUrl+"pipelines/"+processId, page, limit)
 	if err != nil {
@@ -91,21 +91,26 @@ func getLogs(cmd *cobra.Command, apiServerUrl, token, processId, page, limit str
 		byteBody, _ := json.Marshal(data)
 		var result []string
 		json.Unmarshal(byteBody, &result)
-		for _, logData := range result {
-			cmd.Println(logData)
+		for i := skip; i < int64(len(result)); i++ {
+			cmd.Println(result[i])
 		}
-	} else {
-		return nil
+		lim , _ := strconv.Atoi(limit)
+		if len(result) <  lim {
+			skip = int64(len(result))
+		} else {
+			skip = 0
+		}
+	} else if data == nil {
+		p, _ := strconv.Atoi(page)
+		page = strconv.Itoa(p - 1)
 	}
 	if follow {
-		if data == nil {
-			limit = strconv.Itoa(5)
-		} else {
-			i, _ := strconv.Atoi(page)
-			page = strconv.Itoa(i + 1)
+		if skip == 0 {
+			p, _ := strconv.Atoi(page)
+			page = strconv.Itoa(p + 1)
 		}
 		time.Sleep(time.Millisecond * 500)
-		getLogs(cmd, apiServerUrl, token, processId, page, limit, follow)
+		getLogs(cmd, apiServerUrl, token, processId, page, limit, follow, skip)
 	}
 	return nil
 }
