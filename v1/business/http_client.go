@@ -6,6 +6,7 @@ import (
 	"github.com/klovercloud-ci/ctl/v1/service"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -16,6 +17,9 @@ type httpClientService struct {
 // Put method that fires a Put request.
 func (h httpClientService) Put(url string, header map[string]string, body []byte) (httpCode int, err error) {
 	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(body))
+	if err != nil {
+		log.Println(err.Error())
+	}
 	for k, v := range header {
 		req.Header.Set(k, v)
 	}
