@@ -79,18 +79,26 @@ func (c companyService) Apply() {
 			c.cmd.Println("Successfully Created Company")
 		}
 	case string(enums.UPDATE_REPOSITORIES):
-		err :=  c.UpdateRepositoriesByCompanyId(c.company, c.companyId, c.option)
-		if err != nil {
-			c.cmd.Println("[ERROR]: Repository Update Failed")
+		if c.option != string(enums.APPEND_REPOSITORY) && c.option != string(enums.SOFT_DELETE_REPOSITORY) && c.option != string(enums.DELETE_REPOSITORY) {
+			c.cmd.Println("[ERROR]: Invalid Repository Update Option")
 		} else {
-			c.cmd.Println("Successfully Updated Repositories")
+			err :=  c.UpdateRepositoriesByCompanyId(c.company, c.companyId, c.option)
+			if err != nil {
+				c.cmd.Println("[ERROR]: Repository Update Failed")
+			} else {
+				c.cmd.Println("Successfully Updated Repositories")
+			}
 		}
 	case string(enums.UPDATE_APPLICATIONS):
-		err :=  c.UpdateApplicationsByRepositoryId(c.company, c.repoId, c.option)
-		if err != nil {
-			c.cmd.Println("[ERROR]: Application Update Failed")
+		if c.option != string(enums.APPEND_APPLICATION) && c.option != string(enums.SOFT_DELETE_APPLICATION) && c.option != string(enums.DELETE_APPLICATION) {
+			c.cmd.Println("[ERROR]: Invalid Application Update Option")
 		} else {
-			c.cmd.Println("Successfully Updated Applications")
+			err :=  c.UpdateApplicationsByRepositoryId(c.company, c.repoId, c.option)
+			if err != nil {
+				c.cmd.Println("[ERROR]: Application Update Failed")
+			} else {
+				c.cmd.Println("Successfully Updated Applications")
+			}
 		}
 	case string(enums.GET_COMPANY_BY_ID):
 		code, data, err := c.GetCompanyById()
