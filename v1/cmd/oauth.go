@@ -65,6 +65,7 @@ func Login() *cobra.Command{
 				Email:    email,
 				Password: password,
 			}
+			cfg = v1.GetConfigFile()
 			oauthService := dependency_manager.GetOauthService()
 			ctlToken, err := oauthService.SecurityUrl(cfg.SecurityUrl).Apply(loginDto)
 			if err != nil {
