@@ -92,7 +92,9 @@ func getLogs(cmd *cobra.Command, apiServerUrl, token, processId, page, limit str
 		var result []string
 		json.Unmarshal(byteBody, &result)
 		for i := skip; i < int64(len(result)); i++ {
-			cmd.Println(result[i])
+			if result[i] != "" {
+				cmd.Println(result[i])
+			}
 		}
 		lim , _ := strconv.Atoi(limit)
 		if len(result) <  lim {
