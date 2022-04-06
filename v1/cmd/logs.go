@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"github.com/klovercloud-ci/ctl/dependency_manager"
 	v1 "github.com/klovercloud-ci/ctl/v1"
+	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -93,7 +95,23 @@ func getLogs(cmd *cobra.Command, apiServerUrl, token, processId, page, limit str
 		json.Unmarshal(byteBody, &result)
 		for i := skip; i < int64(len(result)); i++ {
 			if result[i] != "" {
-				cmd.Println(result[i])
+				if strings.HasSuffix(strings.ToLower(result[i]), "step started") {
+					cmd.Println("\n")
+					table := tablewriter.NewWriter(os.Stdout)
+					table.SetHeader([]string{result[i]})
+					table.SetBorder(false)
+					table.SetBorders(tablewriter.Border{
+						Left:   false,
+						Right:  false,
+						Top:    false,
+						Bottom: false,
+					})
+					table.SetHeaderColor(tablewriter.Colors{tablewriter.BgHiWhiteColor, tablewriter.Bold, tablewriter.BgBlackColor,tablewriter.ALIGN_CENTER},)
+					table.Render()
+					cmd.Println("\n")
+				} else {
+					cmd.Println(result[i])
+				}
 			}
 		}
 		lim , _ := strconv.Atoi(limit)
