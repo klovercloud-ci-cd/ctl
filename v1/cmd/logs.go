@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/fatih/color"
 	"github.com/klovercloud-ci/ctl/dependency_manager"
 	v1 "github.com/klovercloud-ci/ctl/v1"
-	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -97,17 +97,9 @@ func getLogs(cmd *cobra.Command, apiServerUrl, token, processId, page, limit str
 			if result[i] != "" {
 				if strings.HasSuffix(strings.ToLower(result[i]), "step started") {
 					cmd.Println("\n")
-					table := tablewriter.NewWriter(os.Stdout)
-					table.SetHeader([]string{result[i]})
-					table.SetBorder(false)
-					table.SetBorders(tablewriter.Border{
-						Left:   false,
-						Right:  false,
-						Top:    false,
-						Bottom: false,
-					})
-					table.SetHeaderColor(tablewriter.Colors{tablewriter.BgHiWhiteColor, tablewriter.Bold, tablewriter.BgBlackColor,tablewriter.ALIGN_CENTER},)
-					table.Render()
+					color.Set(color.FgHiCyan, color.Bold)
+					fmt.Println(center(result[i], 110))
+					color.Unset()
 					cmd.Println("\n")
 				} else {
 					cmd.Println(result[i])
@@ -133,4 +125,8 @@ func getLogs(cmd *cobra.Command, apiServerUrl, token, processId, page, limit str
 		getLogs(cmd, apiServerUrl, token, processId, page, limit, follow, skip)
 	}
 	return nil
+}
+
+func center(s string, w int) string {
+	return fmt.Sprintf("%[1]*s", -w, fmt.Sprintf("%[1]*s", (w+len(s))/2, s))
 }
