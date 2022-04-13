@@ -18,7 +18,7 @@ type LoginDto struct {
 	Password string `json:"password" bson:"password"`
 }
 
-func Login() *cobra.Command{
+func Login() *cobra.Command {
 	return &cobra.Command{
 		Use:       "login",
 		Short:     "Login using email and password",
@@ -27,8 +27,8 @@ func Login() *cobra.Command{
 			var apiServerUrl string
 			var securityUrl string
 			for idx, each := range args {
-				if strings.Contains(strings.ToLower(each), "option") {
-					if idx + 1 < len(args) {
+				if strings.Contains(strings.ToLower(each), "-o") {
+					if idx+1 < len(args) {
 						if strings.Contains(strings.ToLower(args[idx+1]), "apiserver=") {
 							strs := strings.Split(strings.ToLower(args[idx+1]), "=")
 							if len(strs) > 1 {
@@ -85,10 +85,11 @@ func Login() *cobra.Command{
 			cmd.Println("[SUCCESS]: Successfully logged in!")
 			return nil
 		},
+		DisableFlagParsing: true,
 	}
 }
 
-func Logout() *cobra.Command{
+func Logout() *cobra.Command {
 	return &cobra.Command{
 		Use:       "logout",
 		Short:     "Logout user from the ctl",
