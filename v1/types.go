@@ -10,7 +10,7 @@ import (
 
 // ResponseDTO Http response dto
 type ResponseDTO struct {
-	Metadata interface{}      `json:"_metadata"`
+	Metadata interface{} `json:"_metadata"`
 	Data     interface{} `json:"data" msgpack:"data" xml:"data"`
 	Status   string      `json:"status" msgpack:"status" xml:"status"`
 	Message  string      `json:"message" msgpack:"message" xml:"message"`
@@ -18,9 +18,9 @@ type ResponseDTO struct {
 
 // RepositoryDto contains repository dto
 type RepositoryDto struct {
-	ApiVersion string `bson:"apiVersion" json:"apiVersion"`
-	Kind       string `bson:"kind" json:"kind"`
-	Repository Repository	`bson:"repository" json:"repository"`
+	ApiVersion string     `bson:"apiVersion" json:"apiVersion"`
+	Kind       string     `bson:"kind" json:"kind"`
+	Repository Repository `bson:"repository" json:"repository"`
 }
 
 // Repositories contains repository list
@@ -39,9 +39,9 @@ type Repository struct {
 
 // ApplicationDto contains application dto
 type ApplicationDto struct {
-	ApiVersion string `bson:"apiVersion" json:"apiVersion"`
-	Kind       string `bson:"kind" json:"kind"`
-	Application Application	`bson:"application" json:"application"`
+	ApiVersion  string      `bson:"apiVersion" json:"apiVersion"`
+	Kind        string      `bson:"kind" json:"kind"`
+	Application Application `bson:"application" json:"application"`
 }
 
 // Application contains application info
@@ -55,7 +55,7 @@ type ApplicationMetadata struct {
 	Labels           map[string]string `bson:"labels" json:"labels"`
 	Id               string            `bson:"id" json:"id"`
 	Name             string            `bson:"name" json:"name"`
-	IsWebhookEnabled bool            `bson:"is_webhook_enabled" json:"is_webhook_enabled"`
+	IsWebhookEnabled bool              `bson:"is_webhook_enabled" json:"is_webhook_enabled"`
 }
 
 // Applications contains application list
@@ -66,18 +66,18 @@ type Applications []struct {
 
 // CompanyDto contains company data
 type CompanyDto struct {
-	ApiVersion string `bson:"apiVersion" json:"apiVersion"`
-	Kind       string `bson:"kind" json:"kind"`
-	Company Company	`bson:"company" json:"company"`
+	ApiVersion string  `bson:"apiVersion" json:"apiVersion"`
+	Kind       string  `bson:"kind" json:"kind"`
+	Company    Company `bson:"company" json:"company"`
 }
 
 // Company contains company data
 type Company struct {
-	MetaData     CompanyMetadata      `bson:"_metadata" json:"_metadata"`
-	Id           string               `bson:"id" json:"id"`
-	Name         string               `bson:"name" json:"name"`
-	Repositories []Repository         `bson:"repositories" json:"repositories"`
-	Status       string `bson:"status" json:"status"`
+	MetaData     CompanyMetadata `bson:"_metadata" json:"_metadata"`
+	Id           string          `bson:"id" json:"id"`
+	Name         string          `bson:"name" json:"name"`
+	Repositories []Repository    `bson:"repositories" json:"repositories"`
+	Status       string          `bson:"status" json:"status"`
 }
 
 // CompanyMetadata contains company metadata info
@@ -93,7 +93,7 @@ type Processes []struct {
 	AppId        string                 `bson:"app_id" json:"app_id"`
 	RepositoryId string                 `bson:"repository_id" json:"repository_id"`
 	Data         map[string]interface{} `bson:"data" json:"data"`
-	CreatedAt	 time.Time					`bson:"created_at" json:"created_at"`
+	CreatedAt    time.Time              `bson:"created_at" json:"created_at"`
 }
 
 // UserRegistrationDto dto that holds user registration info.
@@ -105,10 +105,10 @@ type UserRegistrationDto struct {
 	Email              string                 `json:"email" bson:"email" `
 	Phone              string                 `json:"phone" bson:"phone"`
 	Password           string                 `json:"password" bson:"password" `
-	Status             string           	  `json:"status" bson:"status"`
+	Status             string                 `json:"status" bson:"status"`
 	CreatedDate        time.Time              `json:"created_date" bson:"created_date"`
 	UpdatedDate        time.Time              `json:"updated_date" bson:"updated_date"`
-	AuthType           string       		  `json:"auth_type" bson:"auth_type"`
+	AuthType           string                 `json:"auth_type" bson:"auth_type"`
 	ResourcePermission UserResourcePermission `json:"resource_permission" bson:"resource_permission"`
 }
 
@@ -135,8 +135,8 @@ type UserMetadata struct {
 
 // UserResourcePermissionDto holds metadata and user
 type UserResourcePermissionDto struct {
-	Metadata  UserMetadata           `json:"metadata" bson:"-"`
-	UserId    string                 `json:"user_id" bson:"user_id"`
+	Metadata UserMetadata `json:"metadata" bson:"-"`
+	UserId   string       `json:"user_id" bson:"user_id"`
 }
 
 // PasswordResetDto contains data for password reset
@@ -149,9 +149,10 @@ type PasswordResetDto struct {
 
 // Config contains config file struct
 type Config struct {
-	Token 			string `json:"token" bson:"token"`
-	ApiServerUrl 	string `json:"api_server_url" bson:"api_server_url"`
-	SecurityUrl 	string `json:"security_url" bson:"security_url"`
+	Token        string `json:"token" bson:"token"`
+	ApiServerUrl string `json:"api_server_url" bson:"api_server_url"`
+	SecurityUrl  string `json:"security_url" bson:"security_url"`
+	RepositoryId string `json:"repository_id" bson:"repository_id"`
 }
 
 func (cfg Config) Store() error {
@@ -184,7 +185,7 @@ func (cfg Config) Store() error {
 }
 
 func GetConfigFile() Config {
-	jsonFile, err := os.Open(GetCfgPath()+"config.cfg")
+	jsonFile, err := os.Open(GetCfgPath() + "config.cfg")
 	if err != nil {
 		return Config{}
 	}

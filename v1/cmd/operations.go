@@ -635,6 +635,48 @@ func List() *cobra.Command {
 	}
 }
 
+func Set() *cobra.Command {
+	return &cobra.Command{
+		Use:       "set",
+		Short:     "Set Default Id [repository]",
+		ValidArgs: []string{},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cfg := v1.GetConfigFile()
+			if cfg.Token == "" {
+				cmd.Printf("[ERROR]: %v", "user is not logged in")
+				return nil
+			}
+			if len(args) < 1 {
+				cmd.Printf("[ERROR]: %v", "please provide a resource name!")
+				return nil
+			}
+			var repositoryId string
+			if strings.Contains(strings.ToLower(args[0]), "repo=") {
+				strs := strings.Split(strings.ToLower(args[0]), "=")
+				if len(strs) > 1 {
+					repositoryId = strs[1]
+				}
+			} else if strings.ToLower(args[0]) == "-r" {
+				if len(args) > 0 {
+					repositoryId = args[1]
+				}
+			}
+			if repositoryId != "" {
+				cfg.RepositoryId = repositoryId
+				err := cfg.Store()
+				if err != nil {
+					cmd.Println("[ERROR]: ", err.Error())
+					return nil
+				}
+				cmd.Println("[Success]: " + "successfully updated repository id")
+			}
+			return nil
+		},
+		DisableFlagParsing: true,
+	}
+
+}
+
 func Update() *cobra.Command {
 	return &cobra.Command{
 		Use:       "update",
