@@ -8,21 +8,22 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
+	"log"
 	"os"
 	"strconv"
 )
 
 type companyService struct {
-	httpClient service.HttpClient
-	flag string
-    company interface{}
-	companyId string
-	repoId string
-	option string
-	cmd *cobra.Command
-	kind string
+	httpClient   service.HttpClient
+	flag         string
+	company      interface{}
+	companyId    string
+	repoId       string
+	option       string
+	cmd          *cobra.Command
+	kind         string
 	apiServerUrl string
-	token string
+	token        string
 }
 
 func (c companyService) ApiServerUrl(apiServerUrl string) service.Company {
@@ -36,36 +37,36 @@ func (c companyService) Token(token string) service.Company {
 }
 
 func (c companyService) Kind(kind string) service.Company {
-	c.kind=kind
+	c.kind = kind
 	return c
 }
 
 func (c companyService) Cmd(cmd *cobra.Command) service.Company {
-	c.cmd=cmd
+	c.cmd = cmd
 	return c
 }
 func (c companyService) Flag(flag string) service.Company {
-	c.flag=flag
+	c.flag = flag
 	return c
 }
 
 func (c companyService) Company(company interface{}) service.Company {
-	c.company=company
+	c.company = company
 	return c
 }
 
 func (c companyService) CompanyId(companyId string) service.Company {
-	c.companyId=companyId
+	c.companyId = companyId
 	return c
 }
 
 func (c companyService) RepoId(repoId string) service.Company {
-	c.repoId=repoId
+	c.repoId = repoId
 	return c
 }
 
 func (c companyService) Option(option string) service.Company {
-	c.option=option
+	c.option = option
 	return c
 }
 
@@ -82,7 +83,8 @@ func (c companyService) Apply() {
 		if c.option != string(enums.APPEND_REPOSITORY) && c.option != string(enums.SOFT_DELETE_REPOSITORY) && c.option != string(enums.DELETE_REPOSITORY) {
 			c.cmd.Println("[ERROR]: Invalid Repository Update Option")
 		} else {
-			err :=  c.UpdateRepositoriesByCompanyId(c.company, c.companyId, c.option)
+			err := c.UpdateRepositoriesByCompanyId(c.company, c.companyId, c.option)
+			log.Println(err)
 			if err != nil {
 				c.cmd.Println("[ERROR]: Repository Update Failed")
 			} else {
@@ -93,7 +95,7 @@ func (c companyService) Apply() {
 		if c.option != string(enums.APPEND_APPLICATION) && c.option != string(enums.SOFT_DELETE_APPLICATION) && c.option != string(enums.DELETE_APPLICATION) {
 			c.cmd.Println("[ERROR]: Invalid Application Update Option")
 		} else {
-			err :=  c.UpdateApplicationsByRepositoryId(c.company, c.repoId, c.option)
+			err := c.UpdateApplicationsByRepositoryId(c.company, c.repoId, c.option)
 			if err != nil {
 				c.cmd.Println("[ERROR]: Application Update Failed")
 			} else {

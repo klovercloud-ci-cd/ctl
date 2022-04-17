@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-func Create() *cobra.Command{
+func Create() *cobra.Command {
 	return &cobra.Command{
 		Use:       "create",
 		Short:     "Create resource [user/repositories/applications]",
@@ -23,22 +23,22 @@ func Create() *cobra.Command{
 				cmd.Printf("[ERROR]: %v", "user is not logged in")
 				return nil
 			}
-			if len(args) < 1{
+			if len(args) < 1 {
 				cmd.Printf("[ERROR]: %v", "please provide a resource name!")
 				return nil
 			}
 			var apiServerUrl string
 			var securityUrl string
 			var file string
-			if args[0] == "user" {
+			if strings.ToLower(args[0]) == "-u" || strings.ToLower(args[0]) == "user" {
 				for idx, each := range args {
 					if strings.Contains(strings.ToLower(each), "file=") || strings.Contains(strings.ToLower(each), "-f=") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 0 {
 							file = strs[1]
 						}
-					} else if strings.Contains(strings.ToLower(each), "option") {
-						if idx + 1 < len(args) {
+					} else if strings.Contains(strings.ToLower(each), "option") || strings.Contains(strings.ToLower(each), "-o") {
+						if idx+1 < len(args) {
 							if strings.Contains(strings.ToLower(args[idx+1]), "apiserver=") {
 								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
 								if len(strs) > 1 {
@@ -97,7 +97,7 @@ func Create() *cobra.Command{
 				userService := dependency_manager.GetUserService()
 				userService.Cmd(cmd).SecurityUrl(cfg.SecurityUrl).Token(cfg.Token).Flag(string(enums.CREATE_USER)).User(user).Apply()
 				return nil
-			} else if args[0]=="repositories" || args[0]=="repos"{
+			} else if strings.ToLower(args[0]) == "repositories" || strings.ToLower(args[0]) == "repos" || strings.ToLower(args[0]) == "-r" {
 				userMetadata, err := v1.GetUserMetadataFromBearerToken(cfg.Token)
 				if err != nil {
 					cmd.Printf("[ERROR]: %v", err.Error())
@@ -160,7 +160,7 @@ func Create() *cobra.Command{
 				companyService := dependency_manager.GetCompanyService()
 				companyService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Cmd(cmd).Flag(string(enums.UPDATE_REPOSITORIES)).Company(*repos).CompanyId(companyId).Option("APPEND_REPOSITORY").Apply()
 				return nil
-			} else if args[0]=="applications" || args[0]=="apps"{
+			} else if strings.ToLower(args[0]) == "applications" || strings.ToLower(args[0]) == "apps" || strings.ToLower(args[0]) == "-a" {
 				var repoId string
 				for _, each := range args {
 					if strings.Contains(strings.ToLower(each), "file=") || strings.Contains(strings.ToLower(each), "-f=") {
@@ -168,7 +168,7 @@ func Create() *cobra.Command{
 						if len(strs) > 1 {
 							file = strs[1]
 						}
-					} else if strings.Contains(strings.ToLower(each), "repoid=") {
+					} else if strings.Contains(strings.ToLower(each), "repo=") {
 						strs := strings.Split(each, "=")
 						if len(strs) > 1 {
 							repoId = strs[1]
@@ -228,10 +228,11 @@ func Create() *cobra.Command{
 				return nil
 			}
 		},
+		DisableFlagParsing: true,
 	}
 }
 
-func Registration() *cobra.Command{
+func Registration() *cobra.Command {
 	return &cobra.Command{
 		Use:       "register",
 		Short:     "Register user",
@@ -246,8 +247,8 @@ func Registration() *cobra.Command{
 					if len(strs) > 0 {
 						file = strs[1]
 					}
-				} else if strings.Contains(strings.ToLower(each), "option") {
-					if idx + 1 < len(args) {
+				} else if strings.Contains(strings.ToLower(each), "option") || strings.Contains(strings.ToLower(each), "-o") {
+					if idx+1 < len(args) {
 						if strings.Contains(strings.ToLower(args[idx+1]), "apiserver=") {
 							strs := strings.Split(strings.ToLower(args[idx+1]), "=")
 							if len(strs) > 1 {
@@ -308,10 +309,11 @@ func Registration() *cobra.Command{
 			userService.SecurityUrl(cfg.SecurityUrl).Cmd(cmd).Flag(string(enums.CREATE_ADMIN)).User(user).Apply()
 			return nil
 		},
+		DisableFlagParsing: true,
 	}
 }
 
-func Describe() *cobra.Command{
+func Describe() *cobra.Command {
 	return &cobra.Command{
 		Use:       "describe",
 		Short:     "Describe resource [company/repository/application]",
@@ -322,7 +324,7 @@ func Describe() *cobra.Command{
 				cmd.Printf("[ERROR]: %v", "user is not logged in")
 				return nil
 			}
-			if len(args) < 1{
+			if len(args) < 1 {
 				cmd.Printf("[ERROR]: %v", "please provide a resource name!")
 				return nil
 			}
@@ -337,20 +339,20 @@ func Describe() *cobra.Command{
 				return nil
 			}
 			var apiServerUrl string
-			if args[0]=="company"{
+			if strings.ToLower(args[0]) == "company" || strings.ToLower(args[0]) == "-c" {
 				loadRepo := false
 				loadApp := false
 				for idx, each := range args {
-					if strings.Contains(strings.ToLower(each), "option") {
-						if idx + 1 < len(args) {
-							if strings.Contains(strings.ToLower(args[idx+1]), "loadrepositories=") ||  strings.Contains(strings.ToLower(args[idx+1]), "loadrepos=") || strings.Contains(strings.ToLower(args[idx+1]), "lr=") {
+					if strings.Contains(strings.ToLower(each), "option") || strings.Contains(strings.ToLower(each), "-o") {
+						if idx+1 < len(args) {
+							if strings.Contains(strings.ToLower(args[idx+1]), "loadrepositories=") || strings.Contains(strings.ToLower(args[idx+1]), "loadrepos=") || strings.Contains(strings.ToLower(args[idx+1]), "lr=") {
 								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
 								if len(strs) > 1 {
 									if strs[1] == "true" {
 										loadRepo = true
 									}
 								}
-							} else if strings.Contains(strings.ToLower(args[idx+1]), "loadapplications=") ||  strings.Contains(strings.ToLower(args[idx+1]), "loadapps=") || strings.Contains(strings.ToLower(args[idx+1]), "la="){
+							} else if strings.Contains(strings.ToLower(args[idx+1]), "loadapplications=") || strings.Contains(strings.ToLower(args[idx+1]), "loadapps=") || strings.Contains(strings.ToLower(args[idx+1]), "la=") {
 								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
 								if len(strs) > 1 {
 									if strs[1] == "true" {
@@ -380,14 +382,14 @@ func Describe() *cobra.Command{
 					}
 				}
 				companyService := dependency_manager.GetCompanyService()
-				companyService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Kind("Company").Cmd(cmd).Flag(string(enums.GET_COMPANY_BY_ID)).CompanyId(companyId).Option("loadRepositories="+strconv.FormatBool(loadRepo)+"&loadApplications="+strconv.FormatBool(loadApp)).Apply()
-			}else if args[0]=="repository" || args[0]=="repo"{
-				if len(args)<2 {
+				companyService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Kind("Company").Cmd(cmd).Flag(string(enums.GET_COMPANY_BY_ID)).CompanyId(companyId).Option("loadRepositories=" + strconv.FormatBool(loadRepo) + "&loadApplications=" + strconv.FormatBool(loadApp)).Apply()
+			} else if strings.ToLower(args[0]) == "repository" || strings.ToLower(args[0]) == "repo" || strings.ToLower(args[0]) == "-r" {
+				if len(args) < 2 {
 					cmd.Printf("[ERROR]: %v", "please provide repository id!")
 					return nil
 				}
 				var repoId string
-				if strings.Contains(strings.ToLower(args[1]), "repoid=") {
+				if strings.Contains(strings.ToLower(args[1]), "repo=") {
 					strs := strings.Split(strings.ToLower(args[1]), "=")
 					if len(strs) > 1 {
 						repoId = strs[1]
@@ -395,9 +397,9 @@ func Describe() *cobra.Command{
 				}
 				loadApp := false
 				for idx, each := range args {
-					if strings.Contains(strings.ToLower(each), "option") {
-						if idx + 1 < len(args) {
-							if strings.Contains(strings.ToLower(args[idx+1]), "loadapplications=") ||  strings.Contains(strings.ToLower(args[idx+1]), "loadapps=") || strings.Contains(strings.ToLower(args[idx+1]), "la="){
+					if strings.Contains(strings.ToLower(each), "option") || strings.Contains(strings.ToLower(each), "-o") {
+						if idx+1 < len(args) {
+							if strings.Contains(strings.ToLower(args[idx+1]), "loadapplications=") || strings.Contains(strings.ToLower(args[idx+1]), "loadapps=") || strings.Contains(strings.ToLower(args[idx+1]), "la=") {
 								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
 								if len(strs) > 1 {
 									if strs[1] == "true" {
@@ -427,17 +429,17 @@ func Describe() *cobra.Command{
 					}
 				}
 				repositoryService := dependency_manager.GetRepositoryService()
-				repositoryService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Kind("Repository").Cmd(cmd).Flag(string(enums.GET_REPOSITORY)).Repo(repoId).Option("loadApplications="+strconv.FormatBool(loadApp)).Apply()
-			}else if args[0]=="application" || args[0]=="app" {
+				repositoryService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Kind("Repository").Cmd(cmd).Flag(string(enums.GET_REPOSITORY)).Repo(repoId).Option("loadApplications=" + strconv.FormatBool(loadApp)).Apply()
+			} else if strings.ToLower(args[0]) == "application" || strings.ToLower(args[0]) == "app" || strings.ToLower(args[0]) == "-a" {
 				var repoId string
 				var appId string
 				for _, each := range args {
-					if strings.Contains(strings.ToLower(each), "repositoryid=") || strings.Contains(strings.ToLower(each), "repoid=") {
+					if strings.Contains(strings.ToLower(each), "repository=") || strings.Contains(strings.ToLower(each), "repo=") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
 							repoId = strs[1]
 						}
-					} else if strings.Contains(strings.ToLower(each), "applicationid=") || strings.Contains(strings.ToLower(each), "appid=") {
+					} else if strings.Contains(strings.ToLower(each), "application=") || strings.Contains(strings.ToLower(each), "app=") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
 							appId = strs[1]
@@ -478,10 +480,11 @@ func Describe() *cobra.Command{
 			}
 			return nil
 		},
+		DisableFlagParsing: true,
 	}
 }
 
-func List() *cobra.Command{
+func List() *cobra.Command {
 	return &cobra.Command{
 		Use:       "list",
 		Short:     "List resources [company/repository/application/process]",
@@ -492,7 +495,7 @@ func List() *cobra.Command{
 				cmd.Printf("[ERROR]: %v", "user is not logged in")
 				return nil
 			}
-			if len(args) < 1{
+			if len(args) < 1 {
 				cmd.Printf("[ERROR]: %v", "please provide a resource name!")
 				return nil
 			}
@@ -507,12 +510,12 @@ func List() *cobra.Command{
 				return nil
 			}
 			var apiServerUrl string
-			if args[0]=="repositories" || args[0]=="repos"{
+			if strings.ToLower(args[0]) == "repositories" || strings.ToLower(args[0]) == "repos" || strings.ToLower(args[0]) == "-r" {
 				loadApp := false
 				for idx, each := range args {
-					if strings.Contains(strings.ToLower(each), "option") {
-						if idx + 1 < len(args) {
-							if strings.Contains(strings.ToLower(args[idx+1]), "loadapplications=") ||  strings.Contains(strings.ToLower(args[idx+1]), "loadapps=") || strings.Contains(strings.ToLower(args[idx+1]), "la="){
+					if strings.Contains(strings.ToLower(each), "option") || strings.Contains(strings.ToLower(each), "-o") {
+						if idx+1 < len(args) {
+							if strings.Contains(strings.ToLower(args[idx+1]), "loadapplications=") || strings.Contains(strings.ToLower(args[idx+1]), "loadapps=") || strings.Contains(strings.ToLower(args[idx+1]), "la=") {
 								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
 								if len(strs) > 1 {
 									if strs[1] == "true" {
@@ -542,11 +545,11 @@ func List() *cobra.Command{
 					}
 				}
 				companyService := dependency_manager.GetCompanyService()
-				companyService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Kind("Repository").Cmd(cmd).Flag(string(enums.GET_REPOSITORIES)).CompanyId(companyId).Option("loadApplications="+strconv.FormatBool(loadApp)).Apply()
-			} else if args[0]=="applications" || args[0]=="apps"{
+				companyService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Kind("Repository").Cmd(cmd).Flag(string(enums.GET_REPOSITORIES)).CompanyId(companyId).Option("loadApplications=" + strconv.FormatBool(loadApp)).Apply()
+			} else if strings.ToLower(args[0]) == "applications" || strings.ToLower(args[0]) == "apps" || strings.ToLower(args[0]) == "-a" {
 				var repoId string
 				for _, each := range args {
-					if strings.Contains(strings.ToLower(each), "repositoryid=") || strings.Contains(strings.ToLower(each), "repoid=") {
+					if strings.Contains(strings.ToLower(each), "repository=") || strings.Contains(strings.ToLower(each), "repo=") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
 							repoId = strs[1]
@@ -578,16 +581,16 @@ func List() *cobra.Command{
 					repositoryService := dependency_manager.GetRepositoryService()
 					repositoryService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Kind("Application").Cmd(cmd).Flag(string(enums.GET_APPLICATIONS)).Repo(repoId).Apply()
 				}
-			} else if args[0]=="process" {
+			} else if strings.ToLower(args[0]) == "process" || strings.ToLower(args[0]) == "-p" {
 				var repoId string
 				var appId string
 				for _, each := range args {
-					if strings.Contains(strings.ToLower(each), "repositoryid=") || strings.Contains(strings.ToLower(each), "repoid=") {
+					if strings.Contains(strings.ToLower(each), "repository=") || strings.Contains(strings.ToLower(each), "repo=") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
 							repoId = strs[1]
 						}
-					} else if strings.Contains(strings.ToLower(each), "applicationid=") || strings.Contains(strings.ToLower(each), "appid=") {
+					} else if strings.Contains(strings.ToLower(each), "application=") || strings.Contains(strings.ToLower(each), "app=") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
 							appId = strs[1]
@@ -628,16 +631,17 @@ func List() *cobra.Command{
 			}
 			return nil
 		},
+		DisableFlagParsing: true,
 	}
 }
 
-func Update() *cobra.Command{
+func Update() *cobra.Command {
 	return &cobra.Command{
 		Use:       "update",
 		Short:     "Update resource [user/repository/application]",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) < 1{
+			if len(args) < 1 {
 				cmd.Printf("[ERROR]: %v", "please provide a resource name!")
 				return nil
 			}
@@ -646,14 +650,14 @@ func Update() *cobra.Command{
 			var repoId string
 			var email string
 			var apiServerUrl string
-			if args[0]=="user" {
+			if strings.ToLower(args[0]) == "user" || strings.ToLower(args[0]) == "-u" {
 				for _, each := range args {
 					if strings.Contains(strings.ToLower(each), "file=") || strings.Contains(strings.ToLower(each), "-f=") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 0 {
 							file = strs[1]
 						}
-					} else if strings.Contains(strings.ToLower(each), "option=") {
+					} else if strings.Contains(strings.ToLower(each), "option=") || strings.Contains(strings.ToLower(each), "-o=") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
 							option = strs[1]
@@ -714,7 +718,7 @@ func Update() *cobra.Command{
 					}
 					userService := dependency_manager.GetUserService()
 					userService.SecurityUrl(cfg.SecurityUrl).Token(cfg.Token).Cmd(cmd).Flag(string(enums.ATTACH_COMPANY)).Company(company).Apply()
-				} else if option == string(enums.RESET_PASSWORD) || option == "rp" {
+				} else if strings.ToLower(option) == string(enums.RESET_PASSWORD) || strings.ToLower(option) == "rp" {
 					if file == "" {
 						cmd.Printf("[ERROR]: %v", "please provide a file!")
 						return nil
@@ -744,7 +748,7 @@ func Update() *cobra.Command{
 					userService := dependency_manager.GetUserService()
 					userService.SecurityUrl(cfg.SecurityUrl).Cmd(cmd).Flag(string(enums.FORGOT_PASSWORD)).Email(email).Apply()
 				}
-			} else if args[0]=="repositories" || args[0]=="repos"{
+			} else if strings.ToLower(args[0]) == "repositories" || strings.ToLower(args[0]) == "repos" || strings.ToLower(args[0]) == "-r" {
 				cfg := v1.GetConfigFile()
 				if cfg.Token == "" {
 					cmd.Printf("[ERROR]: %v", "user is not logged in")
@@ -821,7 +825,7 @@ func Update() *cobra.Command{
 				companyService := dependency_manager.GetCompanyService()
 				companyService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Cmd(cmd).Flag(string(enums.UPDATE_REPOSITORIES)).Company(*repos).CompanyId(companyId).Option(option).Apply()
 				return nil
-			} else if args[0]=="applications" || args[0]=="apps"{
+			} else if strings.ToLower(args[0]) == "applications" || strings.ToLower(args[0]) == "apps" || strings.ToLower(args[0]) == "-a" {
 				cfg := v1.GetConfigFile()
 				if cfg.Token == "" {
 					cmd.Printf("[ERROR]: %v", "user is not logged in")
@@ -838,7 +842,7 @@ func Update() *cobra.Command{
 						if len(strs) > 1 {
 							option = strs[1]
 						}
-					} else if strings.Contains(strings.ToLower(each), "repoid=") {
+					} else if strings.Contains(strings.ToLower(each), "repo=") {
 						strs := strings.Split(each, "=")
 						if len(strs) > 1 {
 							repoId = strs[1]
@@ -903,5 +907,6 @@ func Update() *cobra.Command{
 			}
 			return nil
 		},
+		DisableFlagParsing: true,
 	}
 }
