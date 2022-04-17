@@ -9,6 +9,7 @@ import (
 	"golang.org/x/term"
 	_ "golang.org/x/term"
 	"os"
+	"strconv"
 	"strings"
 	"syscall"
 )
@@ -67,9 +68,9 @@ func Login() *cobra.Command{
 			}
 			cfg = v1.GetConfigFile()
 			oauthService := dependency_manager.GetOauthService()
-			ctlToken, err := oauthService.SecurityUrl(cfg.SecurityUrl).Apply(loginDto)
+			ctlToken, err, code := oauthService.SecurityUrl(cfg.SecurityUrl).Apply(loginDto)
 			if err != nil {
-				cmd.Println(err.Error())
+				cmd.Println("[ERROR]: " + err.Error() + " Status Code: " + strconv.Itoa(code))
 				return nil
 			}
 			if ctlToken == "" {

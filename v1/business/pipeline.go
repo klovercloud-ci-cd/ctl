@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/klovercloud-ci/ctl/common"
 	"github.com/klovercloud-ci/ctl/v1/service"
+	"net/http"
 )
 
 type pipelineService struct {
@@ -29,7 +30,7 @@ func (p pipelineService) Logs(url, page, limit string) (httpCode int, data inter
 	}
 	er := json.Unmarshal(b, &response)
 	if er != nil {
-		return code, nil, err
+		return http.StatusBadRequest, nil, err
 	}
 
 	return code, response.Data, nil

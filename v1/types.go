@@ -55,7 +55,7 @@ type ApplicationMetadata struct {
 	Labels           map[string]string `bson:"labels" json:"labels"`
 	Id               string            `bson:"id" json:"id"`
 	Name             string            `bson:"name" json:"name"`
-	IsWebhookEnabled bool            `bson:"is_webhook_enabled" json:"is_webhook_enabled"`
+	IsWebhookEnabled bool              `json:"is_webhook_enabled" yaml:"isWebhookEnabled"`
 }
 
 // Applications contains application list

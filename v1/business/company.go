@@ -8,6 +8,7 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
+	"net/http"
 	"os"
 	"strconv"
 )
@@ -72,9 +73,10 @@ func (c companyService) Option(option string) service.Company {
 func (c companyService) Apply() {
 	switch c.flag {
 	case string(enums.CREATE_COMPANY):
-		err := c.CreateCompany(c.company)
+		httpCode, _, err := c.CreateCompany(c.company)
 		if err != nil {
-			c.cmd.Printf("[ERROR]: %v", err)
+			c.cmd.Println("[ERROR]: %v", err)
+			c.cmd.Println("Status Code: %v", httpCode)
 		} else {
 			c.cmd.Println("Successfully Created Company")
 		}
@@ -82,9 +84,9 @@ func (c companyService) Apply() {
 		if c.option != string(enums.APPEND_REPOSITORY) && c.option != string(enums.SOFT_DELETE_REPOSITORY) && c.option != string(enums.DELETE_REPOSITORY) {
 			c.cmd.Println("[ERROR]: Invalid Repository Update Option")
 		} else {
-			err :=  c.UpdateRepositoriesByCompanyId(c.company, c.companyId, c.option)
+			httpCode, _, err :=  c.UpdateRepositoriesByCompanyId(c.company, c.companyId, c.option)
 			if err != nil {
-				c.cmd.Println("[ERROR]: Repository Update Failed")
+				c.cmd.Println("[ERROR]: " + err.Error() + "Status Code: ", httpCode)
 			} else {
 				c.cmd.Println("Successfully Updated Repositories")
 			}
@@ -93,19 +95,19 @@ func (c companyService) Apply() {
 		if c.option != string(enums.APPEND_APPLICATION) && c.option != string(enums.SOFT_DELETE_APPLICATION) && c.option != string(enums.DELETE_APPLICATION) {
 			c.cmd.Println("[ERROR]: Invalid Application Update Option")
 		} else {
-			err :=  c.UpdateApplicationsByRepositoryId(c.company, c.repoId, c.option)
+			httpCode, _, err :=  c.UpdateApplicationsByRepositoryId(c.company, c.repoId, c.option)
 			if err != nil {
-				c.cmd.Println("[ERROR]: Application Update Failed")
+				c.cmd.Println("[ERROR]: " + err.Error() + "Status Code: ", httpCode)
 			} else {
 				c.cmd.Println("Successfully Updated Applications")
 			}
 		}
 	case string(enums.GET_COMPANY_BY_ID):
-		code, data, err := c.GetCompanyById()
+		httpCode, data, err := c.GetCompanyById()
 		if err != nil {
-			c.cmd.Println("[ERROR]: ", err.Error())
-		} else if code != 200 {
-			c.cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", code)
+			c.cmd.Println("[ERROR]: " + err.Error() + "Status Code: ", httpCode)
+		} else if httpCode != 200 {
+			c.cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", httpCode)
 		} else if data != nil {
 			var responseDTO v1.ResponseDTO
 			err := json.Unmarshal(data, &responseDTO)
@@ -172,49 +174,49 @@ func (c companyService) Apply() {
 
 }
 
-func (c companyService) CreateCompany(company interface{}) error {
+func (c companyService) CreateCompany(company interface{}) (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + c.token
 	header["Content-Type"] = "application/json"
 	b, err := json.Marshal(company)
 	if err != nil {
-		return err
+		return http.StatusBadRequest, nil, err
 	}
-	_, _, err = c.httpClient.Post(c.apiServerUrl+"companies", header, b)
+	httpCode, data, err = c.httpClient.Post(c.apiServerUrl+"companies", header, b)
 	if err != nil {
-		return err
+		return httpCode, nil, err
 	}
-	return nil
+	return httpCode, data, nil
 }
 
-func (c companyService) UpdateRepositoriesByCompanyId(company interface{}, companyId string, option string) error {
+func (c companyService) UpdateRepositoriesByCompanyId(company interface{}, companyId string, option string) (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + c.token
 	header["Content-Type"] = "application/json"
 	b, err := json.Marshal(company)
 	if err != nil {
-		return err
+		return http.StatusBadRequest, nil, err
 	}
-	_, err = c.httpClient.Put(c.apiServerUrl+"companies/"+companyId+"/repositories?companyUpdateOption="+option, header, b)
+	httpCode, err = c.httpClient.Put(c.apiServerUrl+"companies/"+companyId+"/repositories?companyUpdateOption="+option, header, b)
 	if err != nil {
-		return err
+		return httpCode, nil, err
 	}
-	return nil
+	return httpCode, data, nil
 }
 
-func (c companyService) UpdateApplicationsByRepositoryId(company interface{}, repoId string, option string) error {
+func (c companyService) UpdateApplicationsByRepositoryId(company interface{}, repoId string, option string) (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + c.token
 	header["Content-Type"] = "application/json"
 	b, err := json.Marshal(company)
 	if err != nil {
-		return err
+		return http.StatusBadRequest, nil, err
 	}
-	_, _, err = c.httpClient.Post(c.apiServerUrl+"applications?repositoryId="+repoId+"&companyUpdateOption="+option, header, b)
+	httpCode, data, err = c.httpClient.Post(c.apiServerUrl+"applications?repositoryId="+repoId+"&companyUpdateOption="+option, header, b)
 	if err != nil {
-		return err
+		return httpCode, nil, err
 	}
-	return nil
+	return httpCode, data, nil
 }
 
 func (c companyService) GetCompanyById() (httpCode int, data []byte, err error) {

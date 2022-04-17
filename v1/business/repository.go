@@ -69,6 +69,7 @@ func (r repositoryService) Apply() {
 		code, data, err := r.GetRepositoryById(r.repo)
 		if err != nil {
 			r.cmd.Println("[ERROR]: ", err.Error())
+			r.cmd.Println("Status Code: ", code)
 		} else if code != 200 {
 			r.cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", code)
 		} else if data != nil {
@@ -91,11 +92,11 @@ func (r repositoryService) Apply() {
 			}
 		}
 	case string(enums.GET_APPLICATIONS):
-		code, data, err := r.GetApplicationsByRepositoryId(r.repo)
+		httpCode, data, err := r.GetApplicationsByRepositoryId(r.repo)
 		if err != nil {
-			r.cmd.Println("[ERROR]: ", err.Error())
-		} else if code != 200 {
-			r.cmd.Println("[ERROR]: ", "Something went wrong! Status Code: ", code)
+			r.cmd.Println("[ERROR]: " + err.Error() + "Status Code: ", httpCode)
+		} else if httpCode != 200 {
+			r.cmd.Println("[ERROR]: ", "Something went wrong! Status Code: ", httpCode)
 		} else if data != nil {
 			var responseDTO v1.ResponseDTO
 			err := json.Unmarshal(data, &responseDTO)

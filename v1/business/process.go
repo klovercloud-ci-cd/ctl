@@ -6,7 +6,6 @@ import (
 	"github.com/klovercloud-ci/ctl/v1/service"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
-	"log"
 	"os"
 	"strconv"
 	"time"
@@ -53,11 +52,11 @@ func (p processService) Cmd(cmd *cobra.Command) service.Process {
 }
 
 func (p processService) Apply() {
-	code, data, err := p.GetByCompanyIdAndRepositoryIdAndAppName()
+	httpCode, data, err := p.GetByCompanyIdAndRepositoryIdAndAppName()
 	if err != nil {
-		log.Fatalf("[ERROR]: %v", err)
-	} else if code != 200 {
-		p.cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", code)
+		p.cmd.Println("[ERROR]: " + err.Error() + "Status Code: ", httpCode)
+	} else if httpCode != 200 {
+		p.cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", httpCode)
 	} else if data != nil {
 		var responseDTO v1.ResponseDTO
 		err := json.Unmarshal(data, &responseDTO)

@@ -6,6 +6,7 @@ import (
 	v1 "github.com/klovercloud-ci/ctl/v1"
 	"github.com/klovercloud-ci/ctl/v1/service"
 	"github.com/spf13/cobra"
+	"net/http"
 )
 
 type userService struct {
@@ -64,37 +65,37 @@ func (u userService) Cmd(cmd *cobra.Command) service.User {
 func (u userService) Apply() {
 	switch u.flag {
 	case string(enums.CREATE_USER):
-		err := u.CreateUser(u.user)
+		httpCode, _, err := u.CreateUser(u.user)
 		if err != nil {
-			u.cmd.Printf("[ERROR]: %v", err)
+			u.cmd.Println("[ERROR]: " + err.Error() + "Status Code: ", httpCode)
 		} else {
 			u.cmd.Println("Successfully Created User")
 		}
 	case string(enums.CREATE_ADMIN):
-		err := u.CreateAdmin()
+		httpCode, _, err := u.CreateAdmin()
 		if err != nil {
-			u.cmd.Printf("[ERROR]: %v", err)
+			u.cmd.Println("[ERROR]: " + err.Error() + "Status Code: ", httpCode)
 		} else {
 			u.cmd.Println("Successfully Created User")
 		}
 	case string(enums.ATTACH_COMPANY):
-		err := u.AttachCompany(u.company)
+		httpCode, err := u.AttachCompany(u.company)
 		if err != nil {
-			u.cmd.Printf("[ERROR]: %v", err)
+			u.cmd.Println("[ERROR]: " + err.Error() + "Status Code: ", httpCode)
 		} else {
 			u.cmd.Println("[SUCCESS]: Successfully Attached Company")
 		}
 	case string(enums.RESET_PASSWORD):
-		err := u.ResetPassword(u.passwordResetDto)
+		httpCode, err := u.ResetPassword(u.passwordResetDto)
 		if err != nil {
-			u.cmd.Printf("[ERROR]: %v", err)
+			u.cmd.Println("[ERROR]: " + err.Error() + "Status Code: ", httpCode)
 		} else {
 			u.cmd.Println("[SUCCESS]: Successfully Reset Password")
 		}
 	case string(enums.FORGOT_PASSWORD):
-		err := u.ForgotPassword(u.email)
+		httpCode, err := u.ForgotPassword(u.email)
 		if err != nil {
-			u.cmd.Printf("[ERROR]: %v", err)
+			u.cmd.Println("[ERROR]: " + err.Error() + "Status Code: ", httpCode)
 		} else {
 			u.cmd.Println("[SUCCESS]: Otp sent sucessfully")
 		}
@@ -103,72 +104,72 @@ func (u userService) Apply() {
 	}
 }
 
-func (u userService) CreateUser(user v1.UserRegistrationDto) error {
+func (u userService) CreateUser(user v1.UserRegistrationDto) (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + u.token
 	header["Content-Type"] = "application/json"
 	b, err := json.Marshal(user)
 	if err != nil {
-		return err
+		return http.StatusBadRequest, nil, err
 	}
-	_, _, err = u.httpClient.Post(u.securityUrl+"users?action=create_user", header, b)
+	httpCode, data, err = u.httpClient.Post(u.securityUrl+"users?action=create_user", header, b)
 	if err != nil {
-		return err
+		return httpCode, nil, err
 	}
-	return nil
+	return httpCode, nil, nil
 }
 
-func (u userService) CreateAdmin() error {
+func (u userService) CreateAdmin() (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
 	header["Content-Type"] = "application/json"
 	b, err := json.Marshal(u.user)
 	if err != nil {
-		return err
+		return http.StatusBadRequest, nil, err
 	}
-	_, _, err = u.httpClient.Post(u.securityUrl+"users", header, b)
+	httpCode, data, err = u.httpClient.Post(u.securityUrl+"users", header, b)
 	if err != nil {
-		return err
+		return httpCode, nil, err
 	}
-	return nil
+	return httpCode, nil, nil
 }
 
-func (u userService) AttachCompany(company interface{}) error {
+func (u userService) AttachCompany(company interface{}) (httpCode int, err error) {
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + u.token
 	header["Content-Type"] = "application/json"
 	b, err := json.Marshal(company)
 	if err != nil {
-		return err
+		return http.StatusBadRequest, err
 	}
-	_, err = u.httpClient.Put(u.securityUrl+"users?action="+string(enums.ATTACH_COMPANY), header, b)
+	httpCode, err = u.httpClient.Put(u.securityUrl+"users?action="+string(enums.ATTACH_COMPANY), header, b)
 	if err != nil {
-		return err
+		return httpCode, err
 	}
-	return nil
+	return httpCode, nil
 }
 
-func (u userService) ResetPassword(passwordResetDto interface{}) error {
+func (u userService) ResetPassword(passwordResetDto interface{}) (httpCode int, err error) {
 	header := make(map[string]string)
 	header["Content-Type"] = "application/json"
 	b, err := json.Marshal(passwordResetDto)
 	if err != nil {
-		return err
+		return http.StatusBadRequest, err
 	}
 	_, err = u.httpClient.Put(u.securityUrl+"users?action="+string(enums.RESET_PASSWORD), header, b)
 	if err != nil {
-		return err
+		return httpCode, err
 	}
-	return nil
+	return httpCode, nil
 }
 
-func (u userService) ForgotPassword(email string) error {
+func (u userService) ForgotPassword(email string) (httpCode int, err error) {
 	header := make(map[string]string)
 	header["Content-Type"] = "application/json"
-	_, err := u.httpClient.Put(u.securityUrl+"users?action="+string(enums.FORGOT_PASSWORD)+"&media="+email, header, nil)
+	httpCode, err = u.httpClient.Put(u.securityUrl+"users?action="+string(enums.FORGOT_PASSWORD)+"&media="+email, header, nil)
 	if err != nil {
-		return err
+		return httpCode, err
 	}
-	return nil
+	return httpCode, nil
 }
 
 

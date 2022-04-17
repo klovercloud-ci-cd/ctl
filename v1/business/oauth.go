@@ -2,7 +2,6 @@ package business
 
 import (
 	"encoding/json"
-	"errors"
 	"github.com/klovercloud-ci/ctl/v1/service"
 )
 
@@ -20,40 +19,29 @@ type JWTPayLoad struct {
 	AccessToken  string `json:"access_token" bson:"access_token"`
 	RefreshToken string `json:"refresh_token" bson:"refresh_token"`
 }
-type ResponseDTOWithPagination struct {
+type ResponseDTO struct {
 	Data     JWTPayLoad `json:"data" msgpack:"data" xml:"data"`
 	Status   string      `json:"status" msgpack:"status" xml:"status"`
 	Message  string      `json:"message" msgpack:"message" xml:"message"`
 }
 
-type ErrorDTOWithPagination struct {
-	Data     string `json:"data" msgpack:"data" xml:"data"`
-	Status   string      `json:"status" msgpack:"status" xml:"status"`
-	Message  string      `json:"message" msgpack:"message" xml:"message"`
-}
-
-func (o oauthService) Apply(loginDto interface{}) (string, error) {
+func (o oauthService) Apply(loginDto interface{}) (string, error, int) {
 	header := make(map[string]string)
 	header["Content-Type"] = "application/json"
 	b, err := json.Marshal(loginDto)
 	if err != nil {
-		return "", err
+		return "", err, 0
 	}
-	_, data, err := o.httpClient.Post(o.securityUrl+"oauth/login?grant_type=password&token_type=ctl", header, b)
+	code, data, err := o.httpClient.Post(o.securityUrl+"oauth/login?grant_type=password&token_type=ctl", header, b)
 	if err != nil {
-		var errorData ErrorDTOWithPagination
-		err = json.Unmarshal([]byte(err.Error()), &errorData)
-		if err != nil {
-			return "", err
-		}
-		return "", errors.New(errorData.Data+" "+errorData.Message)
+		return "", err, code
 	}
-	var payload ResponseDTOWithPagination
+	var payload ResponseDTO
 	err = json.Unmarshal(data, &payload)
 	if err != nil {
-		return "", err
+		return "", err, code
 	}
-	return payload.Data.AccessToken, nil
+	return payload.Data.AccessToken, nil, code
 }
 
 // NewOauthService returns oauth type service
