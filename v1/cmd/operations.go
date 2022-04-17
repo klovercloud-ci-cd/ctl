@@ -172,6 +172,8 @@ func Create() *cobra.Command {
 						strs := strings.Split(each, "=")
 						if len(strs) > 1 {
 							repoId = strs[1]
+						} else {
+							repoId = cfg.RepositoryId
 						}
 					} else if strings.Contains(strings.ToLower(each), "apiserver=") {
 						strs := strings.Split(strings.ToLower(each), "=")
@@ -393,6 +395,8 @@ func Describe() *cobra.Command {
 					strs := strings.Split(strings.ToLower(args[1]), "=")
 					if len(strs) > 1 {
 						repoId = strs[1]
+					} else {
+						repoId = cfg.RepositoryId
 					}
 				}
 				loadApp := false
@@ -438,6 +442,8 @@ func Describe() *cobra.Command {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
 							repoId = strs[1]
+						} else {
+							repoId = cfg.RepositoryId
 						}
 					} else if strings.Contains(strings.ToLower(each), "application=") || strings.Contains(strings.ToLower(each), "app=") {
 						strs := strings.Split(strings.ToLower(each), "=")
@@ -553,6 +559,8 @@ func List() *cobra.Command {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
 							repoId = strs[1]
+						} else {
+							repoId = cfg.RepositoryId
 						}
 					} else if strings.Contains(strings.ToLower(each), "apiserver=") {
 						strs := strings.Split(strings.ToLower(each), "=")
@@ -589,6 +597,8 @@ func List() *cobra.Command {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
 							repoId = strs[1]
+						} else {
+							repoId = cfg.RepositoryId
 						}
 					} else if strings.Contains(strings.ToLower(each), "application=") || strings.Contains(strings.ToLower(each), "app=") {
 						strs := strings.Split(strings.ToLower(each), "=")
@@ -888,6 +898,8 @@ func Update() *cobra.Command {
 						strs := strings.Split(each, "=")
 						if len(strs) > 1 {
 							repoId = strs[1]
+						} else {
+							repoId = cfg.RepositoryId
 						}
 					} else if strings.Contains(strings.ToLower(each), "apiserver=") {
 						strs := strings.Split(strings.ToLower(each), "=")
