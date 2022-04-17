@@ -34,16 +34,16 @@ func AddRootIndent(b []byte, n int) []byte {
 	return bytes.ReplaceAll(b, []byte("\n"), prefix)
 }
 
-func GetCfgPath() string{
+func GetCfgPath() string {
 	path := os.Getenv("KCPATH")
-	if path[len(path) - 1] != '/' {
+	if path[len(path)-1] != '/' {
 		path += "/"
 	}
 	return path
 }
 
 func FixUrl(url string) string {
-	if url[len(url) - 1] != '/' {
+	if url[len(url)-1] != '/' {
 		url += "/"
 	}
 	return url
