@@ -128,6 +128,36 @@ type Role struct {
 	Name string `json:"name" bson:"name"`
 }
 
+type PipelineMetadata struct {
+	CompanyId       string          `json:"company_id" yaml:"company_id"`
+	CompanyMetadata CompanyMetadata `json:"company_metadata" yaml:"company_metadata"`
+}
+
+type PipelineApplyOption struct {
+	Purging string
+}
+
+type Pipeline struct {
+	MetaData   PipelineMetadata    `json:"_metadata" yaml:"_metadata"`
+	Option     PipelineApplyOption `json:"option" yaml:"option"`
+	ApiVersion string              `json:"api_version" yaml:"api_version"`
+	Name       string              `json:"name"  yaml:"name"`
+	ProcessId  string              `json:"process_id" yaml:"process_id"`
+	Label      map[string]string   `json:"label" yaml:"label"`
+	Steps      []Step              `json:"steps" yaml:"steps"`
+}
+
+type Step struct {
+	Name    string            `json:"name" yaml:"name"`
+	Type    string            `json:"type" yaml:"type"`
+	Status  string            `json:"status" yaml:"status"`
+	Trigger string            `json:"trigger" yaml:"trigger"`
+	Params  map[string]string `json:"params" yaml:"params"`
+	Next    []string          `json:"next" yaml:"next"`
+	ArgData map[string]string `json:"arg_data"  yaml:"arg_data"`
+	EnvData map[string]string `json:"env_data"  yaml:"env_data"`
+}
+
 // UserMetadata holds users metadata
 type UserMetadata struct {
 	CompanyId string `json:"company_id" bson:"company_id"`

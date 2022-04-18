@@ -5,9 +5,11 @@ import (
 	"github.com/klovercloud-ci/ctl/dependency_manager"
 	"github.com/klovercloud-ci/ctl/enums"
 	v1 "github.com/klovercloud-ci/ctl/v1"
+	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -482,6 +484,17 @@ func Describe() *cobra.Command {
 				}
 				applicationService := dependency_manager.GetApplicationService()
 				applicationService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Kind("Application").Cmd(cmd).Flag(string(enums.GET_APPLICATION)).RepoId(repoId).ApplicationId(appId).Apply()
+			} else if strings.ToLower(args[0]) == "process" || strings.ToLower(args[0]) == "-p" {
+				var processId string
+				for _, each := range args {
+					if strings.Contains(strings.ToLower(each), "processid=") || strings.Contains(strings.ToLower(each), "process=") {
+						strs := strings.Split(strings.ToLower(each), "=")
+						if len(strs) > 1 {
+							processId = strs[1]
+						}
+					}
+				}
+				return getPipeline(cmd, processId, "get_pipeline", cfg.ApiServerUrl, cfg.Token)
 			} else {
 				cmd.Println("[ERROR]: Wrong command")
 				return nil
@@ -491,7 +504,32 @@ func Describe() *cobra.Command {
 		DisableFlagParsing: true,
 	}
 }
-
+func getPipeline(cmd *cobra.Command, processId, action, url, token string) error {
+	pipelineService := dependency_manager.GetPipelineService()
+	code, data, err := pipelineService.Get(processId, action, url, token)
+	if err != nil {
+		cmd.Println("[ERROR]: ", err.Error())
+		return nil
+	} else if code != 200 {
+		cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", code)
+		return nil
+	} else if data != nil {
+		byteBody, _ := json.Marshal(data)
+		var pipeline v1.Pipeline
+		err := json.Unmarshal(byteBody, &pipeline)
+		if err != nil {
+			return err
+		}
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"Api Version", "Kind", "Step", "Status"})
+		for _, each := range pipeline.Steps {
+			process := []string{"api/v1", "Process", each.Name, each.Status}
+			table.Append(process)
+		}
+		table.Render()
+	}
+	return nil
+}
 func List() *cobra.Command {
 	return &cobra.Command{
 		Use:       "list",
