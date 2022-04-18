@@ -172,8 +172,6 @@ func Create() *cobra.Command {
 						strs := strings.Split(each, "=")
 						if len(strs) > 1 {
 							repoId = strs[1]
-						} else {
-							repoId = cfg.RepositoryId
 						}
 					} else if strings.Contains(strings.ToLower(each), "apiserver=") {
 						strs := strings.Split(strings.ToLower(each), "=")
@@ -200,8 +198,11 @@ func Create() *cobra.Command {
 					return nil
 				}
 				if repoId == "" {
-					cmd.Printf("[ERROR]: %v", "please provide repository id!")
-					return nil
+					repoId = cfg.RepositoryId
+					if repoId == "" {
+						cmd.Printf("[ERROR]: %v", "please provide repository id!")
+						return nil
+					}
 				}
 				data, err := ioutil.ReadFile(file)
 				if err != nil {
@@ -386,17 +387,17 @@ func Describe() *cobra.Command {
 				companyService := dependency_manager.GetCompanyService()
 				companyService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Kind("Company").Cmd(cmd).Flag(string(enums.GET_COMPANY_BY_ID)).CompanyId(companyId).Option("loadRepositories=" + strconv.FormatBool(loadRepo) + "&loadApplications=" + strconv.FormatBool(loadApp)).Apply()
 			} else if strings.ToLower(args[0]) == "repository" || strings.ToLower(args[0]) == "repo" || strings.ToLower(args[0]) == "-r" {
-				if len(args) < 2 {
-					cmd.Printf("[ERROR]: %v", "please provide repository id!")
-					return nil
-				}
 				var repoId string
-				if strings.Contains(strings.ToLower(args[1]), "repo=") {
+				if len(args) < 2 {
+					repoId = cfg.RepositoryId
+					if repoId == "" {
+						cmd.Printf("[ERROR]: %v", "please provide repository id!")
+						return nil
+					}
+				} else if strings.Contains(strings.ToLower(args[1]), "repo=") {
 					strs := strings.Split(strings.ToLower(args[1]), "=")
 					if len(strs) > 1 {
 						repoId = strs[1]
-					} else {
-						repoId = cfg.RepositoryId
 					}
 				}
 				loadApp := false
@@ -442,8 +443,6 @@ func Describe() *cobra.Command {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
 							repoId = strs[1]
-						} else {
-							repoId = cfg.RepositoryId
 						}
 					} else if strings.Contains(strings.ToLower(each), "application=") || strings.Contains(strings.ToLower(each), "app=") {
 						strs := strings.Split(strings.ToLower(each), "=")
@@ -458,8 +457,11 @@ func Describe() *cobra.Command {
 					}
 				}
 				if repoId == "" {
-					cmd.Printf("[ERROR]: %v", "please provide repository id!")
-					return nil
+					repoId = cfg.RepositoryId
+					if repoId == "" {
+						cmd.Printf("[ERROR]: %v", "please provide repository id!")
+						return nil
+					}
 				}
 				if appId == "" {
 					cmd.Printf("[ERROR]: %v", "please provide application id!")
@@ -559,8 +561,6 @@ func List() *cobra.Command {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
 							repoId = strs[1]
-						} else {
-							repoId = cfg.RepositoryId
 						}
 					} else if strings.Contains(strings.ToLower(each), "apiserver=") {
 						strs := strings.Split(strings.ToLower(each), "=")
@@ -597,8 +597,6 @@ func List() *cobra.Command {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
 							repoId = strs[1]
-						} else {
-							repoId = cfg.RepositoryId
 						}
 					} else if strings.Contains(strings.ToLower(each), "application=") || strings.Contains(strings.ToLower(each), "app=") {
 						strs := strings.Split(strings.ToLower(each), "=")
@@ -613,8 +611,11 @@ func List() *cobra.Command {
 					}
 				}
 				if repoId == "" {
-					cmd.Printf("[ERROR]: %v", "please provide repository id!")
-					return nil
+					repoId = cfg.RepositoryId
+					if repoId == "" {
+						cmd.Printf("[ERROR]: %v", "please provide repository id!")
+						return nil
+					}
 				}
 				if appId == "" {
 					cmd.Printf("[ERROR]: %v", "please provide application id!")
@@ -898,8 +899,6 @@ func Update() *cobra.Command {
 						strs := strings.Split(each, "=")
 						if len(strs) > 1 {
 							repoId = strs[1]
-						} else {
-							repoId = cfg.RepositoryId
 						}
 					} else if strings.Contains(strings.ToLower(each), "apiserver=") {
 						strs := strings.Split(strings.ToLower(each), "=")
@@ -926,8 +925,11 @@ func Update() *cobra.Command {
 					return nil
 				}
 				if repoId == "" {
-					cmd.Printf("[ERROR]: %v", "please provide repository id!")
-					return nil
+					repoId = cfg.RepositoryId
+					if repoId == "" {
+						cmd.Printf("[ERROR]: %v", "please provide repository id!")
+						return nil
+					}
 				}
 				if option == "" {
 					cmd.Printf("[ERROR]: %v", "please provide update option!")
