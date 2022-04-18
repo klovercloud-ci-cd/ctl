@@ -12,15 +12,15 @@ import (
 )
 
 type repositoryService struct {
-	httpClient service.HttpClient
-	flag string
-	companyId string
-	repo string
-	cmd *cobra.Command
-	option string
-	kind string
+	httpClient   service.HttpClient
+	flag         string
+	companyId    string
+	repo         string
+	cmd          *cobra.Command
+	option       string
+	kind         string
 	apiServerUrl string
-	token string
+	token        string
 }
 
 func (r repositoryService) ApiServerUrl(apiServerUrl string) service.Repository {
@@ -34,32 +34,32 @@ func (r repositoryService) Token(token string) service.Repository {
 }
 
 func (r repositoryService) Kind(kind string) service.Repository {
-	r.kind=kind
+	r.kind = kind
 	return r
 }
 
 func (r repositoryService) Option(option string) service.Repository {
-	r.option=option
+	r.option = option
 	return r
 }
 
 func (r repositoryService) Cmd(cmd *cobra.Command) service.Repository {
-	r.cmd=cmd
+	r.cmd = cmd
 	return r
 }
 
 func (r repositoryService) Flag(flag string) service.Repository {
-	r.flag=flag
+	r.flag = flag
 	return r
 }
 
 func (r repositoryService) CompanyId(companyId string) service.Repository {
-	r.companyId=companyId
+	r.companyId = companyId
 	return r
 }
 
 func (r repositoryService) Repo(repoId string) service.Repository {
-	r.repo=repoId
+	r.repo = repoId
 	return r
 }
 
@@ -80,7 +80,10 @@ func (r repositoryService) Apply() {
 			} else {
 				jsonString, _ := json.Marshal(responseDTO.Data)
 				var repository v1.Repository
-				json.Unmarshal(jsonString, &repository)
+				err := json.Unmarshal(jsonString, &repository)
+				if err != nil {
+					return
+				}
 				repositoryDto := v1.RepositoryDto{
 					ApiVersion: "api/v1",
 					Kind:       r.kind,
@@ -94,7 +97,7 @@ func (r repositoryService) Apply() {
 	case string(enums.GET_APPLICATIONS):
 		httpCode, data, err := r.GetApplicationsByRepositoryId(r.repo)
 		if err != nil {
-			r.cmd.Println("[ERROR]: " + err.Error() + "Status Code: ", httpCode)
+			r.cmd.Println("[ERROR]: "+err.Error()+"Status Code: ", httpCode)
 		} else if httpCode != 200 {
 			r.cmd.Println("[ERROR]: ", "Something went wrong! Status Code: ", httpCode)
 		} else if data != nil {

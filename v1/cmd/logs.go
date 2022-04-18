@@ -92,7 +92,10 @@ func getLogs(cmd *cobra.Command, apiServerUrl, token, processId, page, limit str
 	} else if data != nil {
 		byteBody, _ := json.Marshal(data)
 		var result []string
-		json.Unmarshal(byteBody, &result)
+		err := json.Unmarshal(byteBody, &result)
+		if err != nil {
+			return err
+		}
 		for i := skip; i < int64(len(result)); i++ {
 			if result[i] != "" {
 				if strings.HasSuffix(strings.ToLower(result[i]), "step started") {
@@ -106,8 +109,8 @@ func getLogs(cmd *cobra.Command, apiServerUrl, token, processId, page, limit str
 				}
 			}
 		}
-		lim , _ := strconv.Atoi(limit)
-		if len(result) <  lim {
+		lim, _ := strconv.Atoi(limit)
+		if len(result) < lim {
 			skip = int64(len(result))
 		} else {
 			skip = 0
@@ -122,7 +125,10 @@ func getLogs(cmd *cobra.Command, apiServerUrl, token, processId, page, limit str
 			page = strconv.Itoa(p + 1)
 		}
 		time.Sleep(time.Millisecond * 500)
-		getLogs(cmd, apiServerUrl, token, processId, page, limit, follow, skip)
+		err := getLogs(cmd, apiServerUrl, token, processId, page, limit, follow, skip)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

@@ -12,16 +12,16 @@ import (
 )
 
 type applicationService struct {
-	httpClient service.HttpClient
-	flag string
-	companyId string
-	repoId string
+	httpClient    service.HttpClient
+	flag          string
+	companyId     string
+	repoId        string
 	applicationId string
-	option string
-	cmd *cobra.Command
-	kind string
-	apiServerUrl string
-	token string
+	option        string
+	cmd           *cobra.Command
+	kind          string
+	apiServerUrl  string
+	token         string
 }
 
 func (a applicationService) ApiServerUrl(apiServerUrl string) service.Application {
@@ -50,7 +50,10 @@ func (a applicationService) Apply() {
 			} else {
 				jsonString, _ := json.Marshal(responseDTO.Data)
 				var application v1.Application
-				json.Unmarshal(jsonString, &application)
+				err := json.Unmarshal(jsonString, &application)
+				if err != nil {
+					return
+				}
 				applicationDto := v1.ApplicationDto{
 					ApiVersion:  "api/v1",
 					Kind:        a.kind,

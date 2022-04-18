@@ -84,9 +84,9 @@ func (c companyService) Apply() {
 		if c.option != string(enums.APPEND_REPOSITORY) && c.option != string(enums.SOFT_DELETE_REPOSITORY) && c.option != string(enums.DELETE_REPOSITORY) {
 			c.cmd.Println("[ERROR]: Invalid Repository Update Option")
 		} else {
-			httpCode, _, err :=  c.UpdateRepositoriesByCompanyId(c.company, c.companyId, c.option)
+			httpCode, _, err := c.UpdateRepositoriesByCompanyId(c.company, c.companyId, c.option)
 			if err != nil {
-				c.cmd.Println("[ERROR]: " + err.Error() + "Status Code: ", httpCode)
+				c.cmd.Println("[ERROR]: "+err.Error()+"Status Code: ", httpCode)
 			} else {
 				c.cmd.Println("Successfully Updated Repositories")
 			}
@@ -95,9 +95,9 @@ func (c companyService) Apply() {
 		if c.option != string(enums.APPEND_APPLICATION) && c.option != string(enums.SOFT_DELETE_APPLICATION) && c.option != string(enums.DELETE_APPLICATION) {
 			c.cmd.Println("[ERROR]: Invalid Application Update Option")
 		} else {
-			httpCode, _, err :=  c.UpdateApplicationsByRepositoryId(c.company, c.repoId, c.option)
+			httpCode, _, err := c.UpdateApplicationsByRepositoryId(c.company, c.repoId, c.option)
 			if err != nil {
-				c.cmd.Println("[ERROR]: " + err.Error() + "Status Code: ", httpCode)
+				c.cmd.Println("[ERROR]: "+err.Error()+"Status Code: ", httpCode)
 			} else {
 				c.cmd.Println("Successfully Updated Applications")
 			}
@@ -105,7 +105,7 @@ func (c companyService) Apply() {
 	case string(enums.GET_COMPANY_BY_ID):
 		httpCode, data, err := c.GetCompanyById()
 		if err != nil {
-			c.cmd.Println("[ERROR]: " + err.Error() + "Status Code: ", httpCode)
+			c.cmd.Println("[ERROR]: "+err.Error()+"Status Code: ", httpCode)
 		} else if httpCode != 200 {
 			c.cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", httpCode)
 		} else if data != nil {
@@ -116,7 +116,10 @@ func (c companyService) Apply() {
 			} else {
 				jsonString, _ := json.Marshal(responseDTO.Data)
 				var company v1.Company
-				json.Unmarshal(jsonString, &company)
+				err := json.Unmarshal(jsonString, &company)
+				if err != nil {
+					return
+				}
 				companyDto := v1.CompanyDto{
 					ApiVersion: "api/v1",
 					Kind:       c.kind,
@@ -150,7 +153,10 @@ func (c companyService) Apply() {
 			} else {
 				jsonString, _ := json.Marshal(responseDTO.Data)
 				var repositories v1.Repositories
-				json.Unmarshal(jsonString, &repositories)
+				err := json.Unmarshal(jsonString, &repositories)
+				if err != nil {
+					return
+				}
 				table := tablewriter.NewWriter(os.Stdout)
 				if c.option == "loadApplications=false" {
 					table.SetHeader([]string{"Api Version", "Kind", "Id", "Type"})

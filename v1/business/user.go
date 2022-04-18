@@ -10,15 +10,15 @@ import (
 )
 
 type userService struct {
-	httpClient service.HttpClient
-	flag string
-	user v1.UserRegistrationDto
-	cmd *cobra.Command
-	company interface{}
+	httpClient       service.HttpClient
+	flag             string
+	user             v1.UserRegistrationDto
+	cmd              *cobra.Command
+	company          interface{}
 	passwordResetDto interface{}
-	email string
-	securityUrl string
-	token string
+	email            string
+	securityUrl      string
+	token            string
 }
 
 func (u userService) SecurityUrl(securityUrl string) service.User {
@@ -56,7 +56,6 @@ func (u userService) Flag(flag string) service.User {
 	return u
 }
 
-
 func (u userService) Cmd(cmd *cobra.Command) service.User {
 	u.cmd = cmd
 	return u
@@ -67,35 +66,35 @@ func (u userService) Apply() {
 	case string(enums.CREATE_USER):
 		httpCode, _, err := u.CreateUser(u.user)
 		if err != nil {
-			u.cmd.Println("[ERROR]: " + err.Error() + "Status Code: ", httpCode)
+			u.cmd.Println("[ERROR]: "+err.Error()+"Status Code: ", httpCode)
 		} else {
 			u.cmd.Println("Successfully Created User")
 		}
 	case string(enums.CREATE_ADMIN):
 		httpCode, _, err := u.CreateAdmin()
 		if err != nil {
-			u.cmd.Println("[ERROR]: " + err.Error() + "Status Code: ", httpCode)
+			u.cmd.Println("[ERROR]: "+err.Error()+"Status Code: ", httpCode)
 		} else {
 			u.cmd.Println("Successfully Created User")
 		}
 	case string(enums.ATTACH_COMPANY):
 		httpCode, err := u.AttachCompany(u.company)
 		if err != nil {
-			u.cmd.Println("[ERROR]: " + err.Error() + "Status Code: ", httpCode)
+			u.cmd.Println("[ERROR]: "+err.Error()+"Status Code: ", httpCode)
 		} else {
 			u.cmd.Println("[SUCCESS]: Successfully Attached Company")
 		}
 	case string(enums.RESET_PASSWORD):
 		httpCode, err := u.ResetPassword(u.passwordResetDto)
 		if err != nil {
-			u.cmd.Println("[ERROR]: " + err.Error() + "Status Code: ", httpCode)
+			u.cmd.Println("[ERROR]: "+err.Error()+"Status Code: ", httpCode)
 		} else {
 			u.cmd.Println("[SUCCESS]: Successfully Reset Password")
 		}
 	case string(enums.FORGOT_PASSWORD):
 		httpCode, err := u.ForgotPassword(u.email)
 		if err != nil {
-			u.cmd.Println("[ERROR]: " + err.Error() + "Status Code: ", httpCode)
+			u.cmd.Println("[ERROR]: "+err.Error()+"Status Code: ", httpCode)
 		} else {
 			u.cmd.Println("[SUCCESS]: Otp sent sucessfully")
 		}
@@ -172,9 +171,7 @@ func (u userService) ForgotPassword(email string) (httpCode int, err error) {
 	return httpCode, nil
 }
 
-
-
-// NewUseryService returns user type service
+// NewUserService returns user type service
 func NewUserService(httpClient service.HttpClient) service.User {
 	return &userService{
 		httpClient: httpClient,

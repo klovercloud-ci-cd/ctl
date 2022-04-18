@@ -85,8 +85,11 @@ func Trigger() *cobra.Command {
 					cmd.Printf("failed to convert byte int any of the git: %v", err)
 					return nil
 				}
-				git.Apply(event, webhook.CompanyId, cfg.ApiServerUrl, cfg.Token)
-			}else if  webhook.Type == v1.BITBUCKET {
+				err = git.Apply(event, webhook.CompanyId, cfg.ApiServerUrl, cfg.Token)
+				if err != nil {
+					return err
+				}
+			} else if webhook.Type == v1.BITBUCKET {
 				var git service.Git
 				if webhook.APIVersion == "v1" {
 					git = dependency_manager.GetV1BitbucketService()
@@ -102,7 +105,10 @@ func Trigger() *cobra.Command {
 					cmd.Printf("failed to convert byte int any of the git: %v", err)
 					return nil
 				}
-				git.Apply(event, webhook.CompanyId, cfg.ApiServerUrl, cfg.Token)
+				err = git.Apply(event, webhook.CompanyId, cfg.ApiServerUrl, cfg.Token)
+				if err != nil {
+					return err
+				}
 			}
 			return nil
 		},

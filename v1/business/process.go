@@ -12,13 +12,13 @@ import (
 )
 
 type processService struct {
-	httpClient service.HttpClient
-	cmd *cobra.Command
-	repoId string
-	appId string
-	kind string
+	httpClient   service.HttpClient
+	cmd          *cobra.Command
+	repoId       string
+	appId        string
+	kind         string
 	apiServerUrl string
-	token string
+	token        string
 }
 
 func (p processService) ApiServerUrl(apiServerUrl string) service.Process {
@@ -54,7 +54,7 @@ func (p processService) Cmd(cmd *cobra.Command) service.Process {
 func (p processService) Apply() {
 	httpCode, data, err := p.GetByCompanyIdAndRepositoryIdAndAppName()
 	if err != nil {
-		p.cmd.Println("[ERROR]: " + err.Error() + "Status Code: ", httpCode)
+		p.cmd.Println("[ERROR]: "+err.Error()+"Status Code: ", httpCode)
 	} else if httpCode != 200 {
 		p.cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", httpCode)
 	} else if data != nil {
@@ -65,7 +65,10 @@ func (p processService) Apply() {
 		} else {
 			jsonString, _ := json.Marshal(responseDTO.Data)
 			var processes v1.Processes
-			json.Unmarshal(jsonString, &processes)
+			err := json.Unmarshal(jsonString, &processes)
+			if err != nil {
+				return
+			}
 			table := tablewriter.NewWriter(os.Stdout)
 			table.SetHeader([]string{"Api Version", "Kind", "Process Id", "Application Id", "Repository Id", "Created At"})
 			if len(processes) < 5 {
@@ -75,7 +78,7 @@ func (p processService) Apply() {
 					table.Append(process)
 				}
 			} else {
-				processes = processes[0 : 5]
+				processes = processes[0:5]
 				for _, eachProcess := range processes {
 					createdAt := strconv.Itoa(eachProcess.CreatedAt.Local().Day()) + "-" + strconv.Itoa(int(eachProcess.CreatedAt.Local().Month())) + "-" + strconv.Itoa(eachProcess.CreatedAt.Local().Year()) + " " + eachProcess.CreatedAt.Local().Format(time.Kitchen)
 					process := []string{"api/v1", p.kind, eachProcess.ProcessId, eachProcess.AppId, eachProcess.RepositoryId, createdAt}

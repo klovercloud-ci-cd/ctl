@@ -28,7 +28,12 @@ func (h httpClientService) Put(url string, header map[string]string, body []byte
 	if err != nil {
 		return http.StatusBadRequest, err
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Println(err.Error())
+		}
+	}(resp.Body)
 	if resp.StatusCode >= 300 || resp.StatusCode < 200 {
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
@@ -54,7 +59,12 @@ func (h httpClientService) Get(url string, header map[string]string) (httpCode i
 	if err != nil {
 		return res.StatusCode, nil, err
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Println(err.Error())
+		}
+	}(res.Body)
 	if res.StatusCode >= 200 && res.StatusCode < 300 {
 		jsonDataFromHttp, err := ioutil.ReadAll(res.Body)
 		if err != nil {
