@@ -34,7 +34,7 @@ func GetOauthService() service.Oauth {
 }
 
 func GetProcessService() service.Process {
-	return business.NewProcessService(business.NewHttpClientService())
+	return business.NewProcessService(business.NewHttpClientService(), business.NewPipelineService(business.NewHttpClientService()))
 }
 
 func GetUserService() service.User {

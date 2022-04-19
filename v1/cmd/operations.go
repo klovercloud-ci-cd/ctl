@@ -523,7 +523,7 @@ func getPipeline(cmd *cobra.Command, processId, action, url, token string) error
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"Api Version", "Kind", "Step", "Status"})
 		for _, each := range pipeline.Steps {
-			process := []string{"api/v1", "Process", each.Name, each.Status}
+			process := []string{"api/v1", "Process", strings.Title(each.Name), strings.Title(each.Status)}
 			table.Append(process)
 		}
 		table.Render()

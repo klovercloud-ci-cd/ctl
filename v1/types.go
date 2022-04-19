@@ -96,6 +96,16 @@ type Processes []struct {
 	CreatedAt    time.Time              `bson:"created_at" json:"created_at"`
 }
 
+//ProcessesWithStatus contains process list with status
+type ProcessesWithStatus struct {
+	ProcessId    string                 `bson:"process_id" json:"process_id"`
+	AppId        string                 `bson:"app_id" json:"app_id"`
+	RepositoryId string                 `bson:"repository_id" json:"repository_id"`
+	Data         map[string]interface{} `bson:"data" json:"data"`
+	CreatedAt    time.Time              `bson:"created_at" json:"created_at"`
+	Status       string                 `bson:"status" json:"status"`
+}
+
 // UserRegistrationDto dto that holds user registration info.
 type UserRegistrationDto struct {
 	Metadata           UserMetadata           `json:"metadata"`

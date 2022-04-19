@@ -13,6 +13,7 @@ import (
 
 type processService struct {
 	httpClient   service.HttpClient
+	pipeline     service.Pipeline
 	cmd          *cobra.Command
 	repoId       string
 	appId        string
@@ -69,19 +70,111 @@ func (p processService) Apply() {
 			if err != nil {
 				return
 			}
+			var processList []v1.ProcessesWithStatus
+			for _, each := range processes {
+				_, data, err := p.pipeline.Get(each.ProcessId, "get_pipeline", p.apiServerUrl, p.token)
+				if err != nil {
+					return
+				}
+				var pipeline v1.Pipeline
+				byteBody, _ := json.Marshal(data)
+				json.Unmarshal(byteBody, &pipeline)
+				totalStep := len(pipeline.Steps)
+				statusMap := make(map[string][]v1.Step)
+				for _, eachStep := range pipeline.Steps {
+					statusMap[eachStep.Status] = append(statusMap[eachStep.Status], eachStep)
+				}
+				if _, ok := statusMap["active"]; ok {
+					processList = append(processList, v1.ProcessesWithStatus{
+						ProcessId:    each.ProcessId,
+						AppId:        each.AppId,
+						RepositoryId: each.RepositoryId,
+						Data:         each.Data,
+						CreatedAt:    each.CreatedAt,
+						Status:       "active",
+					})
+				} else if steps, ok := statusMap["completed"]; ok {
+					count := len(steps)
+					if count < totalStep {
+						if _, ok := statusMap["failed"]; ok {
+							processList = append(processList, v1.ProcessesWithStatus{
+								ProcessId:    each.ProcessId,
+								AppId:        each.AppId,
+								RepositoryId: each.RepositoryId,
+								Data:         each.Data,
+								CreatedAt:    each.CreatedAt,
+								Status:       "failed",
+							})
+						} else if steps, ok := statusMap["paused"]; ok {
+							for _, eachStp := range steps {
+								if eachStp.Trigger == "AUTO" {
+									processList = append(processList, v1.ProcessesWithStatus{
+										ProcessId:    each.ProcessId,
+										AppId:        each.AppId,
+										RepositoryId: each.RepositoryId,
+										Data:         each.Data,
+										CreatedAt:    each.CreatedAt,
+										Status:       "paused",
+									})
+								} else {
+									processList = append(processList, v1.ProcessesWithStatus{
+										ProcessId:    each.ProcessId,
+										AppId:        each.AppId,
+										RepositoryId: each.RepositoryId,
+										Data:         each.Data,
+										CreatedAt:    each.CreatedAt,
+										Status:       "completed",
+									})
+								}
+							}
+						} else if steps, ok := statusMap["non_initialized"]; ok {
+							for _, eachStp := range steps {
+								if eachStp.Trigger == "AUTO" {
+									processList = append(processList, v1.ProcessesWithStatus{
+										ProcessId:    each.ProcessId,
+										AppId:        each.AppId,
+										RepositoryId: each.RepositoryId,
+										Data:         each.Data,
+										CreatedAt:    each.CreatedAt,
+										Status:       "non_initialized",
+									})
+								} else {
+									processList = append(processList, v1.ProcessesWithStatus{
+										ProcessId:    each.ProcessId,
+										AppId:        each.AppId,
+										RepositoryId: each.RepositoryId,
+										Data:         each.Data,
+										CreatedAt:    each.CreatedAt,
+										Status:       "completed",
+									})
+								}
+							}
+						} else {
+							processList = append(processList, v1.ProcessesWithStatus{
+								ProcessId:    each.ProcessId,
+								AppId:        each.AppId,
+								RepositoryId: each.RepositoryId,
+								Data:         each.Data,
+								CreatedAt:    each.CreatedAt,
+								Status:       "completed",
+							})
+						}
+					}
+				}
+			}
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Api Version", "Kind", "Process Id", "Application Id", "Repository Id", "Created At"})
-			if len(processes) < 5 {
-				for _, eachProcess := range processes {
+			table.SetHeader([]string{"Api Version", "Kind", "Process Id", "Application Id", "Repository Id", "Created At", "Status"})
+			if len(processList) < 5 {
+				for _, eachProcess := range processList {
 					createdAt := strconv.Itoa(eachProcess.CreatedAt.Local().Day()) + "-" + strconv.Itoa(int(eachProcess.CreatedAt.Local().Month())) + "-" + strconv.Itoa(eachProcess.CreatedAt.Local().Year()) + " " + eachProcess.CreatedAt.Local().Format(time.Kitchen)
-					process := []string{"api/v1", p.kind, eachProcess.ProcessId, eachProcess.AppId, eachProcess.RepositoryId, createdAt}
+					process := []string{"api/v1", p.kind, eachProcess.ProcessId, eachProcess.AppId, eachProcess.RepositoryId, createdAt, eachProcess.Status}
 					table.Append(process)
 				}
 			} else {
-				processes = processes[0:5]
-				for _, eachProcess := range processes {
+				processList = processList[0:5]
+				for _, eachProcess := range processList {
 					createdAt := strconv.Itoa(eachProcess.CreatedAt.Local().Day()) + "-" + strconv.Itoa(int(eachProcess.CreatedAt.Local().Month())) + "-" + strconv.Itoa(eachProcess.CreatedAt.Local().Year()) + " " + eachProcess.CreatedAt.Local().Format(time.Kitchen)
-					process := []string{"api/v1", p.kind, eachProcess.ProcessId, eachProcess.AppId, eachProcess.RepositoryId, createdAt}
+					process := []string{"api/v1", p.kind, eachProcess.ProcessId, eachProcess.AppId, eachProcess.RepositoryId, createdAt, eachProcess.Status}
 					table.Append(process)
 				}
 			}
@@ -98,8 +191,9 @@ func (p processService) GetByCompanyIdAndRepositoryIdAndAppName() (httpCode int,
 }
 
 // NewProcessService returns process type service
-func NewProcessService(httpClient service.HttpClient) service.Process {
+func NewProcessService(httpClient service.HttpClient, pipeline service.Pipeline) service.Process {
 	return &processService{
 		httpClient: httpClient,
+		pipeline:   pipeline,
 	}
 }
