@@ -114,8 +114,8 @@ func Trigger() *cobra.Command {
 		},
 	}
 	command.SetUsageTemplate("Usage: \n" +
-		"  ctl trigger {file | -f}=WEBHOOK_PAYLOAD [apiserver=APISERVER_URL] \n" +
-		"  ctl help trigger \n" +
+		"  cli trigger {file | -f}=WEBHOOK_PAYLOAD [apiserver=APISERVER_URL] \n" +
+		"  cli help trigger \n" +
 		"\nOptions: \n" +
 		"  help\t" + "Show this screen. \n")
 	return &command

@@ -89,8 +89,8 @@ func Login() *cobra.Command {
 		DisableFlagParsing: true,
 	}
 	command.SetUsageTemplate("Usage:\n" +
-		"  ctl login [-o [apiserver=APISERVER_URL] | [security=SERCURITY_SERVER_URL]]...\n" +
-		"  ctl help login\n" +
+		"  cli login [-o [apiserver=APISERVER_URL] | [security=SERCURITY_SERVER_URL]]...\n" +
+		"  cli help login\n" +
 		"\nOptions:\n" +
 		"  -o\t" + "Provide api or security server url option\n" +
 		"  help\t" + "Show this screen.\n")

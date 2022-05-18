@@ -79,8 +79,8 @@ func GetLogs() *cobra.Command {
 		},
 	}
 	command.SetUsageTemplate("Usage: \n" +
-		"  ctl logs [processid=PROCESS_ID] [page=PAGE_NUMBER] [limit=LIMIT_NUMBER] [follow | -f] [apiserver=APISERVER_URL] \n" +
-		"  ctl help logs \n" +
+		"  cli logs [processid=PROCESS_ID] [page=PAGE_NUMBER] [limit=LIMIT_NUMBER] [follow | -f] [apiserver=APISERVER_URL] \n" +
+		"  cli help logs \n" +
 		"\nOptions: \n" +
 		"  help\t" + "Show this screen. \n")
 	return &command

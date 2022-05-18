@@ -236,10 +236,10 @@ func Create() *cobra.Command {
 		DisableFlagParsing: true,
 	}
 	command.SetUsageTemplate("Usage: \n" +
-		"  ctl create {user | -u} {file | -f}=USER_PAYLOAD [{option | -o} [apiserver=APISERVER_URL | security=SECURITY_SERVER_URL]]... \n" +
-		"  ctl create {repositories | repos | -r} {file | -f}=REPOSITORY_PAYLOAD [apiserver=APISERVER_URL] \n" +
-		"  ctl create {applications | apps | -a} {file | -f}=APPLICATION_PAYLOAD repo=REPOSITORY_ID [apiserver=APISERVER_URL] \n" +
-		"  ctl help create \n" +
+		"  cli create {user | -u} {file | -f}=USER_PAYLOAD [{option | -o} [apiserver=APISERVER_URL | security=SECURITY_SERVER_URL]]... \n" +
+		"  cli create {repositories | repos | -r} {file | -f}=REPOSITORY_PAYLOAD [apiserver=APISERVER_URL] \n" +
+		"  cli create {applications | apps | -a} {file | -f}=APPLICATION_PAYLOAD repo=REPOSITORY_ID [apiserver=APISERVER_URL] \n" +
+		"  cli help create \n" +
 		"\nOptions: \n" +
 		"  option | -o\t" + "Provide apiserver or security server url option while creating user resource. \n" +
 		"  help\t" + "Show this screen. \n")
@@ -326,8 +326,8 @@ func Registration() *cobra.Command {
 		DisableFlagParsing: true,
 	}
 	command.SetUsageTemplate("Usage: \n" +
-		"  ctl register {file | -f}=USER_REGISTRATION_PAYLOAD [{option | -o} [apiserver=APISERVER_URL | security=SECURITY_SERVER_URL]]...\n" +
-		"  ctl help register \n" +
+		"  cli register {file | -f}=USER_REGISTRATION_PAYLOAD [{option | -o} [apiserver=APISERVER_URL | security=SECURITY_SERVER_URL]]...\n" +
+		"  cli help register \n" +
 		"\nOptions: \n" +
 		"  option | -o\t" + "Provide apiserver or security server url option \n" +
 		"  help\t" + "Show this screen. \n")
@@ -524,11 +524,11 @@ func Describe() *cobra.Command {
 		DisableFlagParsing: true,
 	}
 	command.SetUsageTemplate("Usage: \n" +
-		"  ctl describe {company | -c} [{option | -o} [{loadrepositories | loadrepos | lr}={true | false} | {loadapplications | loadapps | la}={true | false} | apiserver=APISERVER_URL]]...\n" +
-		"  ctl describe {repository | repo | -r} {repository | repo}=REPOSITORY_ID [{option | -o} [{loadapplications | loadapps | la}={true | false} | apiserver=APISERVER_URL]]...\n" +
-		"  ctl describe {application | app | -a} {repository | repo}=REPOSITORY_ID {application | app}=APPLICATION_ID [{option | -o} apiserver=APISERVER_URL]\n" +
-		"  ctl describe {process | -p} {processid | process}=PROCESS_ID \n" +
-		"  ctl help describe \n" +
+		"  cli describe {company | -c} [{option | -o} [{loadrepositories | loadrepos | lr}={true | false} | {loadapplications | loadapps | la}={true | false} | apiserver=APISERVER_URL]]...\n" +
+		"  cli describe {repository | repo | -r} {repository | repo}=REPOSITORY_ID [{option | -o} [{loadapplications | loadapps | la}={true | false} | apiserver=APISERVER_URL]]...\n" +
+		"  cli describe {application | app | -a} {repository | repo}=REPOSITORY_ID {application | app}=APPLICATION_ID [{option | -o} apiserver=APISERVER_URL]\n" +
+		"  cli describe {process | -p} {processid | process}=PROCESS_ID \n" +
+		"  cli help describe \n" +
 		"\nOptions: \n" +
 		"  option | -o\t" + "Provide load repositories, load applications or apiserver url option \n" +
 		"  help\t" + "Show this screen. \n")
@@ -721,10 +721,10 @@ func List() *cobra.Command {
 		DisableFlagParsing: true,
 	}
 	command.SetUsageTemplate("Usage: \n" +
-		"  ctl list {repositories | repos | -r} [{option | -o} [{loadapplications | loadapps | la}={true | false} | apiserver=APISERVER_URL]]...\n" +
-		"  ctl list {applications | apps | -a} {repository | repo}=REPOSITORY_ID {application | app}=APPLICATION_ID [{option | -o} apiserver=APISERVER_URL]\n" +
-		"  ctl list {process | -p} {processid | process}=PROCESS_ID {repository | repo}=REPOSITORY_ID {application | app}=APPLICATION_ID [{option | -o} apiserver=APISERVER_URL] \n" +
-		"  ctl help list \n" +
+		"  cli list {repositories | repos | -r} [{option | -o} [{loadapplications | loadapps | la}={true | false} | apiserver=APISERVER_URL]]...\n" +
+		"  cli list {applications | apps | -a} {repository | repo}=REPOSITORY_ID {application | app}=APPLICATION_ID [{option | -o} apiserver=APISERVER_URL]\n" +
+		"  cli list {process | -p} {processid | process}=PROCESS_ID {repository | repo}=REPOSITORY_ID {application | app}=APPLICATION_ID [{option | -o} apiserver=APISERVER_URL] \n" +
+		"  cli help list \n" +
 		"\nOptions: \n" +
 		"  option | -o\t" + "Provide load applications or apiserver url option \n" +
 		"  help\t" + "Show this screen. \n")
@@ -771,9 +771,9 @@ func Set() *cobra.Command {
 		DisableFlagParsing: true,
 	}
 	command.SetUsageTemplate("Usage: \n" +
-		"  ctl set {repository | repo}=REPOSITORY_ID \n" +
-		"  ctl set -r REPOSITORY_ID \n" +
-		"  ctl help set \n" +
+		"  cli set {repository | repo}=REPOSITORY_ID \n" +
+		"  cli set -r REPOSITORY_ID \n" +
+		"  cli help set \n" +
 		"\nOptions: \n" +
 		"  help\t" + "Show this screen. \n")
 	return &command
@@ -1057,12 +1057,12 @@ func Update() *cobra.Command {
 		DisableFlagParsing: true,
 	}
 	command.SetUsageTemplate("Usage: \n" +
-		"  ctl update {user | -u} {option | -o}={attach_company | ac} {file | -f}=COMPANY_ATTACH_PAYLOAD [apiserver=APISERVER_URL] \n" +
-		"  ctl update {user | -u} {option | -o}={forgot_password | fp} email={USER_EMAIL} [apiserver=APISERVER_URL] \n" +
-		"  ctl update {user | -u} {option | -o}={reset_password | rp} {file | -f}=RESET_PASSWORD_PAYLOAD [apiserver=APISERVER_URL] \n" +
-		"  ctl update {repositories | repos | -r} {file | -f}=REPOSITORY_UPDATE_PAYLOAD option={APPEND_REPOSITORY | SOFT_DELETE_REPOSITORY | DELETE_REPOSITORY} [apiserver=APISERVER_URL]\n" +
-		"  ctl update {applications | apps | -a} {repository | repo}=REPOSITORY_ID  option={APPEND_APPLICATION | SOFT_DELETE_APPLICATION | DELETE_APPLICATION} [apiserver=APISERVER_URL]\n" +
-		"  ctl help update \n" +
+		"  cli update {user | -u} {option | -o}={attach_company | ac} {file | -f}=COMPANY_ATTACH_PAYLOAD [apiserver=APISERVER_URL] \n" +
+		"  cli update {user | -u} {option | -o}={forgot_password | fp} email={USER_EMAIL} [apiserver=APISERVER_URL] \n" +
+		"  cli update {user | -u} {option | -o}={reset_password | rp} {file | -f}=RESET_PASSWORD_PAYLOAD [apiserver=APISERVER_URL] \n" +
+		"  cli update {repositories | repos | -r} {file | -f}=REPOSITORY_UPDATE_PAYLOAD option={APPEND_REPOSITORY | SOFT_DELETE_REPOSITORY | DELETE_REPOSITORY} [apiserver=APISERVER_URL]\n" +
+		"  cli update {applications | apps | -a} {repository | repo}=REPOSITORY_ID  option={APPEND_APPLICATION | SOFT_DELETE_APPLICATION | DELETE_APPLICATION} [apiserver=APISERVER_URL]\n" +
+		"  cli help update \n" +
 		"\nOptions: \n" +
 		"  help\t" + "Show this screen. \n")
 	return &command
