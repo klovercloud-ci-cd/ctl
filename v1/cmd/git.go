@@ -12,14 +12,14 @@ import (
 )
 
 func Trigger() *cobra.Command {
-	return &cobra.Command{
+	command := cobra.Command{
 		Use:       "trigger",
 		Short:     "Notify git",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg := v1.GetConfigFile()
 			if cfg.Token == "" {
-				cmd.Printf("[ERROR]: %v", "user is not logged in")
+				cmd.Println("[ERROR]: %v", "user is not logged in")
 				return nil
 			}
 			var file string
@@ -52,20 +52,20 @@ func Trigger() *cobra.Command {
 			}
 			data, err := ioutil.ReadFile(file)
 			if err != nil {
-				cmd.Printf("data.Get err   #%v ", err)
+				cmd.Println("data.Get err   #%v ", err)
 				return nil
 			}
 			webhook := new(v1.GitWebHookEvent)
 			if strings.HasSuffix(file, ".yaml") {
 				err = yaml.Unmarshal(data, webhook)
 				if err != nil {
-					cmd.Printf("yaml Unmarshal: %v", err)
+					cmd.Println("yaml Unmarshal: %v", err)
 					return nil
 				}
 			} else {
 				err = json.Unmarshal(data, webhook)
 				if err != nil {
-					cmd.Printf("json Unmarshal: %v", err)
+					cmd.Println("json Unmarshal: %v", err)
 					return nil
 				}
 			}
@@ -77,12 +77,12 @@ func Trigger() *cobra.Command {
 				event := new(v1.GithubWebHookEvent)
 				b, err := json.Marshal(webhook.Event)
 				if err != nil {
-					cmd.Printf("failed to json marshal: %v", err.Error())
+					cmd.Println("failed to json marshal: %v", err.Error())
 					return nil
 				}
 				err = json.Unmarshal(b, event)
 				if err != nil {
-					cmd.Printf("failed to convert byte int any of the git: %v", err)
+					cmd.Println("failed to convert byte int any of the git: %v", err)
 					return nil
 				}
 				err = git.Apply(event, webhook.CompanyId, cfg.ApiServerUrl, cfg.Token)
@@ -97,12 +97,12 @@ func Trigger() *cobra.Command {
 				event := new(v1.BitbucketWebHookEvent)
 				b, err := json.Marshal(webhook.Event)
 				if err != nil {
-					cmd.Printf("failed to json marshal: %v", err.Error())
+					cmd.Println("failed to json marshal: %v", err.Error())
 					return nil
 				}
 				err = json.Unmarshal(b, event)
 				if err != nil {
-					cmd.Printf("failed to convert byte int any of the git: %v", err)
+					cmd.Println("failed to convert byte int any of the git: %v", err)
 					return nil
 				}
 				err = git.Apply(event, webhook.CompanyId, cfg.ApiServerUrl, cfg.Token)
@@ -113,4 +113,10 @@ func Trigger() *cobra.Command {
 			return nil
 		},
 	}
+	command.SetUsageTemplate("Usage: \n" +
+		"  ctl trigger {file | -f}=WEBHOOK_PAYLOAD [apiserver=APISERVER_URL] \n" +
+		"  ctl help trigger \n" +
+		"\nOptions: \n" +
+		"  help\t" + "Show this screen. \n")
+	return &command
 }

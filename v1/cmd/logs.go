@@ -13,14 +13,14 @@ import (
 )
 
 func GetLogs() *cobra.Command {
-	return &cobra.Command{
+	command := cobra.Command{
 		Use:       "logs",
 		Short:     "Get logs by process ID",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg := v1.GetConfigFile()
 			if cfg.Token == "" {
-				cmd.Printf("[ERROR]: %v", "user is not logged in")
+				cmd.Println("[ERROR]: %v", "user is not logged in")
 				return nil
 			}
 			var processId, page, limit string
@@ -78,6 +78,12 @@ func GetLogs() *cobra.Command {
 			return getLogs(cmd, cfg.ApiServerUrl, cfg.Token, processId, page, limit, follow, 0)
 		},
 	}
+	command.SetUsageTemplate("Usage: \n" +
+		"  ctl logs [processid=PROCESS_ID] [page=PAGE_NUMBER] [limit=LIMIT_NUMBER] [follow | -f] [apiserver=APISERVER_URL] \n" +
+		"  ctl help logs \n" +
+		"\nOptions: \n" +
+		"  help\t" + "Show this screen. \n")
+	return &command
 }
 
 func getLogs(cmd *cobra.Command, apiServerUrl, token, processId, page, limit string, follow bool, skip int64) error {

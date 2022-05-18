@@ -15,18 +15,18 @@ import (
 )
 
 func Create() *cobra.Command {
-	return &cobra.Command{
+	command := cobra.Command{
 		Use:       "create",
-		Short:     "Create resource [user/repositories/applications]",
+		Short:     "Create any resource [user/repositories/applications]",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg := v1.GetConfigFile()
 			if cfg.Token == "" {
-				cmd.Printf("[ERROR]: %v", "user is not logged in")
+				cmd.Println("[ERROR]: %v", "user is not logged in")
 				return nil
 			}
 			if len(args) < 1 {
-				cmd.Printf("[ERROR]: %v", "please provide a resource name!")
+				cmd.Println("[ERROR]: %v", "please provide a resource name!")
 				return nil
 			}
 			var apiServerUrl string
@@ -56,25 +56,25 @@ func Create() *cobra.Command {
 					}
 				}
 				if file == "" {
-					cmd.Printf("[ERROR]: %v", "please provide a file!")
+					cmd.Println("[ERROR]: %v", "please provide a file!")
 					return nil
 				}
 				data, err := ioutil.ReadFile(file)
 				if err != nil {
-					cmd.Printf("data.Get err   #%v ", err.Error())
+					cmd.Println("data.Get err   #%v ", err.Error())
 					return nil
 				}
 				var user v1.UserRegistrationDto
 				if strings.HasSuffix(file, ".yaml") {
 					err = yaml.Unmarshal(data, &user)
 					if err != nil {
-						cmd.Printf("yaml Unmarshal: %v", err)
+						cmd.Println("yaml Unmarshal: %v", err)
 						return nil
 					}
 				} else {
 					err = json.Unmarshal(data, &user)
 					if err != nil {
-						cmd.Printf("json Unmarshal: %v", err)
+						cmd.Println("json Unmarshal: %v", err)
 						return nil
 					}
 				}
@@ -102,12 +102,12 @@ func Create() *cobra.Command {
 			} else if strings.ToLower(args[0]) == "repositories" || strings.ToLower(args[0]) == "repos" || strings.ToLower(args[0]) == "-r" {
 				userMetadata, err := v1.GetUserMetadataFromBearerToken(cfg.Token)
 				if err != nil {
-					cmd.Printf("[ERROR]: %v", err.Error())
+					cmd.Println("[ERROR]: %v", err.Error())
 					return nil
 				}
 				companyId := userMetadata.CompanyId
 				if companyId == "" {
-					cmd.Printf("[ERROR]: %v", "User got no company attached!")
+					cmd.Println("[ERROR]: %v", "User got no company attached!")
 					return nil
 				}
 				for _, each := range args {
@@ -137,25 +137,25 @@ func Create() *cobra.Command {
 					}
 				}
 				if file == "" {
-					cmd.Printf("[ERROR]: %v", "please provide update file!")
+					cmd.Println("[ERROR]: %v", "please provide update file!")
 					return nil
 				}
 				data, err := ioutil.ReadFile(file)
 				if err != nil {
-					cmd.Printf("data.Get err   #%v ", err)
+					cmd.Println("data.Get err   #%v ", err)
 					return nil
 				}
 				repos := new(interface{})
 				if strings.HasSuffix(file, ".yaml") {
 					err = yaml.Unmarshal(data, repos)
 					if err != nil {
-						cmd.Printf("yaml Unmarshal: %v", err)
+						cmd.Println("yaml Unmarshal: %v", err)
 						return nil
 					}
 				} else {
 					err = json.Unmarshal(data, repos)
 					if err != nil {
-						cmd.Printf("json Unmarshal: %v", err)
+						cmd.Println("json Unmarshal: %v", err)
 						return nil
 					}
 				}
@@ -196,32 +196,32 @@ func Create() *cobra.Command {
 					}
 				}
 				if file == "" {
-					cmd.Printf("[ERROR]: %v", "please provide update file!")
+					cmd.Println("[ERROR]: %v", "please provide update file!")
 					return nil
 				}
 				if repoId == "" {
 					repoId = cfg.RepositoryId
 					if repoId == "" {
-						cmd.Printf("[ERROR]: %v", "please provide repository id!")
+						cmd.Println("[ERROR]: %v", "please provide repository id!")
 						return nil
 					}
 				}
 				data, err := ioutil.ReadFile(file)
 				if err != nil {
-					cmd.Printf("data.Get err   #%v ", err)
+					cmd.Println("data.Get err   #%v ", err)
 					return nil
 				}
 				company := new(interface{})
 				if strings.HasSuffix(file, ".yaml") {
 					err = yaml.Unmarshal(data, company)
 					if err != nil {
-						cmd.Printf("yaml Unmarshal: %v", err)
+						cmd.Println("yaml Unmarshal: %v", err)
 						return nil
 					}
 				} else {
 					err = json.Unmarshal(data, company)
 					if err != nil {
-						cmd.Printf("json Unmarshal: %v", err)
+						cmd.Println("json Unmarshal: %v", err)
 						return nil
 					}
 				}
@@ -235,10 +235,19 @@ func Create() *cobra.Command {
 		},
 		DisableFlagParsing: true,
 	}
+	command.SetUsageTemplate("Usage: \n" +
+		"  ctl create {user | -u} {file | -f}=USER_PAYLOAD [{option | -o} [apiserver=APISERVER_URL | security=SECURITY_SERVER_URL]]... \n" +
+		"  ctl create {repositories | repos | -r} {file | -f}=REPOSITORY_PAYLOAD [apiserver=APISERVER_URL] \n" +
+		"  ctl create {applications | apps | -a} {file | -f}=APPLICATION_PAYLOAD repo=REPOSITORY_ID [apiserver=APISERVER_URL] \n" +
+		"  ctl help create \n" +
+		"\nOptions: \n" +
+		"  option | -o\t" + "Provide apiserver or security server url option while creating user resource. \n" +
+		"  help\t" + "Show this screen. \n")
+	return &command
 }
 
 func Registration() *cobra.Command {
-	return &cobra.Command{
+	command := cobra.Command{
 		Use:       "register",
 		Short:     "Register user",
 		ValidArgs: []string{},
@@ -269,25 +278,25 @@ func Registration() *cobra.Command {
 				}
 			}
 			if file == "" {
-				cmd.Printf("[ERROR]: %v", "please provide a file!")
+				cmd.Println("[ERROR]: %v", "please provide a file!")
 				return nil
 			}
 			data, err := ioutil.ReadFile(file)
 			if err != nil {
-				cmd.Printf("data.Get err   #%v ", err.Error())
+				cmd.Println("data.Get err   #%v ", err.Error())
 				return nil
 			}
 			var user v1.UserRegistrationDto
 			if strings.HasSuffix(file, ".yaml") {
 				err = yaml.Unmarshal(data, &user)
 				if err != nil {
-					cmd.Printf("yaml Unmarshal: %v", err)
+					cmd.Println("yaml Unmarshal: %v", err)
 					return nil
 				}
 			} else {
 				err = json.Unmarshal(data, &user)
 				if err != nil {
-					cmd.Printf("json Unmarshal: %v", err)
+					cmd.Println("json Unmarshal: %v", err)
 					return nil
 				}
 			}
@@ -316,31 +325,38 @@ func Registration() *cobra.Command {
 		},
 		DisableFlagParsing: true,
 	}
+	command.SetUsageTemplate("Usage: \n" +
+		"  ctl register {file | -f}=USER_REGISTRATION_PAYLOAD [{option | -o} [apiserver=APISERVER_URL | security=SECURITY_SERVER_URL]]...\n" +
+		"  ctl help register \n" +
+		"\nOptions: \n" +
+		"  option | -o\t" + "Provide apiserver or security server url option \n" +
+		"  help\t" + "Show this screen. \n")
+	return &command
 }
 
 func Describe() *cobra.Command {
-	return &cobra.Command{
+	command := cobra.Command{
 		Use:       "describe",
 		Short:     "Describe resource [company/repository/application]",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg := v1.GetConfigFile()
 			if cfg.Token == "" {
-				cmd.Printf("[ERROR]: %v", "user is not logged in")
+				cmd.Println("[ERROR]: %v", "user is not logged in")
 				return nil
 			}
 			if len(args) < 1 {
-				cmd.Printf("[ERROR]: %v", "please provide a resource name!")
+				cmd.Println("[ERROR]: %v", "please provide a resource name!")
 				return nil
 			}
 			userMetadata, err := v1.GetUserMetadataFromBearerToken(cfg.Token)
 			if err != nil {
-				cmd.Printf("[ERROR]: %v", err.Error())
+				cmd.Println("[ERROR]: %v", err.Error())
 				return nil
 			}
 			companyId := userMetadata.CompanyId
 			if companyId == "" {
-				cmd.Printf("[ERROR]: %v", "User got no company attached!")
+				cmd.Println("[ERROR]: %v", "User got no company attached!")
 				return nil
 			}
 			var apiServerUrl string
@@ -393,10 +409,10 @@ func Describe() *cobra.Command {
 				if len(args) < 2 {
 					repoId = cfg.RepositoryId
 					if repoId == "" {
-						cmd.Printf("[ERROR]: %v", "please provide repository id!")
+						cmd.Println("[ERROR]: %v", "please provide repository id!")
 						return nil
 					}
-				} else if strings.Contains(strings.ToLower(args[1]), "repo=") {
+				} else if strings.Contains(strings.ToLower(args[1]), "repository=") || strings.Contains(strings.ToLower(args[1]), "repo=") {
 					strs := strings.Split(strings.ToLower(args[1]), "=")
 					if len(strs) > 1 {
 						repoId = strs[1]
@@ -440,7 +456,7 @@ func Describe() *cobra.Command {
 			} else if strings.ToLower(args[0]) == "application" || strings.ToLower(args[0]) == "app" || strings.ToLower(args[0]) == "-a" {
 				var repoId string
 				var appId string
-				for _, each := range args {
+				for idx, each := range args {
 					if strings.Contains(strings.ToLower(each), "repository=") || strings.Contains(strings.ToLower(each), "repo=") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
@@ -451,22 +467,26 @@ func Describe() *cobra.Command {
 						if len(strs) > 1 {
 							appId = strs[1]
 						}
-					} else if strings.Contains(strings.ToLower(each), "apiserver=") {
-						strs := strings.Split(strings.ToLower(each), "=")
-						if len(strs) > 1 {
-							apiServerUrl = strs[1]
+					} else if strings.Contains(strings.ToLower(each), "option") || strings.Contains(strings.ToLower(each), "-o") {
+						if idx+1 < len(args) {
+							if strings.Contains(strings.ToLower(args[idx+1]), "apiserver=") {
+								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+								if len(strs) > 1 {
+									apiServerUrl = strs[1]
+								}
+							}
 						}
 					}
 				}
 				if repoId == "" {
 					repoId = cfg.RepositoryId
 					if repoId == "" {
-						cmd.Printf("[ERROR]: %v", "please provide repository id!")
+						cmd.Println("[ERROR]: %v", "please provide repository id!")
 						return nil
 					}
 				}
 				if appId == "" {
-					cmd.Printf("[ERROR]: %v", "please provide application id!")
+					cmd.Println("[ERROR]: %v", "please provide application id!")
 					return nil
 				}
 				if apiServerUrl == "" {
@@ -503,6 +523,16 @@ func Describe() *cobra.Command {
 		},
 		DisableFlagParsing: true,
 	}
+	command.SetUsageTemplate("Usage: \n" +
+		"  ctl describe {company | -c} [{option | -o} [{loadrepositories | loadrepos | lr}={true | false} | {loadapplications | loadapps | la}={true | false} | apiserver=APISERVER_URL]]...\n" +
+		"  ctl describe {repository | repo | -r} {repository | repo}=REPOSITORY_ID [{option | -o} [{loadapplications | loadapps | la}={true | false} | apiserver=APISERVER_URL]]...\n" +
+		"  ctl describe {application | app | -a} {repository | repo}=REPOSITORY_ID {application | app}=APPLICATION_ID [{option | -o} apiserver=APISERVER_URL]\n" +
+		"  ctl describe {process | -p} {processid | process}=PROCESS_ID \n" +
+		"  ctl help describe \n" +
+		"\nOptions: \n" +
+		"  option | -o\t" + "Provide load repositories, load applications or apiserver url option \n" +
+		"  help\t" + "Show this screen. \n")
+	return &command
 }
 func getPipeline(cmd *cobra.Command, processId, action, url, token string) error {
 	pipelineService := dependency_manager.GetPipelineService()
@@ -531,28 +561,28 @@ func getPipeline(cmd *cobra.Command, processId, action, url, token string) error
 	return nil
 }
 func List() *cobra.Command {
-	return &cobra.Command{
+	command := cobra.Command{
 		Use:       "list",
-		Short:     "List resources [company/repository/application/process]",
+		Short:     "List resources [repository/application/process]",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg := v1.GetConfigFile()
 			if cfg.Token == "" {
-				cmd.Printf("[ERROR]: %v", "user is not logged in")
+				cmd.Println("[ERROR]: %v", "user is not logged in")
 				return nil
 			}
 			if len(args) < 1 {
-				cmd.Printf("[ERROR]: %v", "please provide a resource name!")
+				cmd.Println("[ERROR]: %v", "please provide a resource name!")
 				return nil
 			}
 			userMetadata, err := v1.GetUserMetadataFromBearerToken(cfg.Token)
 			if err != nil {
-				cmd.Printf("[ERROR]: %v", err.Error())
+				cmd.Println("[ERROR]: %v", err.Error())
 				return nil
 			}
 			companyId := userMetadata.CompanyId
 			if companyId == "" {
-				cmd.Printf("[ERROR]: %v", "User got no company attached!")
+				cmd.Println("[ERROR]: %v", "User got no company attached!")
 				return nil
 			}
 			var apiServerUrl string
@@ -594,16 +624,20 @@ func List() *cobra.Command {
 				companyService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Kind("Repository").Cmd(cmd).Flag(string(enums.GET_REPOSITORIES)).CompanyId(companyId).Option("loadApplications=" + strconv.FormatBool(loadApp)).Apply()
 			} else if strings.ToLower(args[0]) == "applications" || strings.ToLower(args[0]) == "apps" || strings.ToLower(args[0]) == "-a" {
 				var repoId string
-				for _, each := range args {
+				for idx, each := range args {
 					if strings.Contains(strings.ToLower(each), "repository=") || strings.Contains(strings.ToLower(each), "repo=") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
 							repoId = strs[1]
 						}
-					} else if strings.Contains(strings.ToLower(each), "apiserver=") {
-						strs := strings.Split(strings.ToLower(each), "=")
-						if len(strs) > 1 {
-							apiServerUrl = strs[1]
+					} else if strings.Contains(strings.ToLower(each), "option") || strings.Contains(strings.ToLower(each), "-o") {
+						if idx+1 < len(args) {
+							if strings.Contains(strings.ToLower(args[idx+1]), "apiserver=") {
+								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+								if len(strs) > 1 {
+									apiServerUrl = strs[1]
+								}
+							}
 						}
 					}
 				}
@@ -630,7 +664,7 @@ func List() *cobra.Command {
 			} else if strings.ToLower(args[0]) == "process" || strings.ToLower(args[0]) == "-p" {
 				var repoId string
 				var appId string
-				for _, each := range args {
+				for idx, each := range args {
 					if strings.Contains(strings.ToLower(each), "repository=") || strings.Contains(strings.ToLower(each), "repo=") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
@@ -641,22 +675,26 @@ func List() *cobra.Command {
 						if len(strs) > 1 {
 							appId = strs[1]
 						}
-					} else if strings.Contains(strings.ToLower(each), "apiserver=") {
-						strs := strings.Split(strings.ToLower(each), "=")
-						if len(strs) > 1 {
-							apiServerUrl = strs[1]
+					} else if strings.Contains(strings.ToLower(each), "option") || strings.Contains(strings.ToLower(each), "-o") {
+						if idx+1 < len(args) {
+							if strings.Contains(strings.ToLower(args[idx+1]), "apiserver=") {
+								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+								if len(strs) > 1 {
+									apiServerUrl = strs[1]
+								}
+							}
 						}
 					}
 				}
 				if repoId == "" {
 					repoId = cfg.RepositoryId
 					if repoId == "" {
-						cmd.Printf("[ERROR]: %v", "please provide repository id!")
+						cmd.Println("[ERROR]: %v", "please provide repository id!")
 						return nil
 					}
 				}
 				if appId == "" {
-					cmd.Printf("[ERROR]: %v", "please provide application id!")
+					cmd.Println("[ERROR]: %v", "please provide application id!")
 					return nil
 				}
 				if apiServerUrl == "" {
@@ -682,31 +720,40 @@ func List() *cobra.Command {
 		},
 		DisableFlagParsing: true,
 	}
+	command.SetUsageTemplate("Usage: \n" +
+		"  ctl list {repositories | repos | -r} [{option | -o} [{loadapplications | loadapps | la}={true | false} | apiserver=APISERVER_URL]]...\n" +
+		"  ctl list {applications | apps | -a} {repository | repo}=REPOSITORY_ID {application | app}=APPLICATION_ID [{option | -o} apiserver=APISERVER_URL]\n" +
+		"  ctl list {process | -p} {processid | process}=PROCESS_ID {repository | repo}=REPOSITORY_ID {application | app}=APPLICATION_ID [{option | -o} apiserver=APISERVER_URL] \n" +
+		"  ctl help list \n" +
+		"\nOptions: \n" +
+		"  option | -o\t" + "Provide load applications or apiserver url option \n" +
+		"  help\t" + "Show this screen. \n")
+	return &command
 }
 
 func Set() *cobra.Command {
-	return &cobra.Command{
+	command := cobra.Command{
 		Use:       "set",
 		Short:     "Set Default Id [repository]",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg := v1.GetConfigFile()
 			if cfg.Token == "" {
-				cmd.Printf("[ERROR]: %v", "user is not logged in")
+				cmd.Println("[ERROR]: %v", "user is not logged in")
 				return nil
 			}
 			if len(args) < 1 {
-				cmd.Printf("[ERROR]: %v", "please provide a resource name!")
+				cmd.Println("[ERROR]: %v", "please provide a resource name!")
 				return nil
 			}
 			var repositoryId string
-			if strings.Contains(strings.ToLower(args[0]), "repo=") {
+			if strings.Contains(strings.ToLower(args[0]), "repository=") || strings.Contains(strings.ToLower(args[0]), "repo=") {
 				strs := strings.Split(strings.ToLower(args[0]), "=")
 				if len(strs) > 1 {
 					repositoryId = strs[1]
 				}
 			} else if strings.ToLower(args[0]) == "-r" {
-				if len(args) > 0 {
+				if len(args) > 1 {
 					repositoryId = args[1]
 				}
 			}
@@ -723,17 +770,23 @@ func Set() *cobra.Command {
 		},
 		DisableFlagParsing: true,
 	}
-
+	command.SetUsageTemplate("Usage: \n" +
+		"  ctl set {repository | repo}=REPOSITORY_ID \n" +
+		"  ctl set -r REPOSITORY_ID \n" +
+		"  ctl help set \n" +
+		"\nOptions: \n" +
+		"  help\t" + "Show this screen. \n")
+	return &command
 }
 
 func Update() *cobra.Command {
-	return &cobra.Command{
+	command := cobra.Command{
 		Use:       "update",
 		Short:     "Update resource [user/repository/application]",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
-				cmd.Printf("[ERROR]: %v", "please provide a resource name!")
+				cmd.Println("[ERROR]: %v", "please provide a resource name!")
 				return nil
 			}
 			var file string
@@ -781,29 +834,29 @@ func Update() *cobra.Command {
 				}
 				if option == string(enums.ATTACH_COMPANY) || option == "ac" {
 					if cfg.Token == "" {
-						cmd.Printf("[ERROR]: %v", "user is not logged in")
+						cmd.Println("[ERROR]: %v", "user is not logged in")
 						return nil
 					}
 					if file == "" {
-						cmd.Printf("[ERROR]: %v", "please provide a file!")
+						cmd.Println("[ERROR]: %v", "please provide a file!")
 						return nil
 					}
 					data, err := ioutil.ReadFile(file)
 					if err != nil {
-						cmd.Printf("data.Get err   #%v ", err)
+						cmd.Println("data.Get err   #%v ", err)
 						return nil
 					}
 					company := new(v1.Company)
 					if strings.HasSuffix(file, ".yaml") {
 						err = yaml.Unmarshal(data, company)
 						if err != nil {
-							cmd.Printf("yaml Unmarshal: %v", err)
+							cmd.Println("yaml Unmarshal: %v", err)
 							return nil
 						}
 					} else {
 						err = json.Unmarshal(data, company)
 						if err != nil {
-							cmd.Printf("json Unmarshal: %v", err)
+							cmd.Println("json Unmarshal: %v", err)
 							return nil
 						}
 					}
@@ -811,25 +864,25 @@ func Update() *cobra.Command {
 					userService.SecurityUrl(cfg.SecurityUrl).Token(cfg.Token).Cmd(cmd).Flag(string(enums.ATTACH_COMPANY)).Company(company).Apply()
 				} else if strings.ToLower(option) == string(enums.RESET_PASSWORD) || strings.ToLower(option) == "rp" {
 					if file == "" {
-						cmd.Printf("[ERROR]: %v", "please provide a file!")
+						cmd.Println("[ERROR]: %v", "please provide a file!")
 						return nil
 					}
 					data, err := ioutil.ReadFile(file)
 					if err != nil {
-						cmd.Printf("data.Get err   #%v ", err)
+						cmd.Println("data.Get err   #%v ", err)
 						return nil
 					}
 					var passwordResetDto v1.PasswordResetDto
 					if strings.HasSuffix(file, ".yaml") {
 						err = yaml.Unmarshal(data, passwordResetDto)
 						if err != nil {
-							cmd.Printf("yaml Unmarshal: %v", err)
+							cmd.Println("yaml Unmarshal: %v", err)
 							return nil
 						}
 					} else {
 						err = json.Unmarshal(data, &passwordResetDto)
 						if err != nil {
-							cmd.Printf("json Unmarshal: %v", err)
+							cmd.Println("json Unmarshal: %v", err)
 							return nil
 						}
 					}
@@ -842,17 +895,17 @@ func Update() *cobra.Command {
 			} else if strings.ToLower(args[0]) == "repositories" || strings.ToLower(args[0]) == "repos" || strings.ToLower(args[0]) == "-r" {
 				cfg := v1.GetConfigFile()
 				if cfg.Token == "" {
-					cmd.Printf("[ERROR]: %v", "user is not logged in")
+					cmd.Println("[ERROR]: %v", "user is not logged in")
 					return nil
 				}
 				userMetadata, err := v1.GetUserMetadataFromBearerToken(cfg.Token)
 				if err != nil {
-					cmd.Printf("[ERROR]: %v", err.Error())
+					cmd.Println("[ERROR]: %v", err.Error())
 					return nil
 				}
 				companyId := userMetadata.CompanyId
 				if companyId == "" {
-					cmd.Printf("[ERROR]: %v", "User got no company attached!")
+					cmd.Println("[ERROR]: %v", "User got no company attached!")
 					return nil
 				}
 				for _, each := range args {
@@ -887,29 +940,29 @@ func Update() *cobra.Command {
 					}
 				}
 				if file == "" {
-					cmd.Printf("[ERROR]: %v", "please provide update file!")
+					cmd.Println("[ERROR]: %v", "please provide update file!")
 					return nil
 				}
 				if option == "" {
-					cmd.Printf("[ERROR]: %v", "please provide update option!")
+					cmd.Println("[ERROR]: %v", "please provide update option!")
 					return nil
 				}
 				data, err := ioutil.ReadFile(file)
 				if err != nil {
-					cmd.Printf("data.Get err   #%v ", err)
+					cmd.Println("data.Get err   #%v ", err)
 					return nil
 				}
 				repos := new(interface{})
 				if strings.HasSuffix(file, ".yaml") {
 					err = yaml.Unmarshal(data, repos)
 					if err != nil {
-						cmd.Printf("yaml Unmarshal: %v", err)
+						cmd.Println("yaml Unmarshal: %v", err)
 						return nil
 					}
 				} else {
 					err = json.Unmarshal(data, repos)
 					if err != nil {
-						cmd.Printf("json Unmarshal: %v", err)
+						cmd.Println("json Unmarshal: %v", err)
 						return nil
 					}
 				}
@@ -919,7 +972,7 @@ func Update() *cobra.Command {
 			} else if strings.ToLower(args[0]) == "applications" || strings.ToLower(args[0]) == "apps" || strings.ToLower(args[0]) == "-a" {
 				cfg := v1.GetConfigFile()
 				if cfg.Token == "" {
-					cmd.Printf("[ERROR]: %v", "user is not logged in")
+					cmd.Println("[ERROR]: %v", "user is not logged in")
 					return nil
 				}
 				for _, each := range args {
@@ -933,7 +986,7 @@ func Update() *cobra.Command {
 						if len(strs) > 1 {
 							option = strs[1]
 						}
-					} else if strings.Contains(strings.ToLower(each), "repo=") {
+					} else if strings.Contains(strings.ToLower(each), "repository=") || strings.Contains(strings.ToLower(each), "repo=") {
 						strs := strings.Split(each, "=")
 						if len(strs) > 1 {
 							repoId = strs[1]
@@ -959,36 +1012,36 @@ func Update() *cobra.Command {
 					}
 				}
 				if file == "" {
-					cmd.Printf("[ERROR]: %v", "please provide update file!")
+					cmd.Println("[ERROR]: %v", "please provide update file!")
 					return nil
 				}
 				if repoId == "" {
 					repoId = cfg.RepositoryId
 					if repoId == "" {
-						cmd.Printf("[ERROR]: %v", "please provide repository id!")
+						cmd.Println("[ERROR]: %v", "please provide repository id!")
 						return nil
 					}
 				}
 				if option == "" {
-					cmd.Printf("[ERROR]: %v", "please provide update option!")
+					cmd.Println("[ERROR]: %v", "please provide update option!")
 					return nil
 				}
 				data, err := ioutil.ReadFile(file)
 				if err != nil {
-					cmd.Printf("data.Get err   #%v ", err)
+					cmd.Println("data.Get err   #%v ", err)
 					return nil
 				}
 				company := new(interface{})
 				if strings.HasSuffix(file, ".yaml") {
 					err = yaml.Unmarshal(data, company)
 					if err != nil {
-						cmd.Printf("yaml Unmarshal: %v", err)
+						cmd.Println("yaml Unmarshal: %v", err)
 						return nil
 					}
 				} else {
 					err = json.Unmarshal(data, company)
 					if err != nil {
-						cmd.Printf("json Unmarshal: %v", err)
+						cmd.Println("json Unmarshal: %v", err)
 						return nil
 					}
 				}
@@ -1003,4 +1056,14 @@ func Update() *cobra.Command {
 		},
 		DisableFlagParsing: true,
 	}
+	command.SetUsageTemplate("Usage: \n" +
+		"  ctl update {user | -u} {option | -o}={attach_company | ac} {file | -f}=COMPANY_ATTACH_PAYLOAD [apiserver=APISERVER_URL] \n" +
+		"  ctl update {user | -u} {option | -o}={forgot_password | fp} email={USER_EMAIL} [apiserver=APISERVER_URL] \n" +
+		"  ctl update {user | -u} {option | -o}={reset_password | rp} {file | -f}=RESET_PASSWORD_PAYLOAD [apiserver=APISERVER_URL] \n" +
+		"  ctl update {repositories | repos | -r} {file | -f}=REPOSITORY_UPDATE_PAYLOAD option={APPEND_REPOSITORY | SOFT_DELETE_REPOSITORY | DELETE_REPOSITORY} [apiserver=APISERVER_URL]\n" +
+		"  ctl update {applications | apps | -a} {repository | repo}=REPOSITORY_ID  option={APPEND_APPLICATION | SOFT_DELETE_APPLICATION | DELETE_APPLICATION} [apiserver=APISERVER_URL]\n" +
+		"  ctl help update \n" +
+		"\nOptions: \n" +
+		"  help\t" + "Show this screen. \n")
+	return &command
 }

@@ -20,9 +20,9 @@ type LoginDto struct {
 }
 
 func Login() *cobra.Command {
-	return &cobra.Command{
+	command := cobra.Command{
 		Use:       "login",
-		Short:     "Login using email and password",
+		Short:     "Login using email and password.",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var apiServerUrl string
@@ -88,12 +88,20 @@ func Login() *cobra.Command {
 		},
 		DisableFlagParsing: true,
 	}
+	command.SetUsageTemplate("Usage:\n" +
+		"  ctl login [-o [apiserver=APISERVER_URL] | [security=SERCURITY_SERVER_URL]]...\n" +
+		"  ctl help login\n" +
+		"\nOptions:\n" +
+		"  -o\t" + "Provide api or security server url option\n" +
+		"  help\t" + "Show this screen.\n")
+	return &command
 }
 
 func Logout() *cobra.Command {
-	return &cobra.Command{
+	command := cobra.Command{
 		Use:       "logout",
 		Short:     "Logout user from the ctl",
+		Long:      "This command logouts user from the ctl",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg := v1.GetConfigFile()
@@ -107,6 +115,7 @@ func Logout() *cobra.Command {
 			return nil
 		},
 	}
+	return &command
 }
 
 func credentials() (string, string) {
