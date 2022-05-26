@@ -77,6 +77,7 @@ func GetLogs() *cobra.Command {
 			}
 			return getLogs(cmd, cfg.ApiServerUrl, cfg.Token, processId, page, limit, follow, 0)
 		},
+		DisableFlagParsing: true,
 	}
 	command.SetUsageTemplate("Usage: \n" +
 		"  cli logs [processid=PROCESS_ID] [page=PAGE_NUMBER] [limit=LIMIT_NUMBER] [follow | -f] [apiserver=APISERVER_URL] \n" +
