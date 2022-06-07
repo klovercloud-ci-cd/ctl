@@ -10,4 +10,5 @@ type Process interface {
 	Kind(kind string) Process
 	ApiServerUrl(apiServerUrl string) Process
 	Token(token string) Process
+	SkipSsl(skipSsl bool) Process
 }

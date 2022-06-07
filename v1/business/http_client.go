@@ -2,6 +2,7 @@ package business
 
 import (
 	"bytes"
+	"crypto/tls"
 	"errors"
 	"github.com/klovercloud-ci/ctl/v1/service"
 	"io"
@@ -15,7 +16,7 @@ type httpClientService struct {
 }
 
 // Put method that fires a Put request.
-func (h httpClientService) Put(url string, header map[string]string, body []byte) (httpCode int, err error) {
+func (h httpClientService) Put(url string, header map[string]string, body []byte, skipSsl bool) (httpCode int, err error) {
 	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(body))
 	if err != nil {
 		log.Println(err.Error())
@@ -23,7 +24,15 @@ func (h httpClientService) Put(url string, header map[string]string, body []byte
 	for k, v := range header {
 		req.Header.Set(k, v)
 	}
-	client := &http.Client{}
+	var client http.Client
+	if skipSsl {
+		tr := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+		client = http.Client{Transport: tr}
+	} else {
+		client = http.Client{}
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return http.StatusBadRequest, err
@@ -46,8 +55,16 @@ func (h httpClientService) Put(url string, header map[string]string, body []byte
 }
 
 // Get method that fires a get request.
-func (h httpClientService) Get(url string, header map[string]string) (httpCode int, body []byte, err error) {
-	client := http.Client{}
+func (h httpClientService) Get(url string, header map[string]string, skipSsl bool) (httpCode int, body []byte, err error) {
+	var client http.Client
+	if skipSsl {
+		tr := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+		client = http.Client{Transport: tr}
+	} else {
+		client = http.Client{}
+	}
 	req, err := http.NewRequest("GET", url, nil)
 	for k, v := range header {
 		req.Header.Set(k, v)
@@ -76,12 +93,20 @@ func (h httpClientService) Get(url string, header map[string]string) (httpCode i
 }
 
 // Post method that fires a Post request.
-func (h httpClientService) Post(url string, header map[string]string, body []byte) (httpCode int, data []byte, err error) {
+func (h httpClientService) Post(url string, header map[string]string, body []byte, skipSsl bool) (httpCode int, data []byte, err error) {
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
 	for k, v := range header {
 		req.Header.Set(k, v)
 	}
-	client := &http.Client{}
+	var client http.Client
+	if skipSsl {
+		tr := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+		client = http.Client{Transport: tr}
+	} else {
+		client = http.Client{}
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return http.StatusBadRequest, nil, err

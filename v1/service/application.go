@@ -14,4 +14,5 @@ type Application interface {
 	Kind(kind string) Application
 	ApiServerUrl(apiServerUrl string) Application
 	Token(token string) Application
+	SkipSsl(skipSsl bool) Application
 }

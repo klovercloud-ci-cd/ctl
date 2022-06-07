@@ -13,4 +13,5 @@ type Repository interface {
 	Kind(kind string) Repository
 	ApiServerUrl(apiServerUrl string) Repository
 	Token(token string) Repository
+	SkipSsl(skipSsl bool) Repository
 }

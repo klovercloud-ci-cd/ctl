@@ -24,7 +24,7 @@ func GetLogs() *cobra.Command {
 				return nil
 			}
 			var processId, page, limit string
-			var follow bool
+			var follow, skipSsl bool
 			var apiServerUrl string
 			for _, each := range args {
 				if strings.Contains(strings.ToLower(each), "page=") {
@@ -51,6 +51,8 @@ func GetLogs() *cobra.Command {
 					if len(strs) > 1 {
 						apiServerUrl = strs[1]
 					}
+				} else if strings.Contains(strings.ToLower(each), "--skipssl") {
+					skipSsl = true
 				}
 			}
 			if apiServerUrl == "" {
@@ -75,21 +77,22 @@ func GetLogs() *cobra.Command {
 			if processId == "" {
 				return nil
 			}
-			return getLogs(cmd, cfg.ApiServerUrl, cfg.Token, processId, page, limit, follow, 0)
+			return getLogs(cmd, cfg.ApiServerUrl, cfg.Token, processId, page, limit, follow, skipSsl, 0)
 		},
 		DisableFlagParsing: true,
 	}
 	command.SetUsageTemplate("Usage: \n" +
-		"  cli logs [processid=PROCESS_ID] [page=PAGE_NUMBER] [limit=LIMIT_NUMBER] [follow | -f] [apiserver=APISERVER_URL] \n" +
+		"  cli logs [processid=PROCESS_ID] [page=PAGE_NUMBER] [limit=LIMIT_NUMBER] [follow | -f] [apiserver=APISERVER_URL] [--skipssl] \n" +
 		"  cli help logs \n" +
 		"\nOptions: \n" +
+		"  --skipssl\t" + "Ignore SSL certificate errors \n" +
 		"  help\t" + "Show this screen. \n")
 	return &command
 }
 
-func getLogs(cmd *cobra.Command, apiServerUrl, token, processId, page, limit string, follow bool, skip int64) error {
+func getLogs(cmd *cobra.Command, apiServerUrl, token, processId, page, limit string, follow, skipSsl bool, skip int64) error {
 	pipelineService := dependency_manager.GetPipelineService()
-	code, data, err := pipelineService.Token(token).Logs(apiServerUrl+"pipelines/"+processId, page, limit)
+	code, data, err := pipelineService.Token(token).SkipSsl(skipSsl).Logs(apiServerUrl+"pipelines/"+processId, page, limit)
 	if err != nil {
 		cmd.Println("[ERROR]: ", err.Error())
 		return nil
@@ -132,7 +135,7 @@ func getLogs(cmd *cobra.Command, apiServerUrl, token, processId, page, limit str
 			page = strconv.Itoa(p + 1)
 		}
 		time.Sleep(time.Millisecond * 500)
-		err := getLogs(cmd, apiServerUrl, token, processId, page, limit, follow, skip)
+		err := getLogs(cmd, apiServerUrl, token, processId, page, limit, follow, skipSsl, skip)
 		if err != nil {
 			return err
 		}

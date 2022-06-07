@@ -10,7 +10,7 @@ type bitbucketService struct {
 	httpClient service.HttpClient
 }
 
-func (b bitbucketService) Apply(git v1.Git, companyId, apiServerUrl, token string) error {
+func (b bitbucketService) Apply(git v1.Git, companyId, apiServerUrl, token string, skipSsl bool) error {
 	err := git.Validate()
 	if err != nil {
 		return err
@@ -22,7 +22,7 @@ func (b bitbucketService) Apply(git v1.Git, companyId, apiServerUrl, token strin
 	if err != nil {
 		return err
 	}
-	_, _, err = b.httpClient.Post(apiServerUrl+"bitbuckets?companyId="+companyId, header, body)
+	_, _, err = b.httpClient.Post(apiServerUrl+"bitbuckets?companyId="+companyId, header, body, skipSsl)
 	if err != nil {
 		return err
 	}

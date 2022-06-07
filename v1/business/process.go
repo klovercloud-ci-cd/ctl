@@ -20,6 +20,12 @@ type processService struct {
 	kind         string
 	apiServerUrl string
 	token        string
+	skipSsl      bool
+}
+
+func (p processService) SkipSsl(skipSsl bool) service.Process {
+	p.skipSsl = skipSsl
+	return p
 }
 
 func (p processService) ApiServerUrl(apiServerUrl string) service.Process {
@@ -187,7 +193,7 @@ func (p processService) GetByCompanyIdAndRepositoryIdAndAppName() (httpCode int,
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + p.token
 	header["Content-Type"] = "application/json"
-	return p.httpClient.Get(p.apiServerUrl+"processes?repositoryId="+p.repoId+"&appId="+p.appId, header)
+	return p.httpClient.Get(p.apiServerUrl+"processes?repositoryId="+p.repoId+"&appId="+p.appId, header, p.skipSsl)
 }
 
 // NewProcessService returns process type service

@@ -22,6 +22,12 @@ type applicationService struct {
 	kind          string
 	apiServerUrl  string
 	token         string
+	skipSsl       bool
+}
+
+func (a applicationService) SkipSsl(skipSsl bool) service.Application {
+	a.skipSsl = skipSsl
+	return a
 }
 
 func (a applicationService) ApiServerUrl(apiServerUrl string) service.Application {
@@ -142,14 +148,14 @@ func (a applicationService) GetApplication(repoId, applicationId string) (httpCo
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + a.token
 	header["Content-Type"] = "application/json"
-	return a.httpClient.Get(a.apiServerUrl+"applications/"+applicationId+"?repositoryId="+repoId, header)
+	return a.httpClient.Get(a.apiServerUrl+"applications/"+applicationId+"?repositoryId="+repoId, header, a.skipSsl)
 }
 
 func (a applicationService) GetAllApplication() (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + a.token
 	header["Content-Type"] = "application/json"
-	return a.httpClient.Get(a.apiServerUrl+"applications", header)
+	return a.httpClient.Get(a.apiServerUrl+"applications", header, a.skipSsl)
 }
 
 // NewApplicationService returns application type service

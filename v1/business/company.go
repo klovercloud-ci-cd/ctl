@@ -24,6 +24,12 @@ type companyService struct {
 	kind         string
 	apiServerUrl string
 	token        string
+	skipSsl      bool
+}
+
+func (c companyService) SkipSsl(skipSsl bool) service.Company {
+	c.skipSsl = skipSsl
+	return c
 }
 
 func (c companyService) ApiServerUrl(apiServerUrl string) service.Company {
@@ -188,7 +194,7 @@ func (c companyService) CreateCompany(company interface{}) (httpCode int, data [
 	if err != nil {
 		return http.StatusBadRequest, nil, err
 	}
-	httpCode, data, err = c.httpClient.Post(c.apiServerUrl+"companies", header, b)
+	httpCode, data, err = c.httpClient.Post(c.apiServerUrl+"companies", header, b, c.skipSsl)
 	if err != nil {
 		return httpCode, nil, err
 	}
@@ -203,7 +209,7 @@ func (c companyService) UpdateRepositoriesByCompanyId(company interface{}, compa
 	if err != nil {
 		return http.StatusBadRequest, nil, err
 	}
-	httpCode, err = c.httpClient.Put(c.apiServerUrl+"companies/"+companyId+"/repositories?companyUpdateOption="+option, header, b)
+	httpCode, err = c.httpClient.Put(c.apiServerUrl+"companies/"+companyId+"/repositories?companyUpdateOption="+option, header, b, c.skipSsl)
 	if err != nil {
 		return httpCode, nil, err
 	}
@@ -218,7 +224,7 @@ func (c companyService) UpdateApplicationsByRepositoryId(company interface{}, re
 	if err != nil {
 		return http.StatusBadRequest, nil, err
 	}
-	httpCode, data, err = c.httpClient.Post(c.apiServerUrl+"applications?repositoryId="+repoId+"&companyUpdateOption="+option, header, b)
+	httpCode, data, err = c.httpClient.Post(c.apiServerUrl+"applications?repositoryId="+repoId+"&companyUpdateOption="+option, header, b, c.skipSsl)
 	if err != nil {
 		return httpCode, nil, err
 	}
@@ -229,21 +235,21 @@ func (c companyService) GetCompanyById() (httpCode int, data []byte, err error) 
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + c.token
 	header["Content-Type"] = "application/json"
-	return c.httpClient.Get(c.apiServerUrl+"companies/"+c.companyId+"?"+c.option, header)
+	return c.httpClient.Get(c.apiServerUrl+"companies/"+c.companyId+"?"+c.option, header, c.skipSsl)
 }
 
 func (c companyService) GetCompanies() (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + c.token
 	header["Content-Type"] = "application/json"
-	return c.httpClient.Get(c.apiServerUrl+"companies", header)
+	return c.httpClient.Get(c.apiServerUrl+"companies", header, c.skipSsl)
 }
 
 func (c companyService) GetRepositoriesByCompanyId(companyId string) (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + c.token
 	header["Content-Type"] = "application/json"
-	return c.httpClient.Get(c.apiServerUrl+"companies/"+companyId+"/repositories?"+c.option, header)
+	return c.httpClient.Get(c.apiServerUrl+"companies/"+companyId+"/repositories?"+c.option, header, c.skipSsl)
 }
 
 // NewCompanyService returns company type service

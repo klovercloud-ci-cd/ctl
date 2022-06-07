@@ -6,12 +6,18 @@ import (
 )
 
 type oauthService struct {
-	httpClient service.HttpClient
-	securityUrl   string
+	httpClient  service.HttpClient
+	securityUrl string
+	skipSsl     bool
 }
 
 func (o oauthService) SecurityUrl(securityUrl string) service.Oauth {
 	o.securityUrl = securityUrl
+	return o
+}
+
+func (o oauthService) SkipSsl(skipSsl bool) service.Oauth {
+	o.skipSsl = skipSsl
 	return o
 }
 
@@ -20,9 +26,9 @@ type JWTPayLoad struct {
 	RefreshToken string `json:"refresh_token" bson:"refresh_token"`
 }
 type ResponseDTO struct {
-	Data     JWTPayLoad `json:"data" msgpack:"data" xml:"data"`
-	Status   string      `json:"status" msgpack:"status" xml:"status"`
-	Message  string      `json:"message" msgpack:"message" xml:"message"`
+	Data    JWTPayLoad `json:"data" msgpack:"data" xml:"data"`
+	Status  string     `json:"status" msgpack:"status" xml:"status"`
+	Message string     `json:"message" msgpack:"message" xml:"message"`
 }
 
 func (o oauthService) Apply(loginDto interface{}) (string, error, int) {
@@ -32,7 +38,7 @@ func (o oauthService) Apply(loginDto interface{}) (string, error, int) {
 	if err != nil {
 		return "", err, 0
 	}
-	code, data, err := o.httpClient.Post(o.securityUrl+"oauth/login?grant_type=password&token_type=ctl", header, b)
+	code, data, err := o.httpClient.Post(o.securityUrl+"oauth/login?grant_type=password&token_type=ctl", header, b, o.skipSsl)
 	if err != nil {
 		return "", err, code
 	}

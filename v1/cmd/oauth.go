@@ -27,6 +27,7 @@ func Login() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var apiServerUrl string
 			var securityUrl string
+			var skipSsl bool
 			for idx, each := range args {
 				if strings.Contains(strings.ToLower(each), "-o") {
 					if idx+1 < len(args) {
@@ -42,6 +43,8 @@ func Login() *cobra.Command {
 							}
 						}
 					}
+				} else if strings.Contains(strings.ToLower(each), "--skipssl") {
+					skipSsl = true
 				}
 			}
 			cfg := v1.GetConfigFile()
@@ -68,7 +71,7 @@ func Login() *cobra.Command {
 			}
 			cfg = v1.GetConfigFile()
 			oauthService := dependency_manager.GetOauthService()
-			ctlToken, err, code := oauthService.SecurityUrl(cfg.SecurityUrl).Apply(loginDto)
+			ctlToken, err, code := oauthService.SecurityUrl(cfg.SecurityUrl).SkipSsl(skipSsl).Apply(loginDto)
 			if err != nil {
 				cmd.Println("[ERROR]: " + err.Error() + " Status Code: " + strconv.Itoa(code))
 				return nil
@@ -89,11 +92,12 @@ func Login() *cobra.Command {
 		DisableFlagParsing: true,
 	}
 	command.SetUsageTemplate("Usage:\n" +
-		"  cli login [-o [apiserver=APISERVER_URL] | [security=SERCURITY_SERVER_URL]]...\n" +
+		"  cli login [--skipssl] [-o [apiserver=APISERVER_URL] | [security=SERCURITY_SERVER_URL]]...\n" +
 		"  cli help login\n" +
 		"\nOptions:\n" +
-		"  -o\t" + "Provide api or security server url option\n" +
-		"  help\t" + "Show this screen.\n")
+		"  -o\t" + "Provide api or security server url option \n" +
+		"  --skipssl\t" + "Ignore SSL certificate errors \n" +
+		"  help\t" + "Show this screen. \n")
 	return &command
 }
 
@@ -115,6 +119,11 @@ func Logout() *cobra.Command {
 			return nil
 		},
 	}
+	command.SetUsageTemplate("Usage:\n" +
+		"  cli logout\n" +
+		"  cli help logout\n" +
+		"\nOptions:\n" +
+		"  help\t" + "Show this screen.\n")
 	return &command
 }
 

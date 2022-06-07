@@ -11,6 +11,17 @@ import (
 type pipelineService struct {
 	httpClient service.HttpClient
 	token      string
+	skipSsl    bool
+}
+
+func (p pipelineService) SkipSsl(skipSsl bool) service.Pipeline {
+	p.skipSsl = skipSsl
+	return p
+}
+
+func (p pipelineService) Token(token string) service.Pipeline {
+	p.token = token
+	return p
 }
 
 func (p pipelineService) Get(processId string, action string, url string, token string) (httpCode int, data interface{}, err error) {
@@ -19,7 +30,7 @@ func (p pipelineService) Get(processId string, action string, url string, token 
 	header["Authorization"] = "Bearer " + token
 	header["Content-Type"] = "application/json"
 	url = url + "pipelines/" + processId + "?action=" + action
-	code, b, err := p.httpClient.Get(url, header)
+	code, b, err := p.httpClient.Get(url, header, p.skipSsl)
 	if err != nil {
 		return code, nil, err
 	}
@@ -31,18 +42,13 @@ func (p pipelineService) Get(processId string, action string, url string, token 
 	return code, response.Data, nil
 }
 
-func (p pipelineService) Token(token string) service.Pipeline {
-	p.token = token
-	return p
-}
-
 func (p pipelineService) Logs(url, page, limit string) (httpCode int, data interface{}, err error) {
 	var response common.ResponseDTO
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + p.token
 	header["Content-Type"] = "application/json"
 	url = url + "?order=&page=" + page + "&limit=" + limit
-	code, b, err := p.httpClient.Get(url, header)
+	code, b, err := p.httpClient.Get(url, header, p.skipSsl)
 
 	if err != nil {
 		return code, nil, err

@@ -14,4 +14,5 @@ type Company interface {
 	Kind(kind string) Company
 	ApiServerUrl(apiServerUrl string) Company
 	Token(token string) Company
+	SkipSsl(skipSsl bool) Company
 }

@@ -29,9 +29,8 @@ func Create() *cobra.Command {
 				cmd.Println("[ERROR]: %v", "please provide a resource name!")
 				return nil
 			}
-			var apiServerUrl string
-			var securityUrl string
-			var file string
+			var apiServerUrl, securityUrl, file string
+			var skipSsl bool
 			if strings.ToLower(args[0]) == "-u" || strings.ToLower(args[0]) == "user" {
 				for idx, each := range args {
 					if strings.Contains(strings.ToLower(each), "file=") || strings.Contains(strings.ToLower(each), "-f=") {
@@ -53,6 +52,8 @@ func Create() *cobra.Command {
 								}
 							}
 						}
+					} else if strings.Contains(strings.ToLower(each), "--skipssl") {
+						skipSsl = true
 					}
 				}
 				if file == "" {
@@ -97,7 +98,7 @@ func Create() *cobra.Command {
 					cmd.Println("[ERROR]: ", err.Error())
 				}
 				userService := dependency_manager.GetUserService()
-				userService.Cmd(cmd).SecurityUrl(cfg.SecurityUrl).Token(cfg.Token).Flag(string(enums.CREATE_USER)).User(user).Apply()
+				userService.Cmd(cmd).SecurityUrl(cfg.SecurityUrl).SkipSsl(skipSsl).Token(cfg.Token).Flag(string(enums.CREATE_USER)).User(user).Apply()
 				return nil
 			} else if strings.ToLower(args[0]) == "repositories" || strings.ToLower(args[0]) == "repos" || strings.ToLower(args[0]) == "-r" {
 				userMetadata, err := v1.GetUserMetadataFromBearerToken(cfg.Token)
@@ -121,6 +122,8 @@ func Create() *cobra.Command {
 						if len(strs) > 1 {
 							apiServerUrl = strs[1]
 						}
+					} else if strings.Contains(strings.ToLower(each), "--skipssl") {
+						skipSsl = true
 					}
 				}
 				if apiServerUrl == "" {
@@ -160,7 +163,7 @@ func Create() *cobra.Command {
 					}
 				}
 				companyService := dependency_manager.GetCompanyService()
-				companyService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Cmd(cmd).Flag(string(enums.UPDATE_REPOSITORIES)).Company(*repos).CompanyId(companyId).Option("APPEND_REPOSITORY").Apply()
+				companyService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Cmd(cmd).Flag(string(enums.UPDATE_REPOSITORIES)).Company(*repos).CompanyId(companyId).Option("APPEND_REPOSITORY").Apply()
 				return nil
 			} else if strings.ToLower(args[0]) == "applications" || strings.ToLower(args[0]) == "apps" || strings.ToLower(args[0]) == "-a" {
 				var repoId string
@@ -180,6 +183,8 @@ func Create() *cobra.Command {
 						if len(strs) > 1 {
 							apiServerUrl = strs[1]
 						}
+					} else if strings.Contains(strings.ToLower(each), "--skipssl") {
+						skipSsl = true
 					}
 				}
 				if apiServerUrl == "" {
@@ -226,7 +231,7 @@ func Create() *cobra.Command {
 					}
 				}
 				companyService := dependency_manager.GetCompanyService()
-				companyService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Cmd(cmd).Flag(string(enums.UPDATE_APPLICATIONS)).Company(*company).RepoId(repoId).Option("APPEND_APPLICATION").Apply()
+				companyService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Cmd(cmd).Flag(string(enums.UPDATE_APPLICATIONS)).Company(*company).RepoId(repoId).Option("APPEND_APPLICATION").Apply()
 				return nil
 			} else {
 				cmd.Println("[ERROR]: Wrong command")
@@ -236,12 +241,13 @@ func Create() *cobra.Command {
 		DisableFlagParsing: true,
 	}
 	command.SetUsageTemplate("Usage: \n" +
-		"  cli create {user | -u} {file | -f}=USER_PAYLOAD [{option | -o} [apiserver=APISERVER_URL | security=SECURITY_SERVER_URL]]... \n" +
-		"  cli create {repositories | repos | -r} {file | -f}=REPOSITORY_PAYLOAD [apiserver=APISERVER_URL] \n" +
-		"  cli create {applications | apps | -a} {file | -f}=APPLICATION_PAYLOAD repo=REPOSITORY_ID [apiserver=APISERVER_URL] \n" +
+		"  cli create {user | -u} {file | -f}=USER_PAYLOAD [{option | -o} [apiserver=APISERVER_URL | security=SECURITY_SERVER_URL]]... [--skipssl] \n" +
+		"  cli create {repositories | repos | -r} {file | -f}=REPOSITORY_PAYLOAD [apiserver=APISERVER_URL] [--skipssl] \n" +
+		"  cli create {applications | apps | -a} {file | -f}=APPLICATION_PAYLOAD repo=REPOSITORY_ID [apiserver=APISERVER_URL] [--skipssl] \n" +
 		"  cli help create \n" +
 		"\nOptions: \n" +
 		"  option | -o\t" + "Provide apiserver or security server url option while creating user resource. \n" +
+		"  --skipssl\t" + "Ignore SSL certificate errors \n" +
 		"  help\t" + "Show this screen. \n")
 	return &command
 }
@@ -252,9 +258,8 @@ func Registration() *cobra.Command {
 		Short:     "Register user",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			var file string
-			var apiServerUrl string
-			var securityUrl string
+			var file, apiServerUrl, securityUrl string
+			var skipSsl bool
 			for idx, each := range args {
 				if strings.Contains(strings.ToLower(each), "file=") || strings.Contains(strings.ToLower(each), "-f=") {
 					strs := strings.Split(strings.ToLower(each), "=")
@@ -274,6 +279,8 @@ func Registration() *cobra.Command {
 								securityUrl = strs[1]
 							}
 						}
+					} else if strings.Contains(strings.ToLower(each), "--skipssl") {
+						skipSsl = true
 					}
 				}
 			}
@@ -320,16 +327,17 @@ func Registration() *cobra.Command {
 				cmd.Println("[ERROR]: ", err.Error())
 			}
 			userService := dependency_manager.GetUserService()
-			userService.SecurityUrl(cfg.SecurityUrl).Cmd(cmd).Flag(string(enums.CREATE_ADMIN)).User(user).Apply()
+			userService.SecurityUrl(cfg.SecurityUrl).SkipSsl(skipSsl).Cmd(cmd).Flag(string(enums.CREATE_ADMIN)).User(user).Apply()
 			return nil
 		},
 		DisableFlagParsing: true,
 	}
 	command.SetUsageTemplate("Usage: \n" +
-		"  cli register {file | -f}=USER_REGISTRATION_PAYLOAD [{option | -o} [apiserver=APISERVER_URL | security=SECURITY_SERVER_URL]]...\n" +
+		"  cli register {file | -f}=USER_REGISTRATION_PAYLOAD [{option | -o} [apiserver=APISERVER_URL | security=SECURITY_SERVER_URL]]... [--skipssl]\n" +
 		"  cli help register \n" +
 		"\nOptions: \n" +
 		"  option | -o\t" + "Provide apiserver or security server url option \n" +
+		"  --skipssl\t" + "Ignore SSL certificate errors \n" +
 		"  help\t" + "Show this screen. \n")
 	return &command
 }
@@ -363,6 +371,7 @@ func Describe() *cobra.Command {
 			if strings.ToLower(args[0]) == "company" || strings.ToLower(args[0]) == "-c" {
 				loadRepo := false
 				loadApp := false
+				var skipSsl bool
 				for idx, each := range args {
 					if strings.Contains(strings.ToLower(each), "option") || strings.Contains(strings.ToLower(each), "-o") {
 						if idx+1 < len(args) {
@@ -387,6 +396,8 @@ func Describe() *cobra.Command {
 								}
 							}
 						}
+					} else if strings.Contains(strings.ToLower(each), "--skipssl") {
+						skipSsl = true
 					}
 				}
 				if apiServerUrl == "" {
@@ -403,9 +414,10 @@ func Describe() *cobra.Command {
 					}
 				}
 				companyService := dependency_manager.GetCompanyService()
-				companyService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Kind("Company").Cmd(cmd).Flag(string(enums.GET_COMPANY_BY_ID)).CompanyId(companyId).Option("loadRepositories=" + strconv.FormatBool(loadRepo) + "&loadApplications=" + strconv.FormatBool(loadApp)).Apply()
+				companyService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Kind("Company").Cmd(cmd).Flag(string(enums.GET_COMPANY_BY_ID)).CompanyId(companyId).Option("loadRepositories=" + strconv.FormatBool(loadRepo) + "&loadApplications=" + strconv.FormatBool(loadApp)).Apply()
 			} else if strings.ToLower(args[0]) == "repository" || strings.ToLower(args[0]) == "repo" || strings.ToLower(args[0]) == "-r" {
 				var repoId string
+				var skipSsl bool
 				if len(args) < 2 {
 					repoId = cfg.RepositoryId
 					if repoId == "" {
@@ -436,6 +448,8 @@ func Describe() *cobra.Command {
 								}
 							}
 						}
+					} else if strings.Contains(strings.ToLower(each), "--skipssl") {
+						skipSsl = true
 					}
 				}
 				if apiServerUrl == "" {
@@ -452,10 +466,10 @@ func Describe() *cobra.Command {
 					}
 				}
 				repositoryService := dependency_manager.GetRepositoryService()
-				repositoryService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Kind("Repository").Cmd(cmd).Flag(string(enums.GET_REPOSITORY)).Repo(repoId).Option("loadApplications=" + strconv.FormatBool(loadApp)).Apply()
+				repositoryService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Kind("Repository").Cmd(cmd).Flag(string(enums.GET_REPOSITORY)).Repo(repoId).Option("loadApplications=" + strconv.FormatBool(loadApp)).Apply()
 			} else if strings.ToLower(args[0]) == "application" || strings.ToLower(args[0]) == "app" || strings.ToLower(args[0]) == "-a" {
-				var repoId string
-				var appId string
+				var repoId, appId string
+				var skipSsl bool
 				for idx, each := range args {
 					if strings.Contains(strings.ToLower(each), "repository=") || strings.Contains(strings.ToLower(each), "repo=") {
 						strs := strings.Split(strings.ToLower(each), "=")
@@ -476,6 +490,8 @@ func Describe() *cobra.Command {
 								}
 							}
 						}
+					} else if strings.Contains(strings.ToLower(each), "--skipssl") {
+						skipSsl = true
 					}
 				}
 				if repoId == "" {
@@ -503,18 +519,21 @@ func Describe() *cobra.Command {
 					}
 				}
 				applicationService := dependency_manager.GetApplicationService()
-				applicationService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Kind("Application").Cmd(cmd).Flag(string(enums.GET_APPLICATION)).RepoId(repoId).ApplicationId(appId).Apply()
+				applicationService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Kind("Application").Cmd(cmd).Flag(string(enums.GET_APPLICATION)).RepoId(repoId).ApplicationId(appId).Apply()
 			} else if strings.ToLower(args[0]) == "process" || strings.ToLower(args[0]) == "-p" {
 				var processId string
+				var skipSsl bool
 				for _, each := range args {
 					if strings.Contains(strings.ToLower(each), "processid=") || strings.Contains(strings.ToLower(each), "process=") {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
 							processId = strs[1]
 						}
+					} else if strings.Contains(strings.ToLower(each), "--skipssl") {
+						skipSsl = true
 					}
 				}
-				return getPipeline(cmd, processId, "get_pipeline", cfg.ApiServerUrl, cfg.Token)
+				return getPipeline(cmd, processId, "get_pipeline", cfg.ApiServerUrl, cfg.Token, skipSsl)
 			} else {
 				cmd.Println("[ERROR]: Wrong command")
 				return nil
@@ -524,19 +543,20 @@ func Describe() *cobra.Command {
 		DisableFlagParsing: true,
 	}
 	command.SetUsageTemplate("Usage: \n" +
-		"  cli describe {company | -c} [{option | -o} [{loadrepositories | loadrepos | lr}={true | false} | {loadapplications | loadapps | la}={true | false} | apiserver=APISERVER_URL]]...\n" +
-		"  cli describe {repository | repo | -r} {repository | repo}=REPOSITORY_ID [{option | -o} [{loadapplications | loadapps | la}={true | false} | apiserver=APISERVER_URL]]...\n" +
-		"  cli describe {application | app | -a} {repository | repo}=REPOSITORY_ID {application | app}=APPLICATION_ID [{option | -o} apiserver=APISERVER_URL]\n" +
-		"  cli describe {process | -p} {processid | process}=PROCESS_ID \n" +
+		"  cli describe {company | -c} [{option | -o} [{loadrepositories | loadrepos | lr}={true | false} | {loadapplications | loadapps | la}={true | false} | apiserver=APISERVER_URL]]... [--skipssl] \n" +
+		"  cli describe {repository | repo | -r} {repository | repo}=REPOSITORY_ID [{option | -o} [{loadapplications | loadapps | la}={true | false} | apiserver=APISERVER_URL]]... [--skipssl] \n" +
+		"  cli describe {application | app | -a} {repository | repo}=REPOSITORY_ID {application | app}=APPLICATION_ID [{option | -o} apiserver=APISERVER_URL] [--skipssl] \n" +
+		"  cli describe {process | -p} {processid | process}=PROCESS_ID [--skipssl] \n" +
 		"  cli help describe \n" +
 		"\nOptions: \n" +
 		"  option | -o\t" + "Provide load repositories, load applications or apiserver url option \n" +
+		"  --skipssl\t" + "Ignore SSL certificate errors \n" +
 		"  help\t" + "Show this screen. \n")
 	return &command
 }
-func getPipeline(cmd *cobra.Command, processId, action, url, token string) error {
+func getPipeline(cmd *cobra.Command, processId, action, url, token string, skipSsl bool) error {
 	pipelineService := dependency_manager.GetPipelineService()
-	code, data, err := pipelineService.Get(processId, action, url, token)
+	code, data, err := pipelineService.SkipSsl(skipSsl).Get(processId, action, url, token)
 	if err != nil {
 		cmd.Println("[ERROR]: ", err.Error())
 		return nil
@@ -588,6 +608,7 @@ func List() *cobra.Command {
 			var apiServerUrl string
 			if strings.ToLower(args[0]) == "repositories" || strings.ToLower(args[0]) == "repos" || strings.ToLower(args[0]) == "-r" {
 				loadApp := false
+				var skipSsl bool
 				for idx, each := range args {
 					if strings.Contains(strings.ToLower(each), "option") || strings.Contains(strings.ToLower(each), "-o") {
 						if idx+1 < len(args) {
@@ -605,6 +626,8 @@ func List() *cobra.Command {
 								}
 							}
 						}
+					} else if strings.Contains(strings.ToLower(each), "--skipssl") {
+						skipSsl = true
 					}
 				}
 				if apiServerUrl == "" {
@@ -621,9 +644,10 @@ func List() *cobra.Command {
 					}
 				}
 				companyService := dependency_manager.GetCompanyService()
-				companyService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Kind("Repository").Cmd(cmd).Flag(string(enums.GET_REPOSITORIES)).CompanyId(companyId).Option("loadApplications=" + strconv.FormatBool(loadApp)).Apply()
+				companyService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Kind("Repository").Cmd(cmd).Flag(string(enums.GET_REPOSITORIES)).CompanyId(companyId).Option("loadApplications=" + strconv.FormatBool(loadApp)).Apply()
 			} else if strings.ToLower(args[0]) == "applications" || strings.ToLower(args[0]) == "apps" || strings.ToLower(args[0]) == "-a" {
 				var repoId string
+				var skipSsl bool
 				for idx, each := range args {
 					if strings.Contains(strings.ToLower(each), "repository=") || strings.Contains(strings.ToLower(each), "repo=") {
 						strs := strings.Split(strings.ToLower(each), "=")
@@ -639,6 +663,8 @@ func List() *cobra.Command {
 								}
 							}
 						}
+					} else if strings.Contains(strings.ToLower(each), "--skipssl") {
+						skipSsl = true
 					}
 				}
 				if apiServerUrl == "" {
@@ -656,14 +682,14 @@ func List() *cobra.Command {
 				}
 				if repoId == "" {
 					applicationService := dependency_manager.GetApplicationService()
-					applicationService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Kind("Application").Cmd(cmd).Flag(string(enums.GET_All_APPLICATIONS)).Apply()
+					applicationService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Kind("Application").Cmd(cmd).Flag(string(enums.GET_All_APPLICATIONS)).Apply()
 				} else {
 					repositoryService := dependency_manager.GetRepositoryService()
-					repositoryService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Kind("Application").Cmd(cmd).Flag(string(enums.GET_APPLICATIONS)).Repo(repoId).Apply()
+					repositoryService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Kind("Application").Cmd(cmd).Flag(string(enums.GET_APPLICATIONS)).Repo(repoId).Apply()
 				}
 			} else if strings.ToLower(args[0]) == "process" || strings.ToLower(args[0]) == "-p" {
-				var repoId string
-				var appId string
+				var repoId, appId string
+				var skipSsl bool
 				for idx, each := range args {
 					if strings.Contains(strings.ToLower(each), "repository=") || strings.Contains(strings.ToLower(each), "repo=") {
 						strs := strings.Split(strings.ToLower(each), "=")
@@ -684,6 +710,8 @@ func List() *cobra.Command {
 								}
 							}
 						}
+					} else if strings.Contains(strings.ToLower(each), "--skipssl") {
+						skipSsl = true
 					}
 				}
 				if repoId == "" {
@@ -711,7 +739,7 @@ func List() *cobra.Command {
 					}
 				}
 				processService := dependency_manager.GetProcessService()
-				processService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Kind("Process").Cmd(cmd).RepoId(repoId).ApplicationId(appId).Apply()
+				processService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Kind("Process").Cmd(cmd).RepoId(repoId).ApplicationId(appId).Apply()
 			} else {
 				cmd.Println("[ERROR]: Wrong command")
 				return nil
@@ -721,12 +749,13 @@ func List() *cobra.Command {
 		DisableFlagParsing: true,
 	}
 	command.SetUsageTemplate("Usage: \n" +
-		"  cli list {repositories | repos | -r} [{option | -o} [{loadapplications | loadapps | la}={true | false} | apiserver=APISERVER_URL]]...\n" +
-		"  cli list {applications | apps | -a} {repository | repo}=REPOSITORY_ID {application | app}=APPLICATION_ID [{option | -o} apiserver=APISERVER_URL]\n" +
-		"  cli list {process | -p} {processid | process}=PROCESS_ID {repository | repo}=REPOSITORY_ID {application | app}=APPLICATION_ID [{option | -o} apiserver=APISERVER_URL] \n" +
+		"  cli list {repositories | repos | -r} [{option | -o} [{loadapplications | loadapps | la}={true | false} | apiserver=APISERVER_URL]]... [--skipssl] \n" +
+		"  cli list {applications | apps | -a} {repository | repo}=REPOSITORY_ID {application | app}=APPLICATION_ID [{option | -o} apiserver=APISERVER_URL] [--skipssl] \n" +
+		"  cli list {process | -p} {processid | process}=PROCESS_ID {repository | repo}=REPOSITORY_ID {application | app}=APPLICATION_ID [{option | -o} apiserver=APISERVER_URL] [--skipssl] \n" +
 		"  cli help list \n" +
 		"\nOptions: \n" +
 		"  option | -o\t" + "Provide load applications or apiserver url option \n" +
+		"  --skipssl\t" + "Ignore SSL certificate errors \n" +
 		"  help\t" + "Show this screen. \n")
 	return &command
 }
@@ -789,11 +818,8 @@ func Update() *cobra.Command {
 				cmd.Println("[ERROR]: %v", "please provide a resource name!")
 				return nil
 			}
-			var file string
-			var option string
-			var repoId string
-			var email string
-			var apiServerUrl string
+			var file, option, repoId, email, apiServerUrl string
+			var skipSsl bool
 			if strings.ToLower(args[0]) == "user" || strings.ToLower(args[0]) == "-u" {
 				for _, each := range args {
 					if strings.Contains(strings.ToLower(each), "file=") || strings.Contains(strings.ToLower(each), "-f=") {
@@ -816,6 +842,8 @@ func Update() *cobra.Command {
 						if len(strs) > 1 {
 							apiServerUrl = strs[1]
 						}
+					} else if strings.Contains(strings.ToLower(each), "--skipssl") {
+						skipSsl = true
 					}
 				}
 				cfg := v1.GetConfigFile()
@@ -861,7 +889,7 @@ func Update() *cobra.Command {
 						}
 					}
 					userService := dependency_manager.GetUserService()
-					userService.SecurityUrl(cfg.SecurityUrl).Token(cfg.Token).Cmd(cmd).Flag(string(enums.ATTACH_COMPANY)).Company(company).Apply()
+					userService.SecurityUrl(cfg.SecurityUrl).SkipSsl(skipSsl).Token(cfg.Token).Cmd(cmd).Flag(string(enums.ATTACH_COMPANY)).Company(company).Apply()
 				} else if strings.ToLower(option) == string(enums.RESET_PASSWORD) || strings.ToLower(option) == "rp" {
 					if file == "" {
 						cmd.Println("[ERROR]: %v", "please provide a file!")
@@ -887,10 +915,10 @@ func Update() *cobra.Command {
 						}
 					}
 					userService := dependency_manager.GetUserService()
-					userService.SecurityUrl(cfg.SecurityUrl).Cmd(cmd).Flag(string(enums.RESET_PASSWORD)).PasswordResetDto(passwordResetDto).Apply()
+					userService.SecurityUrl(cfg.SecurityUrl).SkipSsl(skipSsl).Cmd(cmd).Flag(string(enums.RESET_PASSWORD)).PasswordResetDto(passwordResetDto).Apply()
 				} else if option == string(enums.FORGOT_PASSWORD) || option == "fp" {
 					userService := dependency_manager.GetUserService()
-					userService.SecurityUrl(cfg.SecurityUrl).Cmd(cmd).Flag(string(enums.FORGOT_PASSWORD)).Email(email).Apply()
+					userService.SecurityUrl(cfg.SecurityUrl).SkipSsl(skipSsl).Cmd(cmd).Flag(string(enums.FORGOT_PASSWORD)).Email(email).Apply()
 				}
 			} else if strings.ToLower(args[0]) == "repositories" || strings.ToLower(args[0]) == "repos" || strings.ToLower(args[0]) == "-r" {
 				cfg := v1.GetConfigFile()
@@ -924,6 +952,8 @@ func Update() *cobra.Command {
 						if len(strs) > 1 {
 							apiServerUrl = strs[1]
 						}
+					} else if strings.Contains(strings.ToLower(each), "--skipssl") {
+						skipSsl = true
 					}
 				}
 				if apiServerUrl == "" {
@@ -967,7 +997,7 @@ func Update() *cobra.Command {
 					}
 				}
 				companyService := dependency_manager.GetCompanyService()
-				companyService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Cmd(cmd).Flag(string(enums.UPDATE_REPOSITORIES)).Company(*repos).CompanyId(companyId).Option(option).Apply()
+				companyService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Cmd(cmd).Flag(string(enums.UPDATE_REPOSITORIES)).Company(*repos).CompanyId(companyId).Option(option).Apply()
 				return nil
 			} else if strings.ToLower(args[0]) == "applications" || strings.ToLower(args[0]) == "apps" || strings.ToLower(args[0]) == "-a" {
 				cfg := v1.GetConfigFile()
@@ -996,6 +1026,8 @@ func Update() *cobra.Command {
 						if len(strs) > 1 {
 							apiServerUrl = strs[1]
 						}
+					} else if strings.Contains(strings.ToLower(each), "--skipssl") {
+						skipSsl = true
 					}
 				}
 				if apiServerUrl == "" {
@@ -1046,7 +1078,7 @@ func Update() *cobra.Command {
 					}
 				}
 				companyService := dependency_manager.GetCompanyService()
-				companyService.ApiServerUrl(cfg.ApiServerUrl).Token(cfg.Token).Cmd(cmd).Flag(string(enums.UPDATE_APPLICATIONS)).Company(*company).RepoId(repoId).Option(option).Apply()
+				companyService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Cmd(cmd).Flag(string(enums.UPDATE_APPLICATIONS)).Company(*company).RepoId(repoId).Option(option).Apply()
 				return nil
 			} else {
 				cmd.Println("[ERROR]: Wrong command")
@@ -1057,13 +1089,15 @@ func Update() *cobra.Command {
 		DisableFlagParsing: true,
 	}
 	command.SetUsageTemplate("Usage: \n" +
-		"  cli update {user | -u} {option | -o}={attach_company | ac} {file | -f}=COMPANY_ATTACH_PAYLOAD [apiserver=APISERVER_URL] \n" +
-		"  cli update {user | -u} {option | -o}={forgot_password | fp} email={USER_EMAIL} [apiserver=APISERVER_URL] \n" +
-		"  cli update {user | -u} {option | -o}={reset_password | rp} {file | -f}=RESET_PASSWORD_PAYLOAD [apiserver=APISERVER_URL] \n" +
-		"  cli update {repositories | repos | -r} {file | -f}=REPOSITORY_UPDATE_PAYLOAD option={APPEND_REPOSITORY | SOFT_DELETE_REPOSITORY | DELETE_REPOSITORY} [apiserver=APISERVER_URL]\n" +
-		"  cli update {applications | apps | -a} {repository | repo}=REPOSITORY_ID  option={APPEND_APPLICATION | SOFT_DELETE_APPLICATION | DELETE_APPLICATION} [apiserver=APISERVER_URL]\n" +
+		"  cli update {user | -u} {option | -o}={attach_company | ac} {file | -f}=COMPANY_ATTACH_PAYLOAD [apiserver=APISERVER_URL] [--skipssl] \n" +
+		"  cli update {user | -u} {option | -o}={forgot_password | fp} email={USER_EMAIL} [apiserver=APISERVER_URL] [--skipssl] \n" +
+		"  cli update {user | -u} {option | -o}={reset_password | rp} {file | -f}=RESET_PASSWORD_PAYLOAD [apiserver=APISERVER_URL]  [--skipssl]\n" +
+		"  cli update {repositories | repos | -r} {file | -f}=REPOSITORY_UPDATE_PAYLOAD option={APPEND_REPOSITORY | SOFT_DELETE_REPOSITORY | DELETE_REPOSITORY} [apiserver=APISERVER_URL] [--skipssl] \n" +
+		"  cli update {applications | apps | -a} {repository | repo}=REPOSITORY_ID  option={APPEND_APPLICATION | SOFT_DELETE_APPLICATION | DELETE_APPLICATION} [apiserver=APISERVER_URL] [--skipssl] \n" +
 		"  cli help update \n" +
 		"\nOptions: \n" +
+		"  option | -o\t" + "Provide resource update option \n" +
+		"  --skipssl\t" + "Ignore SSL certificate errors \n" +
 		"  help\t" + "Show this screen. \n")
 	return &command
 }

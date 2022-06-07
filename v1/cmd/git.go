@@ -24,6 +24,7 @@ func Trigger() *cobra.Command {
 			}
 			var file string
 			var apiServerUrl string
+			var skipSsl bool
 			for _, each := range args {
 				if strings.Contains(strings.ToLower(each), "file=") || strings.Contains(strings.ToLower(each), "-f=") {
 					strs := strings.Split(strings.ToLower(each), "=")
@@ -35,6 +36,8 @@ func Trigger() *cobra.Command {
 					if len(strs) > 1 {
 						apiServerUrl = strs[1]
 					}
+				} else if strings.Contains(strings.ToLower(each), "--skipssl") {
+					skipSsl = true
 				}
 			}
 			if apiServerUrl == "" {
@@ -85,7 +88,7 @@ func Trigger() *cobra.Command {
 					cmd.Println("failed to convert byte int any of the git: %v", err)
 					return nil
 				}
-				err = git.Apply(event, webhook.CompanyId, cfg.ApiServerUrl, cfg.Token)
+				err = git.Apply(event, webhook.CompanyId, cfg.ApiServerUrl, cfg.Token, skipSsl)
 				if err != nil {
 					return err
 				}
@@ -105,7 +108,7 @@ func Trigger() *cobra.Command {
 					cmd.Println("failed to convert byte int any of the git: %v", err)
 					return nil
 				}
-				err = git.Apply(event, webhook.CompanyId, cfg.ApiServerUrl, cfg.Token)
+				err = git.Apply(event, webhook.CompanyId, cfg.ApiServerUrl, cfg.Token, skipSsl)
 				if err != nil {
 					return err
 				}
@@ -114,9 +117,10 @@ func Trigger() *cobra.Command {
 		},
 	}
 	command.SetUsageTemplate("Usage: \n" +
-		"  cli trigger {file | -f}=WEBHOOK_PAYLOAD [apiserver=APISERVER_URL] \n" +
+		"  cli trigger {file | -f}=WEBHOOK_PAYLOAD [apiserver=APISERVER_URL] [--skipssl] \n" +
 		"  cli help trigger \n" +
 		"\nOptions: \n" +
+		"  --skipssl\t" + "Ignore SSL certificate errors \n" +
 		"  help\t" + "Show this screen. \n")
 	return &command
 }

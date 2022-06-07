@@ -21,6 +21,12 @@ type repositoryService struct {
 	kind         string
 	apiServerUrl string
 	token        string
+	skipSsl      bool
+}
+
+func (r repositoryService) SkipSsl(skipSsl bool) service.Repository {
+	r.skipSsl = skipSsl
+	return r
 }
 
 func (r repositoryService) ApiServerUrl(apiServerUrl string) service.Repository {
@@ -138,14 +144,14 @@ func (r repositoryService) GetRepositoryById(repositoryId string) (httpCode int,
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + r.token
 	header["Content-Type"] = "application/json"
-	return r.httpClient.Get(r.apiServerUrl+"repositories/"+repositoryId+"?"+r.option, header)
+	return r.httpClient.Get(r.apiServerUrl+"repositories/"+repositoryId+"?"+r.option, header, r.skipSsl)
 }
 
 func (r repositoryService) GetApplicationsByRepositoryId(repositoryId string) (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + r.token
 	header["Content-Type"] = "application/json"
-	return r.httpClient.Get(r.apiServerUrl+"repositories/"+repositoryId+"/applications?status=ACTIVE", header)
+	return r.httpClient.Get(r.apiServerUrl+"repositories/"+repositoryId+"/applications?status=ACTIVE", header, r.skipSsl)
 }
 
 // NewRepositoryService returns repository type service

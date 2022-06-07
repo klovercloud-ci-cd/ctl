@@ -19,6 +19,12 @@ type userService struct {
 	email            string
 	securityUrl      string
 	token            string
+	skipSsl          bool
+}
+
+func (u userService) SkipSsl(skipSsl bool) service.User {
+	u.skipSsl = skipSsl
+	return u
 }
 
 func (u userService) SecurityUrl(securityUrl string) service.User {
@@ -111,7 +117,7 @@ func (u userService) CreateUser(user v1.UserRegistrationDto) (httpCode int, data
 	if err != nil {
 		return http.StatusBadRequest, nil, err
 	}
-	httpCode, data, err = u.httpClient.Post(u.securityUrl+"users?action=create_user", header, b)
+	httpCode, data, err = u.httpClient.Post(u.securityUrl+"users?action=create_user", header, b, u.skipSsl)
 	if err != nil {
 		return httpCode, nil, err
 	}
@@ -125,7 +131,7 @@ func (u userService) CreateAdmin() (httpCode int, data []byte, err error) {
 	if err != nil {
 		return http.StatusBadRequest, nil, err
 	}
-	httpCode, data, err = u.httpClient.Post(u.securityUrl+"users", header, b)
+	httpCode, data, err = u.httpClient.Post(u.securityUrl+"users", header, b, u.skipSsl)
 	if err != nil {
 		return httpCode, nil, err
 	}
@@ -140,7 +146,7 @@ func (u userService) AttachCompany(company interface{}) (httpCode int, err error
 	if err != nil {
 		return http.StatusBadRequest, err
 	}
-	httpCode, err = u.httpClient.Put(u.securityUrl+"users?action="+string(enums.ATTACH_COMPANY), header, b)
+	httpCode, err = u.httpClient.Put(u.securityUrl+"users?action="+string(enums.ATTACH_COMPANY), header, b, u.skipSsl)
 	if err != nil {
 		return httpCode, err
 	}
@@ -154,7 +160,7 @@ func (u userService) ResetPassword(passwordResetDto interface{}) (httpCode int, 
 	if err != nil {
 		return http.StatusBadRequest, err
 	}
-	_, err = u.httpClient.Put(u.securityUrl+"users?action="+string(enums.RESET_PASSWORD), header, b)
+	_, err = u.httpClient.Put(u.securityUrl+"users?action="+string(enums.RESET_PASSWORD), header, b, u.skipSsl)
 	if err != nil {
 		return httpCode, err
 	}
@@ -164,7 +170,7 @@ func (u userService) ResetPassword(passwordResetDto interface{}) (httpCode int, 
 func (u userService) ForgotPassword(email string) (httpCode int, err error) {
 	header := make(map[string]string)
 	header["Content-Type"] = "application/json"
-	httpCode, err = u.httpClient.Put(u.securityUrl+"users?action="+string(enums.FORGOT_PASSWORD)+"&media="+email, header, nil)
+	httpCode, err = u.httpClient.Put(u.securityUrl+"users?action="+string(enums.FORGOT_PASSWORD)+"&media="+email, header, nil, u.skipSsl)
 	if err != nil {
 		return httpCode, err
 	}
