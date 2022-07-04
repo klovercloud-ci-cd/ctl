@@ -187,6 +187,16 @@ func Create() *cobra.Command {
 						skipSsl = true
 					}
 				}
+				userMetadata, err := v1.GetUserMetadataFromBearerToken(cfg.Token)
+				if err != nil {
+					cmd.Println("[ERROR]: %v", err.Error())
+					return nil
+				}
+				companyId := userMetadata.CompanyId
+				if companyId == "" {
+					cmd.Println("[ERROR]: %v", "User got no company attached!")
+					return nil
+				}
 				if apiServerUrl == "" {
 					if cfg.ApiServerUrl == "" {
 						cmd.Println("[ERROR]: Api server url not found!")
@@ -231,7 +241,7 @@ func Create() *cobra.Command {
 					}
 				}
 				companyService := dependency_manager.GetCompanyService()
-				companyService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Cmd(cmd).Flag(string(enums.UPDATE_APPLICATIONS)).Company(*company).RepoId(repoId).Option("APPEND_APPLICATION").Apply()
+				companyService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Cmd(cmd).Flag(string(enums.UPDATE_APPLICATIONS)).Company(*company).CompanyId(companyId).RepoId(repoId).Option("APPEND_APPLICATION").Apply()
 				return nil
 			} else {
 				cmd.Println("[ERROR]: Wrong command")
@@ -1030,6 +1040,16 @@ func Update() *cobra.Command {
 						skipSsl = true
 					}
 				}
+				userMetadata, err := v1.GetUserMetadataFromBearerToken(cfg.Token)
+				if err != nil {
+					cmd.Println("[ERROR]: %v", err.Error())
+					return nil
+				}
+				companyId := userMetadata.CompanyId
+				if companyId == "" {
+					cmd.Println("[ERROR]: %v", "User got no company attached!")
+					return nil
+				}
 				if apiServerUrl == "" {
 					if cfg.ApiServerUrl == "" {
 						cmd.Println("[ERROR]: Api server url not found!")
@@ -1078,7 +1098,7 @@ func Update() *cobra.Command {
 					}
 				}
 				companyService := dependency_manager.GetCompanyService()
-				companyService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Cmd(cmd).Flag(string(enums.UPDATE_APPLICATIONS)).Company(*company).RepoId(repoId).Option(option).Apply()
+				companyService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Cmd(cmd).Flag(string(enums.UPDATE_APPLICATIONS)).Company(*company).RepoId(repoId).CompanyId(companyId).Option(option).Apply()
 				return nil
 			} else {
 				cmd.Println("[ERROR]: Wrong command")
@@ -1093,7 +1113,7 @@ func Update() *cobra.Command {
 		"  cli update {user | -u} {option | -o}={forgot_password | fp} email={USER_EMAIL} [apiserver=APISERVER_URL] [--skipssl] \n" +
 		"  cli update {user | -u} {option | -o}={reset_password | rp} {file | -f}=RESET_PASSWORD_PAYLOAD [apiserver=APISERVER_URL]  [--skipssl]\n" +
 		"  cli update {repositories | repos | -r} {file | -f}=REPOSITORY_UPDATE_PAYLOAD option={APPEND_REPOSITORY | SOFT_DELETE_REPOSITORY | DELETE_REPOSITORY} [apiserver=APISERVER_URL] [--skipssl] \n" +
-		"  cli update {applications | apps | -a} {repository | repo}=REPOSITORY_ID  option={APPEND_APPLICATION | SOFT_DELETE_APPLICATION | DELETE_APPLICATION} [apiserver=APISERVER_URL] [--skipssl] \n" +
+		"  cli update {applications | apps | -a} {repository | repo}=REPOSITORY_ID {file | -f}=APPLICATION_UPDATE_PAYLOAD option={APPEND_APPLICATION | SOFT_DELETE_APPLICATION | DELETE_APPLICATION} [apiserver=APISERVER_URL] [--skipssl] \n" +
 		"  cli help update \n" +
 		"\nOptions: \n" +
 		"  option | -o\t" + "Provide resource update option \n" +

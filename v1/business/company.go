@@ -101,7 +101,7 @@ func (c companyService) Apply() {
 		if c.option != string(enums.APPEND_APPLICATION) && c.option != string(enums.SOFT_DELETE_APPLICATION) && c.option != string(enums.DELETE_APPLICATION) {
 			c.cmd.Println("[ERROR]: Invalid Application Update Option")
 		} else {
-			httpCode, _, err := c.UpdateApplicationsByRepositoryId(c.company, c.repoId, c.option)
+			httpCode, _, err := c.UpdateApplicationsByRepositoryId(c.company, c.companyId, c.repoId, c.option)
 			if err != nil {
 				c.cmd.Println("[ERROR]: "+err.Error()+"Status Code: ", httpCode)
 			} else {
@@ -216,7 +216,7 @@ func (c companyService) UpdateRepositoriesByCompanyId(company interface{}, compa
 	return httpCode, data, nil
 }
 
-func (c companyService) UpdateApplicationsByRepositoryId(company interface{}, repoId string, option string) (httpCode int, data []byte, err error) {
+func (c companyService) UpdateApplicationsByRepositoryId(company interface{}, companyId, repoId, option string) (httpCode int, data []byte, err error) {
 	header := make(map[string]string)
 	header["Authorization"] = "Bearer " + c.token
 	header["Content-Type"] = "application/json"
@@ -224,11 +224,11 @@ func (c companyService) UpdateApplicationsByRepositoryId(company interface{}, re
 	if err != nil {
 		return http.StatusBadRequest, nil, err
 	}
-	httpCode, data, err = c.httpClient.Post(c.apiServerUrl+"applications?repositoryId="+repoId+"&companyUpdateOption="+option, header, b, c.skipSsl)
+	httpCode, err = c.httpClient.Put(c.apiServerUrl+"companies/"+companyId+"/repositories/"+repoId+"/applications?companyUpdateOption="+option, header, b, c.skipSsl)
 	if err != nil {
 		return httpCode, nil, err
 	}
-	return httpCode, data, nil
+	return httpCode, nil, nil
 }
 
 func (c companyService) GetCompanyById() (httpCode int, data []byte, err error) {

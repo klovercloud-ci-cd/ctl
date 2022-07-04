@@ -245,11 +245,3 @@ func GetConfigFile() Config {
 	}
 	return configFile
 }
-
-//func IsUserLoggedIn() error {
-//	cfg := GetConfigFile()
-//	if cfg.Token == "" {
-//		return errors.New("user is not logged in")
-//	}
-//	return nil
-//}
