@@ -10,7 +10,7 @@ type githubService struct {
 	httpClient service.HttpClient
 }
 
-func (g githubService) Apply(git v1.Git, companyId, apiServerUrl, token string, skipSsl bool) error {
+func (g githubService) Apply(git v1.Git, companyId, appId, apiServerUrl, token string, skipSsl bool) error {
 	err := git.Validate()
 	if err != nil {
 		return err
@@ -22,7 +22,7 @@ func (g githubService) Apply(git v1.Git, companyId, apiServerUrl, token string, 
 	if err != nil {
 		return err
 	}
-	_, _, err = g.httpClient.Post(apiServerUrl+"githubs?companyId="+companyId, header, b, skipSsl)
+	_, _, err = g.httpClient.Post(apiServerUrl+"githubs?companyId="+companyId+"&appId="+appId, header, b, skipSsl)
 	if err != nil {
 		return err
 	}
