@@ -110,6 +110,7 @@ func Logout() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg := v1.GetConfigFile()
 			cfg.Token = ""
+			cfg.RepositoryId = ""
 			err := cfg.Store()
 			if err != nil {
 				cmd.Println("[ERROR]: ", err.Error())
