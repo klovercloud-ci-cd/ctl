@@ -2,15 +2,9 @@
      "applications": [
         {
             "_metadata": {
-                "name": "test1"
+                "name": "test-app"
             },
-            "url": "https://bitbucket.org/shabrulislam2451/testapp/src/master/"
-        },
-        {
-            "_metadata": {
-                "name": "test2"
-            },
-            "url": "https://bitbucket.org/shabrulislam2451/testapp/src/master/"
+            "url": "https://github.com/niloydeb1/test-app"
         }
     ]
 }

@@ -428,21 +428,14 @@ func Describe() *cobra.Command {
 			} else if strings.ToLower(args[0]) == "repository" || strings.ToLower(args[0]) == "repo" || strings.ToLower(args[0]) == "-r" {
 				var repoId string
 				var skipSsl bool
-				if len(args) < 2 {
-					repoId = cfg.RepositoryId
-					if repoId == "" {
-						cmd.Println("[ERROR]: %v", "please provide repository id!")
-						return nil
-					}
-				} else if strings.Contains(strings.ToLower(args[1]), "repository=") || strings.Contains(strings.ToLower(args[1]), "repo=") {
-					strs := strings.Split(strings.ToLower(args[1]), "=")
-					if len(strs) > 1 {
-						repoId = strs[1]
-					}
-				}
 				loadApp := false
 				for idx, each := range args {
-					if strings.Contains(strings.ToLower(each), "option") || strings.Contains(strings.ToLower(each), "-o") {
+					if strings.Contains(strings.ToLower(each), "repository=") || strings.Contains(strings.ToLower(each), "repo=") {
+						strs := strings.Split(strings.ToLower(each), "=")
+						if len(strs) > 0 {
+							repoId = strs[1]
+						}
+					} else if strings.Contains(strings.ToLower(each), "option") || strings.Contains(strings.ToLower(each), "-o") {
 						if idx+1 < len(args) {
 							if strings.Contains(strings.ToLower(args[idx+1]), "loadapplications=") || strings.Contains(strings.ToLower(args[idx+1]), "loadapps=") || strings.Contains(strings.ToLower(args[idx+1]), "la=") {
 								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
@@ -474,6 +467,11 @@ func Describe() *cobra.Command {
 						cmd.Println("[ERROR]: ", err.Error())
 						return nil
 					}
+				}
+				repoId = cfg.RepositoryId
+				if repoId == "" {
+					cmd.Println("[ERROR]: %v", "please provide repository id!")
+					return nil
 				}
 				repositoryService := dependency_manager.GetRepositoryService()
 				repositoryService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Kind("Repository").Cmd(cmd).Flag(string(enums.GET_REPOSITORY)).Repo(repoId).Option("loadApplications=" + strconv.FormatBool(loadApp)).Apply()
@@ -532,7 +530,7 @@ func Describe() *cobra.Command {
 				applicationService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Kind("Application").Cmd(cmd).Flag(string(enums.GET_APPLICATION)).RepoId(repoId).ApplicationId(appId).Apply()
 			} else if strings.ToLower(args[0]) == "process" || strings.ToLower(args[0]) == "-p" {
 				var processId string
-				var skipSsl bool
+				var follow, skipSsl bool
 				for _, each := range args {
 					if strings.Contains(strings.ToLower(each), "processid=") || strings.Contains(strings.ToLower(each), "process=") {
 						strs := strings.Split(strings.ToLower(each), "=")
@@ -541,9 +539,11 @@ func Describe() *cobra.Command {
 						}
 					} else if strings.Contains(strings.ToLower(each), "--skipssl") {
 						skipSsl = true
+					} else if strings.Contains(strings.ToLower(each), "follow") || strings.Contains(strings.ToLower(each), "-f") {
+						follow = true
 					}
 				}
-				return getPipeline(cmd, processId, "get_pipeline", cfg.ApiServerUrl, cfg.Token, skipSsl)
+				return getPipeline(cmd, processId, "get_pipeline", cfg.ApiServerUrl, cfg.Token, follow, true, skipSsl, make(map[string]string))
 			} else {
 				cmd.Println("[ERROR]: Wrong command")
 				return nil
@@ -564,7 +564,7 @@ func Describe() *cobra.Command {
 		"  help\t" + "Show this screen. \n")
 	return &command
 }
-func getPipeline(cmd *cobra.Command, processId, action, url, token string, skipSsl bool) error {
+func getPipeline(cmd *cobra.Command, processId, action, url, token string, follow, firstFollow, skipSsl bool, stepMap map[string]string) error {
 	pipelineService := dependency_manager.GetPipelineService()
 	code, data, err := pipelineService.SkipSsl(skipSsl).Get(processId, action, url, token)
 	if err != nil {
@@ -580,13 +580,31 @@ func getPipeline(cmd *cobra.Command, processId, action, url, token string, skipS
 		if err != nil {
 			return err
 		}
-		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Api Version", "Kind", "Step", "Status"})
+		var tableData [][]string
 		for _, each := range pipeline.Steps {
-			process := []string{"api/v1", "Process", strings.Title(each.Name), strings.Title(each.Status)}
-			table.Append(process)
+			if val, ok := stepMap[each.Name]; !ok || val != each.Status {
+				stepMap[each.Name] = each.Status
+				process := []string{"api/v1", "Process", strings.Title(each.Name), strings.Title(each.Status)}
+				tableData = append(tableData, process)
+			}
 		}
-		table.Render()
+		if len(tableData) > 0 {
+			table := tablewriter.NewWriter(os.Stdout)
+			if firstFollow {
+				table.SetHeader([]string{"Api Version", "Kind   ", "Step              ", "Status         "})
+				table.SetBorders(tablewriter.Border{Left: true, Top: true, Right: true, Bottom: false})
+			} else {
+				table.SetHeader([]string{"           ", "       ", "                  ", "               "})
+				table.SetHeaderLine(false)
+				table.SetAutoFormatHeaders(false)
+				table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
+			}
+			table.AppendBulk(tableData)
+			table.Render()
+		}
+		if follow {
+			return getPipeline(cmd, processId, action, url, token, follow, false, skipSsl, stepMap)
+		}
 	}
 	return nil
 }
@@ -760,8 +778,8 @@ func List() *cobra.Command {
 	}
 	command.SetUsageTemplate("Usage: \n" +
 		"  cli list {repositories | repos | -r} [{option | -o} [{loadapplications | loadapps | la}={true | false} | apiserver=APISERVER_URL]]... [--skipssl] \n" +
-		"  cli list {applications | apps | -a} {repository | repo}=REPOSITORY_ID {application | app}=APPLICATION_ID [{option | -o} apiserver=APISERVER_URL] [--skipssl] \n" +
-		"  cli list {process | -p} {processid | process}=PROCESS_ID {repository | repo}=REPOSITORY_ID {application | app}=APPLICATION_ID [{option | -o} apiserver=APISERVER_URL] [--skipssl] \n" +
+		"  cli list {applications | apps | -a} {repository | repo}=REPOSITORY_ID [{option | -o} apiserver=APISERVER_URL] [--skipssl] \n" +
+		"  cli list {process | -p} {repository | repo}=REPOSITORY_ID {application | app}=APPLICATION_ID [{option | -o} apiserver=APISERVER_URL] [--skipssl] \n" +
 		"  cli help list \n" +
 		"\nOptions: \n" +
 		"  option | -o\t" + "Provide load applications or apiserver url option \n" +
