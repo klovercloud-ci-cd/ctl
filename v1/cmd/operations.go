@@ -620,26 +620,26 @@ func getPipeline(cmd *cobra.Command, processId, action, url, token string, follo
 func List() *cobra.Command {
 	command := cobra.Command{
 		Use:       "list",
-		Short:     "List resources [repository/application/process]",
+		Short:     "List resources [repository/application/process/k8sobjs]",
 		ValidArgs: []string{},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg := v1.GetConfigFile()
 			if cfg.Token == "" {
-				cmd.Println("[ERROR]: %v", "user is not logged in")
+				cmd.Println("[ERROR]: user is not logged in")
 				return nil
 			}
 			if len(args) < 1 {
-				cmd.Println("[ERROR]: %v", "please provide a resource name!")
+				cmd.Println("[ERROR]: please provide a resource name!")
 				return nil
 			}
 			userMetadata, err := v1.GetUserMetadataFromBearerToken(cfg.Token)
 			if err != nil {
-				cmd.Println("[ERROR]: %v", err.Error())
+				cmd.Println("[ERROR]: ", err.Error())
 				return nil
 			}
 			companyId := userMetadata.CompanyId
 			if companyId == "" {
-				cmd.Println("[ERROR]: %v", "User got no company attached!")
+				cmd.Println("[ERROR]: ", "User got no company attached!")
 				return nil
 			}
 			var apiServerUrl string
@@ -754,12 +754,12 @@ func List() *cobra.Command {
 				if repoId == "" {
 					repoId = cfg.RepositoryId
 					if repoId == "" {
-						cmd.Println("[ERROR]: %v", "please provide repository id!")
+						cmd.Println("[ERROR]: please provide repository id!")
 						return nil
 					}
 				}
 				if appId == "" {
-					cmd.Println("[ERROR]: %v", "please provide application id!")
+					cmd.Println("[ERROR]: please provide application id!")
 					return nil
 				}
 				if apiServerUrl == "" {
@@ -777,6 +777,56 @@ func List() *cobra.Command {
 				}
 				processService := dependency_manager.GetProcessService()
 				processService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Kind("Process").Cmd(cmd).RepoId(repoId).ApplicationId(appId).Apply()
+			} else if strings.ToLower(args[0]) == "k8sobjs" || strings.ToLower(args[0]) == "-k" {
+				var agent, processId string
+				var skipSsl bool
+				for idx, each := range args {
+					if strings.Contains(strings.ToLower(each), "processid=") || strings.Contains(strings.ToLower(each), "process=") {
+						strs := strings.Split(strings.ToLower(each), "=")
+						if len(strs) > 1 {
+							processId = strs[1]
+						}
+					} else if strings.Contains(strings.ToLower(each), "agent=") {
+						strs := strings.Split(strings.ToLower(each), "=")
+						if len(strs) > 1 {
+							agent = strs[1]
+						}
+					} else if strings.Contains(strings.ToLower(each), "option") || strings.Contains(strings.ToLower(each), "-o") {
+						if idx+1 < len(args) {
+							if strings.Contains(strings.ToLower(args[idx+1]), "apiserver=") {
+								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+								if len(strs) > 1 {
+									apiServerUrl = strs[1]
+								}
+							}
+						}
+					} else if strings.Contains(strings.ToLower(each), "--skipssl") {
+						skipSsl = true
+					}
+				}
+				if agent == "" {
+					cmd.Println("[ERROR]: please provide agent name!")
+					return nil
+				}
+				if processId == "" {
+					cmd.Println("[ERROR]: please provide process id!")
+					return nil
+				}
+				if apiServerUrl == "" {
+					if cfg.ApiServerUrl == "" {
+						cmd.Println("[ERROR]: Api server url not found!")
+						return nil
+					}
+				} else {
+					cfg.ApiServerUrl = apiServerUrl
+					err = cfg.Store()
+					if err != nil {
+						cmd.Println("[ERROR]: ", err.Error())
+						return nil
+					}
+				}
+				agentService := dependency_manager.GetAgentService()
+				agentService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Flag(string(enums.GET_K8SOBJS)).Cmd(cmd).Name(agent).ProcessId(processId).Apply()
 			} else {
 				cmd.Println("[ERROR]: Wrong command")
 				return nil
@@ -789,6 +839,7 @@ func List() *cobra.Command {
 		"  cli list {repositories | repos | -r} [{option | -o} [{loadapplications | loadapps | la}={true | false} | apiserver=APISERVER_URL]]... [--skipssl] \n" +
 		"  cli list {applications | apps | -a} {repository | repo}=REPOSITORY_ID [{option | -o} apiserver=APISERVER_URL] [--skipssl] \n" +
 		"  cli list {process | -p} {repository | repo}=REPOSITORY_ID {application | app}=APPLICATION_ID [{option | -o} apiserver=APISERVER_URL] [--skipssl] \n" +
+		"  cli list {k8sobjs | -k} agent=AGENT_NAME {processid | process}=PROCESS_ID [{option | -o} apiserver=APISERVER_URL] [--skipssl] \n" +
 		"  cli help list \n" +
 		"\nOptions: \n" +
 		"  option | -o\t" + "Provide load applications or apiserver url option \n" +

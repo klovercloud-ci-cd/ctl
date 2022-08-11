@@ -195,6 +195,75 @@ type Config struct {
 	RepositoryId string `json:"repository_id" bson:"repository_id"`
 }
 
+type K8sObjsInfo struct {
+	Deployments            []DeploymentShortInfo  `json:"deployments"`
+	Services               []K8sObjShortInfo      `json:"services"`
+	ConfigMaps             []K8sObjShortInfo      `json:"config_maps"`
+	StatefulSets           []StatefulSetShortInfo `json:"stateful_sets"`
+	ClusterRoles           []K8sObjShortInfo      `json:"cluster_roles"`
+	ClusterRoleBindings    []K8sObjShortInfo      `json:"cluster_role_bindings"`
+	DaemonSets             []DaemonSetShortInfo   `json:"daemon_sets"`
+	Ingresses              []K8sObjShortInfo      `json:"ingresses"`
+	Namespaces             []K8sObjShortInfo      `json:"namespaces"`
+	NetworkPolicies        []K8sObjShortInfo      `json:"network_policies"`
+	Nodes                  []K8sObjShortInfo      `json:"nodes"`
+	PersistentVolumes      []K8sObjShortInfo      `json:"persistent_volumes"`
+	PersistentVolumeClaims []K8sObjShortInfo      `json:"persistent_volume_claims"`
+	ReplicaSets            []ReplicaSetShortInfo  `json:"replica_sets"`
+	Roles                  []K8sObjShortInfo      `json:"roles"`
+	RoleBindings           []K8sObjShortInfo      `json:"role_bindings"`
+	Secrets                []K8sObjShortInfo      `json:"secrets"`
+	ServiceAccounts        []K8sObjShortInfo      `json:"service_accounts"`
+	Certificates           []K8sObjShortInfo      `json:"certificates"`
+}
+
+type K8sObjShortInfo struct {
+	Kind      string `json:"kind"`
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+	UID       string `json:"uid"`
+}
+
+type DeploymentShortInfo struct {
+	Kind                string `json:"kind"`
+	Name                string `json:"name"`
+	Namespace           string `json:"namespace"`
+	UID                 string `json:"uid"`
+	Replicas            int32  `json:"replicas"`
+	AvailableReplicas   int32  `json:"available_replicas"`
+	UnavailableReplicas int32  `json:"unavailable_replicas"`
+	ReadyReplicas       int32  `json:"ready_replicas"`
+}
+
+type StatefulSetShortInfo struct {
+	Kind          string `json:"kind"`
+	Name          string `json:"name"`
+	Namespace     string `json:"namespace"`
+	UID           string `json:"uid"`
+	Replicas      int32  `json:"replicas"`
+	ReadyReplicas int32  `json:"ready_replicas"`
+}
+
+type ReplicaSetShortInfo struct {
+	Kind              string `json:"kind"`
+	Name              string `json:"name"`
+	Namespace         string `json:"namespace"`
+	UID               string `json:"uid"`
+	Replicas          int32  `json:"replicas"`
+	AvailableReplicas int32  `json:"available_replicas"`
+	ReadyReplicas     int32  `json:"ready_replicas"`
+}
+
+type DaemonSetShortInfo struct {
+	Kind              string `json:"kind"`
+	Name              string `json:"name"`
+	Namespace         string `json:"namespace"`
+	UID               string `json:"uid"`
+	NumberReady       int32  `json:"number_ready"`
+	NumberAvailable   int32  `json:"number_available"`
+	NumberUnavailable int32  `json:"number_unavailable"`
+}
+
 func (cfg Config) Store() error {
 	if cfg.Token != "" {
 		aes := encryption.AES256()

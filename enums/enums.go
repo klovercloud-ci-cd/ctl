@@ -86,7 +86,7 @@ const (
 	CREATE_ADMIN = USER_FLAG("CREATE_ADMIN")
 )
 
-// CUSER_UPDATE_ACTION user update action flag types to apply
+// USER_UPDATE_ACTION user update action flag types to apply
 type USER_UPDATE_ACTION string
 
 const (
@@ -98,4 +98,12 @@ const (
 	ATTACH_COMPANY = USER_UPDATE_ACTION("attach_company")
 	// UPDATE_STATUS refers to status update action
 	UPDATE_STATUS = USER_UPDATE_ACTION("update_status")
+)
+
+// AGENT_FLAG agent query action flag types to apply
+type AGENT_FLAG string
+
+const (
+	// GET_K8SOBJS refers to get k8sobjs action
+	GET_K8SOBJS = AGENT_FLAG("get_k8sobjs")
 )

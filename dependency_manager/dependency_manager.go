@@ -40,3 +40,7 @@ func GetProcessService() service.Process {
 func GetUserService() service.User {
 	return business.NewUserService(business.NewHttpClientService())
 }
+
+func GetAgentService() service.Agent {
+	return business.NewAgentService(business.NewHttpClientService())
+}
