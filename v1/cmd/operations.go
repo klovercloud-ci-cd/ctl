@@ -584,7 +584,15 @@ func getPipeline(cmd *cobra.Command, processId, action, url, token string, follo
 		for _, each := range pipeline.Steps {
 			if val, ok := stepMap[each.Name]; !ok || val != each.Status {
 				stepMap[each.Name] = each.Status
-				process := []string{"api/v1", "Process", strings.Title(each.Name), strings.Title(each.Status)}
+				name := each.Name
+				status := each.Status
+				for i := len(each.Name); i < 18; i++ {
+					name += " "
+				}
+				for i := len(each.Status); i < 15; i++ {
+					status += " "
+				}
+				process := []string{"api/v1     ", "Process", strings.Title(name), strings.Title(status)}
 				tableData = append(tableData, process)
 			}
 		}
@@ -592,11 +600,12 @@ func getPipeline(cmd *cobra.Command, processId, action, url, token string, follo
 			table := tablewriter.NewWriter(os.Stdout)
 			if firstFollow {
 				table.SetHeader([]string{"Api Version", "Kind   ", "Step              ", "Status         "})
-				table.SetBorders(tablewriter.Border{Left: true, Top: true, Right: true, Bottom: false})
+				if follow {
+					table.SetBorders(tablewriter.Border{Left: true, Top: true, Right: true, Bottom: false})
+				} else {
+					table.SetBorders(tablewriter.Border{Left: true, Top: true, Right: true, Bottom: true})
+				}
 			} else {
-				table.SetHeader([]string{"           ", "       ", "                  ", "               "})
-				table.SetHeaderLine(false)
-				table.SetAutoFormatHeaders(false)
 				table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 			}
 			table.AppendBulk(tableData)
