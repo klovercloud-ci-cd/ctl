@@ -96,7 +96,7 @@ type Processes []struct {
 	CreatedAt    time.Time              `bson:"created_at" json:"created_at"`
 }
 
-//ProcessesWithStatus contains process list with status
+// ProcessesWithStatus contains process list with status
 type ProcessesWithStatus struct {
 	ProcessId    string                 `bson:"process_id" json:"process_id"`
 	AppId        string                 `bson:"app_id" json:"app_id"`
@@ -193,6 +193,32 @@ type Config struct {
 	ApiServerUrl string `json:"api_server_url" bson:"api_server_url"`
 	SecurityUrl  string `json:"security_url" bson:"security_url"`
 	RepositoryId string `json:"repository_id" bson:"repository_id"`
+}
+
+// LogEvent contains LogEvent struct
+type LogEvent struct {
+	ProcessId string    `bson:"process_id" json:"process_id"`
+	Log       string    `bson:"log" json:"log"`
+	Step      string    `bson:"step" json:"step"`
+	Footmark  string    `bson:"footmark" json:"footmark"`
+	CreatedAt time.Time `bson:"created_at" json:"created_at"`
+	Claim     int       `bson:"claim" json:"claim"`
+}
+
+// ProcessLifeCycleEvent Pipeline ProcessLifeCycleEvent struct
+type ProcessLifeCycleEvent struct {
+	ProcessId string    `bson:"process_id" json:"process_id"`
+	Step      string    `bson:"step" json:"step"`
+	StepType  string    `bson:"step_type" json:"step_type"`
+	Status    string    `bson:"status" json:"status"`
+	Next      []string  `bson:"next" json:"next"`
+	Agent     string    `bson:"agent" json:"agent"`
+	Pipeline  *Pipeline `bson:"pipeline" json:"pipeline"`
+	CreatedAt time.Time `bson:"created_at" json:"created_at"`
+	UpdatedAt time.Time `bson:"updated_at" json:"updated_at"`
+	Trigger   string    `bson:"trigger" json:"trigger"`
+	Claim     int       `bson:"claim" json:"claim"`
+	ClaimedAt time.Time `bson:"claimed_at" json:"claimed_at"`
 }
 
 type K8sObjsInfo struct {
