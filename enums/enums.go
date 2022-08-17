@@ -107,3 +107,13 @@ const (
 	// GET_K8SOBJS refers to get k8sobjs action
 	GET_K8SOBJS = AGENT_FLAG("get_k8sobjs")
 )
+
+// PROCESS_FLAG process query action flag types to apply
+type PROCESS_FLAG string
+
+const (
+	// GET_PROCESS refers to get process action
+	GET_PROCESS = PROCESS_FLAG("get_process")
+	// GET_LOGS refers to get logs action
+	GET_LOGS = PROCESS_FLAG("get_logs")
+)

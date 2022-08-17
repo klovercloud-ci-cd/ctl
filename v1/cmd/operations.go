@@ -592,7 +592,7 @@ func getPipeline(cmd *cobra.Command, processId, action, url, token string, follo
 				for i := len(each.Status); i < 15; i++ {
 					status += " "
 				}
-				process := []string{"api/v1     ", "Process", strings.Title(name), strings.Title(status)}
+				process := []string{"api/v1     ", "Process", name, strings.Title(status)}
 				tableData = append(tableData, process)
 			}
 		}
@@ -776,7 +776,7 @@ func List() *cobra.Command {
 					}
 				}
 				processService := dependency_manager.GetProcessService()
-				processService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Kind("Process").Cmd(cmd).RepoId(repoId).ApplicationId(appId).Apply()
+				processService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Kind("Process").Flag(string(enums.GET_PROCESS)).Cmd(cmd).RepoId(repoId).ApplicationId(appId).Apply()
 			} else if strings.ToLower(args[0]) == "k8sobjs" || strings.ToLower(args[0]) == "-k" {
 				var agent, processId string
 				var skipSsl bool

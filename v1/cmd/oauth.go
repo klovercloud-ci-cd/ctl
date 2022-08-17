@@ -133,7 +133,7 @@ func credentials() (string, string) {
 	fmt.Print("Enter email: ")
 	email, _ := reader.ReadString('\n')
 	fmt.Print("Enter Password: ")
-	bytePassword, _ := term.ReadPassword(syscall.Stdin)
+	bytePassword, _ := term.ReadPassword(int(syscall.Stdin))
 	fmt.Println()
 	password := string(bytePassword)
 	return strings.TrimSpace(email), strings.TrimSpace(password)
