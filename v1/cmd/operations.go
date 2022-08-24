@@ -777,8 +777,121 @@ func List() *cobra.Command {
 				}
 				processService := dependency_manager.GetProcessService()
 				processService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Kind("Process").Flag(string(enums.GET_PROCESS)).Cmd(cmd).RepoId(repoId).ApplicationId(appId).Apply()
-			} else if strings.ToLower(args[0]) == "k8sobjs" || strings.ToLower(args[0]) == "-k" {
-				var agent, processId string
+			} else if strings.ToLower(args[0]) == "agents" {
+				var processId string
+				var skipSsl bool
+				for idx, each := range args {
+					if strings.Contains(strings.ToLower(each), "processid=") || strings.Contains(strings.ToLower(each), "process=") {
+						strs := strings.Split(strings.ToLower(each), "=")
+						if len(strs) > 1 {
+							processId = strs[1]
+						}
+					} else if strings.Contains(strings.ToLower(each), "option") || strings.Contains(strings.ToLower(each), "-o") {
+						if idx+1 < len(args) {
+							if strings.Contains(strings.ToLower(args[idx+1]), "apiserver=") {
+								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+								if len(strs) > 1 {
+									apiServerUrl = strs[1]
+								}
+							}
+						}
+					} else if strings.Contains(strings.ToLower(each), "--skipssl") {
+						skipSsl = true
+					}
+				}
+				if processId == "" {
+					cmd.Println("[ERROR]: please provide process id!")
+					return nil
+				}
+				if apiServerUrl == "" {
+					if cfg.ApiServerUrl == "" {
+						cmd.Println("[ERROR]: Api server url not found!")
+						return nil
+					}
+				} else {
+					cfg.ApiServerUrl = apiServerUrl
+					err = cfg.Store()
+					if err != nil {
+						cmd.Println("[ERROR]: ", err.Error())
+						return nil
+					}
+				}
+				pipelineService := dependency_manager.GetPipelineService()
+				pipelineService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Flag(string(enums.GET_AGENTS)).Cmd(cmd).ProcessId(processId).Apply()
+			} else if strings.ToLower(args[0]) == "objects" || strings.ToLower(args[0]) == "objs" {
+				var processId string
+				var agentList []string
+				var skipSsl bool
+				for idx, each := range args {
+					if strings.Contains(strings.ToLower(each), "processid=") || strings.Contains(strings.ToLower(each), "process=") {
+						strs := strings.Split(strings.ToLower(each), "=")
+						if len(strs) > 1 {
+							processId = strs[1]
+						}
+					} else if strings.Contains(strings.ToLower(each), "agent=") {
+						strs := strings.Split(strings.ToLower(each), "=")
+						if len(strs) > 1 {
+							agentList = append(agentList, strs[1])
+						}
+					} else if strings.Contains(strings.ToLower(each), "option") || strings.Contains(strings.ToLower(each), "-o") {
+						if idx+1 < len(args) {
+							if strings.Contains(strings.ToLower(args[idx+1]), "apiserver=") {
+								strs := strings.Split(strings.ToLower(args[idx+1]), "=")
+								if len(strs) > 1 {
+									apiServerUrl = strs[1]
+								}
+							}
+						}
+					} else if strings.Contains(strings.ToLower(each), "--skipssl") {
+						skipSsl = true
+					}
+				}
+				if processId == "" {
+					cmd.Println("[ERROR]: please provide process id!")
+					return nil
+				}
+				if apiServerUrl == "" {
+					if cfg.ApiServerUrl == "" {
+						cmd.Println("[ERROR]: Api server url not found!")
+						return nil
+					}
+				} else {
+					cfg.ApiServerUrl = apiServerUrl
+					err = cfg.Store()
+					if err != nil {
+						cmd.Println("[ERROR]: ", err.Error())
+						return nil
+					}
+				}
+				if len(agentList) == 0 {
+					pipelineService := dependency_manager.GetPipelineService()
+					_, data, err := pipelineService.Get(processId, "get_pipeline", cfg.ApiServerUrl, cfg.Token)
+					if err != nil {
+						cmd.Println("[ERROR]: ", err.Error())
+						return nil
+					}
+					var pipeline v1.Pipeline
+					byteBody, _ := json.Marshal(data)
+					err = json.Unmarshal(byteBody, &pipeline)
+					if err != nil {
+						cmd.Println("[ERROR]: ", err.Error())
+						return nil
+					}
+					agentsMap := make(map[string]bool)
+					for _, step := range pipeline.Steps {
+						agent := step.Params["agent"]
+						if step.Type == "DEPLOY" {
+							if _, ok := agentsMap[agent]; !ok {
+								agentsMap[agent] = true
+								agentList = append(agentList, agent)
+							}
+						}
+					}
+				}
+				agentService := dependency_manager.GetAgentService()
+				agentService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Flag(string(enums.GET_K8SOBJS)).Cmd(cmd).AgentList(agentList).ProcessId(processId).Apply()
+			} else if strings.ToLower(args[0]) == "pods" {
+				var agent, processId, owner, ownerid string
 				var skipSsl bool
 				for idx, each := range args {
 					if strings.Contains(strings.ToLower(each), "processid=") || strings.Contains(strings.ToLower(each), "process=") {
@@ -790,6 +903,16 @@ func List() *cobra.Command {
 						strs := strings.Split(strings.ToLower(each), "=")
 						if len(strs) > 1 {
 							agent = strs[1]
+						}
+					} else if strings.Contains(strings.ToLower(each), "owner=") {
+						strs := strings.Split(strings.ToLower(each), "=")
+						if len(strs) > 1 {
+							owner = strs[1]
+						}
+					} else if strings.Contains(strings.ToLower(each), "ownerid=") {
+						strs := strings.Split(strings.ToLower(each), "=")
+						if len(strs) > 1 {
+							ownerid = strs[1]
 						}
 					} else if strings.Contains(strings.ToLower(each), "option") || strings.Contains(strings.ToLower(each), "-o") {
 						if idx+1 < len(args) {
@@ -812,6 +935,14 @@ func List() *cobra.Command {
 					cmd.Println("[ERROR]: please provide process id!")
 					return nil
 				}
+				if owner != string(enums.DEPLOYMENT) && owner != string(enums.DAEMONSET) && owner != string(enums.REPLICASET) && owner != string(enums.STATEFULSET) {
+					cmd.Println("[ERROR]: please provide valid owner reference type! [DEPLOYMENT/DAEMONSET/REPLICASET/STATEFULSET]")
+					return nil
+				}
+				if ownerid == "" {
+					cmd.Println("[ERROR]: please provide owner reference id!")
+					return nil
+				}
 				if apiServerUrl == "" {
 					if cfg.ApiServerUrl == "" {
 						cmd.Println("[ERROR]: Api server url not found!")
@@ -826,7 +957,15 @@ func List() *cobra.Command {
 					}
 				}
 				agentService := dependency_manager.GetAgentService()
-				agentService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Flag(string(enums.GET_K8SOBJS)).Cmd(cmd).Name(agent).ProcessId(processId).Apply()
+				if owner == string(enums.DEPLOYMENT) {
+					agentService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Flag(string(enums.GET_PODS_BY_DEPLOYMENT)).OwnerReferenceId(ownerid).Cmd(cmd).Name(agent).ProcessId(processId).Apply()
+				} else if owner == string(enums.DAEMONSET) {
+					agentService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Flag(string(enums.GET_PODS_BY_DAEMONSET)).OwnerReferenceId(ownerid).Cmd(cmd).Name(agent).ProcessId(processId).Apply()
+				} else if owner == string(enums.REPLICASET) {
+					agentService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Flag(string(enums.GET_PODS_BY_REPLICASET)).OwnerReferenceId(ownerid).Cmd(cmd).Name(agent).ProcessId(processId).Apply()
+				} else if owner == string(enums.STATEFULSET) {
+					agentService.ApiServerUrl(cfg.ApiServerUrl).SkipSsl(skipSsl).Token(cfg.Token).Flag(string(enums.GET_PODS_BY_STATEFULSET)).OwnerReferenceId(ownerid).Cmd(cmd).Name(agent).ProcessId(processId).Apply()
+				}
 			} else {
 				cmd.Println("[ERROR]: Wrong command")
 				return nil
@@ -839,7 +978,9 @@ func List() *cobra.Command {
 		"  cli list {repositories | repos | -r} [{option | -o} [{loadapplications | loadapps | la}={true | false} | apiserver=APISERVER_URL]]... [--skipssl] \n" +
 		"  cli list {applications | apps | -a} {repository | repo}=REPOSITORY_ID [{option | -o} apiserver=APISERVER_URL] [--skipssl] \n" +
 		"  cli list {process | -p} {repository | repo}=REPOSITORY_ID {application | app}=APPLICATION_ID [{option | -o} apiserver=APISERVER_URL] [--skipssl] \n" +
-		"  cli list {k8sobjs | -k} agent=AGENT_NAME {processid | process}=PROCESS_ID [{option | -o} apiserver=APISERVER_URL] [--skipssl] \n" +
+		"  cli list agents {processid | process}=PROCESS_ID [{option | -o} apiserver=APISERVER_URL] [--skipssl] \n" +
+		"  cli list {objects | objs} {processid | process}=PROCESS_ID [agent=AGENT_NAME] [{option | -o} apiserver=APISERVER_URL] [--skipssl] \n" +
+		"  cli list pods {processid | process}=PROCESS_ID agent=AGENT_NAME owner={deployment | daemonset | replicaset | statefulset} ownerid=[OWNER_ID] [{option | -o} apiserver=APISERVER_URL] [--skipssl] \n" +
 		"  cli help list \n" +
 		"\nOptions: \n" +
 		"  option | -o\t" + "Provide load applications or apiserver url option \n" +
