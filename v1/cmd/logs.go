@@ -109,7 +109,7 @@ func GetLogs() *cobra.Command {
 		DisableFlagParsing: true,
 	}
 	command.SetUsageTemplate("Usage: \n" +
-		"  cli logs [processid | process]=PROCESS_ID [page=PAGE_NUMBER] [limit=LIMIT_NUMBER] [follow | -f] [apiserver=APISERVER_URL] [--skipssl] \n" +
+		"  cli logs [processid | process]=PROCESS_ID [{option | -o} [step=STEP_NAME | claim=CLAIM_NUMBER | footmark=FOOTMARK]]... [page=PAGE_NUMBER] [limit=LIMIT_NUMBER] [follow | -f] [apiserver=APISERVER_URL] [--skipssl] \n" +
 		"  cli help logs \n" +
 		"\nOptions: \n" +
 		"  --skipssl\t" + "Ignore SSL certificate errors \n" +

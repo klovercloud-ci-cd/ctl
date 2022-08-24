@@ -106,6 +106,14 @@ type AGENT_FLAG string
 const (
 	// GET_K8SOBJS refers to get k8sobjs action
 	GET_K8SOBJS = AGENT_FLAG("get_k8sobjs")
+	// GET_PODS_BY_DEPLOYMENT refers to get pods by deployment action
+	GET_PODS_BY_DEPLOYMENT = AGENT_FLAG("get_pods_by_deployment")
+	// GET_PODS_BY_DAEMONSET refers to get pods by daemonset action
+	GET_PODS_BY_DAEMONSET = AGENT_FLAG("get_pods_by_daemonset")
+	// GET_PODS_BY_REPLICASET refers to get pods by replicaset action
+	GET_PODS_BY_REPLICASET = AGENT_FLAG("get_pods_by_replicaset")
+	// GET_PODS_BY_STATEFULSET refers to get pods by statefulset action
+	GET_PODS_BY_STATEFULSET = AGENT_FLAG("get_pods_by_statefulset")
 )
 
 // PROCESS_FLAG process query action flag types to apply
@@ -116,4 +124,26 @@ const (
 	GET_PROCESS = PROCESS_FLAG("get_process")
 	// GET_LOGS refers to get logs action
 	GET_LOGS = PROCESS_FLAG("get_logs")
+)
+
+// PIPELINE_FLAG process query action flag types to apply
+type PIPELINE_FLAG string
+
+const (
+	// GET_AGENTS refers to get agenetws action
+	GET_AGENTS = PROCESS_FLAG("get_agent")
+)
+
+// K8SOBJS k8s objects types to apply
+type K8SOBJS string
+
+const (
+	// DEPLOYMENT refers to deployment k8s object type
+	DEPLOYMENT = PROCESS_FLAG("deployment")
+	// DAEMONSET refers to daemonset k8s object type
+	DAEMONSET = PROCESS_FLAG("daemonset")
+	// REPLICASET refers to replicaset k8s object type
+	REPLICASET = PROCESS_FLAG("replicaset")
+	// STATEFULSET refers to statefulset k8s object type
+	STATEFULSET = PROCESS_FLAG("statefulset")
 )

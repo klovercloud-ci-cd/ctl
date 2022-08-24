@@ -3,15 +3,34 @@ package business
 import (
 	"encoding/json"
 	"github.com/klovercloud-ci/ctl/common"
+	"github.com/klovercloud-ci/ctl/enums"
+	v1 "github.com/klovercloud-ci/ctl/v1"
 	"github.com/klovercloud-ci/ctl/v1/service"
+	"github.com/olekukonko/tablewriter"
+	"github.com/spf13/cobra"
 	"log"
 	"net/http"
+	"os"
 )
 
 type pipelineService struct {
-	httpClient service.HttpClient
-	token      string
-	skipSsl    bool
+	httpClient   service.HttpClient
+	processId    string
+	flag         string
+	token        string
+	apiServerUrl string
+	skipSsl      bool
+	cmd          *cobra.Command
+}
+
+func (p pipelineService) ProcessId(processId string) service.Pipeline {
+	p.processId = processId
+	return p
+}
+
+func (p pipelineService) Flag(flag string) service.Pipeline {
+	p.flag = flag
+	return p
 }
 
 func (p pipelineService) SkipSsl(skipSsl bool) service.Pipeline {
@@ -22,6 +41,48 @@ func (p pipelineService) SkipSsl(skipSsl bool) service.Pipeline {
 func (p pipelineService) Token(token string) service.Pipeline {
 	p.token = token
 	return p
+}
+
+func (p pipelineService) ApiServerUrl(apiServerUrl string) service.Pipeline {
+	p.apiServerUrl = apiServerUrl
+	return p
+}
+
+func (p pipelineService) Cmd(cmd *cobra.Command) service.Pipeline {
+	p.cmd = cmd
+	return p
+}
+
+func (p pipelineService) Apply() {
+	switch p.flag {
+	case string(enums.GET_AGENTS):
+		httpCode, data, err := p.Get(p.processId, "get_pipeline", p.apiServerUrl, p.token)
+		if err != nil {
+			p.cmd.Println("[ERROR]: "+err.Error()+"Status Code: ", httpCode)
+		} else if httpCode != 200 {
+			p.cmd.Println("[ERROR]: ", "Something went wrong! StatusCode: ", httpCode)
+		} else if data != nil {
+			var pipeline v1.Pipeline
+			byteBody, _ := json.Marshal(data)
+			err := json.Unmarshal(byteBody, &pipeline)
+			if err != nil {
+				return
+			}
+			table := tablewriter.NewWriter(os.Stdout)
+			table.SetHeader([]string{"Name"})
+			agentsMap := make(map[string]bool)
+			for _, step := range pipeline.Steps {
+				agent := step.Params["agent"]
+				if step.Type == "DEPLOY" {
+					if _, ok := agentsMap[agent]; !ok {
+						agentsMap[agent] = true
+						table.Append([]string{agent})
+					}
+				}
+			}
+			table.Render()
+		}
+	}
 }
 
 func (p pipelineService) Get(processId string, action string, url string, token string) (httpCode int, data interface{}, err error) {
